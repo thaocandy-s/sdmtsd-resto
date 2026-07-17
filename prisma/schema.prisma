@@ -1,0 +1,429 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ===== AUTH & ACCESS =====
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  roleId       String
+  role         Role      @relation(fields: [roleId], references: [id])
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  label       String
+  description String?
+  permissions Permission[]
+  users       User[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Permission {
+  id        String   @id @default(uuid())
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  module    String
+  action    String
+  createdAt DateTime @default(now())
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+}
+
+// ===== RESTAURANT =====
+
+model Restaurant {
+  id           String   @id @default(uuid())
+  name         String
+  slug         String   @unique
+  description  String?
+  address      String?
+  phone        String?
+  email        String?
+  latitude     Float?
+  longitude    Float?
+  openingHours Json?
+  holidays     Json?
+  socialLinks  Json?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ===== HOME / BANNERS =====
+
+model HeroBanner {
+  id             String    @id @default(uuid())
+  title          String
+  subtitle       String?
+  imageUrl       String
+  mobileImageUrl String?
+  ctaLabel       String?
+  ctaUrl         String?
+  sortOrder      Int       @default(0)
+  isActive       Boolean   @default(true)
+  startDate      DateTime?
+  endDate        DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  imageUrl    String?
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ===== FOOD MENU =====
+
+model FoodCategory {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  foods     Food[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Food {
+  id            String        @id @default(uuid())
+  categoryId    String
+  category      FoodCategory  @relation(fields: [categoryId], references: [id])
+  name          String
+  slug          String        @unique
+  description   String?
+  price         Int
+  originalPrice Int?
+  imageUrl      String?
+  images        String[]
+  isPopular     Boolean       @default(false)
+  isRecommended Boolean       @default(false)
+  allergens     String[]
+  ingredients   String?
+  sortOrder     Int           @default(0)
+  status        ContentStatus @default(DRAFT)
+  calories      Int?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+}
+
+// ===== DRINK MENU =====
+
+model DrinkCategory {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  drinks    Drink[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Drink {
+  id             String        @id @default(uuid())
+  categoryId     String
+  category       DrinkCategory @relation(fields: [categoryId], references: [id])
+  name           String
+  slug           String        @unique
+  description    String?
+  price          Int
+  originalPrice  Int?
+  imageUrl       String?
+  images         String[]
+  isPopular      Boolean       @default(false)
+  isRecommended  Boolean       @default(false)
+  alcoholPercent Float?
+  volume         String?
+  sortOrder      Int           @default(0)
+  status         ContentStatus @default(DRAFT)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+}
+
+// ===== BUFFET =====
+
+model BuffetCourse {
+  id          String        @id @default(uuid())
+  name        String
+  slug        String        @unique
+  description String?
+  price       Int
+  duration    Int
+  minPeople   Int?
+  maxPeople   Int?
+  includes    String[]
+  imageUrl    String?
+  images      String[]
+  isPopular   Boolean       @default(false)
+  sortOrder   Int           @default(0)
+  status      ContentStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+}
+
+// ===== BEER ART =====
+
+model BeerArt {
+  id           String   @id @default(uuid())
+  title        String
+  description  String?
+  imageUrl     String
+  customerName String?
+  artistName   String?
+  isPublished  Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+}
+
+// ===== KATANUKI CHALLENGE =====
+
+model KatanukiWinner {
+  id              String   @id @default(uuid())
+  participantName String
+  imageUrl        String?
+  challengeName   String?
+  discountAwarded String?
+  completedAt     DateTime
+  sortOrder       Int      @default(0)
+  isPublished     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model KatanukiRule {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ===== TOURIST GUIDE =====
+
+model TourCategory {
+  id        String      @id @default(uuid())
+  name      String
+  slug      String      @unique
+  sortOrder Int         @default(0)
+  isActive  Boolean     @default(true)
+  places    TourPlace[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model TourPlace {
+  id           String       @id @default(uuid())
+  categoryId   String
+  category     TourCategory @relation(fields: [categoryId], references: [id])
+  name         String
+  slug         String       @unique
+  description  String?
+  address      String?
+  latitude     Float?
+  longitude    Float?
+  websiteUrl   String?
+  phone        String?
+  imageUrl     String?
+  images       String[]
+  openingHours String?
+  isPublished  Boolean      @default(false)
+  sortOrder    Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+}
+
+// ===== FAQ =====
+
+model FaqCategory {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  faqs      Faq[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Faq {
+  id          String      @id @default(uuid())
+  categoryId  String
+  category    FaqCategory @relation(fields: [categoryId], references: [id])
+  question    String
+  answer      String
+  sortOrder   Int         @default(0)
+  isPublished Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+}
+
+// ===== RESERVATION =====
+
+model Reservation {
+  id        String            @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  date      DateTime
+  time      String
+  guests    Int
+  course    String?
+  notes     String?
+  status    ReservationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+// ===== CONTACT =====
+
+model Contact {
+  id        String        @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  isRead    Boolean       @default(false)
+  status    ContactStatus @default(NEW)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+// ===== MEDIA LIBRARY =====
+
+model Media {
+  id          String   @id @default(uuid())
+  fileName    String
+  url         String
+  storagePath String
+  mimeType    String
+  size        Int
+  width       Int?
+  height      Int?
+  alt         String?
+  tags        String[]
+  folder      String?
+  uploadedBy  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ===== SEO =====
+
+model SeoMeta {
+  id              String   @id @default(uuid())
+  pagePath        String   @unique
+  title           String?
+  description     String?
+  keywords        String[]
+  ogImage         String?
+  ogTitle         String?
+  ogDescription   String?
+  canonicalUrl    String?
+  noIndex         Boolean  @default(false)
+  jsonLd          Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ===== SETTINGS =====
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  group     String   @default("general")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ===== AUDIT LOG =====
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  module    String
+  entityId  String?
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+// ===== ANALYTICS =====
+
+model PageView {
+  id        String   @id @default(uuid())
+  path      String
+  locale    String?
+  userAgent String?
+  referrer  String?
+  country   String?
+  createdAt DateTime @default(now())
+}
+
+// ===== ENUMS =====
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum ContactStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}

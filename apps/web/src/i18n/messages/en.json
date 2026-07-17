@@ -1,0 +1,139 @@
+{
+  "common": {
+    "siteName": "Resto Hub",
+    "home": "Home",
+    "menu": "Menu",
+    "drink": "Drinks",
+    "buffet": "Buffet",
+    "beerArt": "Beer Art",
+    "challenge": "Katanuki Challenge",
+    "tourist": "Tourist Guide",
+    "faq": "FAQ",
+    "info": "Restaurant Info",
+    "reservation": "Reservation",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "notFound": "Page not found",
+    "backHome": "Back to Home",
+    "viewMore": "View More",
+    "viewAll": "View All",
+    "readMore": "Read More",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "close": "Close",
+    "price": "Price",
+    "popular": "Popular",
+    "recommended": "Recommended",
+    "new": "New"
+  },
+  "home": {
+    "heroTitle": "Welcome to Resto Hub",
+    "heroSubtitle": "Experience authentic Japanese cuisine in an elegant setting",
+    "popularMenu": "Popular Menu",
+    "beerArtPreview": "Beer Art Gallery",
+    "challengeSection": "Katanuki Challenge",
+    "touristPreview": "Tourist Guide",
+    "faqPreview": "Frequently Asked Questions",
+    "reservationCta": "Make a Reservation",
+    "reserveNow": "Reserve Now"
+  },
+  "menu": {
+    "title": "Food Menu",
+    "subtitle": "Discover our delicious food selection",
+    "categories": "Categories",
+    "allItems": "All Items",
+    "detail": "Menu Detail",
+    "ingredients": "Ingredients",
+    "allergens": "Allergens",
+    "calories": "Calories"
+  },
+  "drink": {
+    "title": "Drink Menu",
+    "subtitle": "Explore our beverage collection",
+    "alcohol": "Alcohol",
+    "volume": "Volume",
+    "nonAlcoholic": "Non-Alcoholic"
+  },
+  "buffet": {
+    "title": "Buffet Courses",
+    "subtitle": "All-you-can-eat buffet options",
+    "duration": "Duration",
+    "minutes": "minutes",
+    "includes": "Includes",
+    "minPeople": "Min. People",
+    "maxPeople": "Max. People"
+  },
+  "beerArt": {
+    "title": "Beer Art Gallery",
+    "subtitle": "Beautiful latte art created by our artists",
+    "artist": "Artist",
+    "customer": "Customer"
+  },
+  "challenge": {
+    "title": "Katanuki Challenge",
+    "subtitle": "Test your skills and win discounts",
+    "rules": "Rules",
+    "winners": "Winner Gallery",
+    "successHistory": "Success History",
+    "discount": "Discount"
+  },
+  "tourist": {
+    "title": "Tourist Guide",
+    "subtitle": "Discover attractions near our restaurant",
+    "nearby": "Nearby Attractions",
+    "website": "Website",
+    "address": "Address",
+    "hours": "Opening Hours"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find answers to common questions",
+    "searchPlaceholder": "Search questions...",
+    "noResults": "No matching questions found"
+  },
+  "info": {
+    "title": "Restaurant Information",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "hours": "Opening Hours",
+    "holidays": "Holidays",
+    "map": "Location Map"
+  },
+  "reservation": {
+    "title": "Make a Reservation",
+    "subtitle": "Book your table today",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "date": "Date",
+    "time": "Time",
+    "guests": "Number of Guests",
+    "course": "Course",
+    "notes": "Special Requests",
+    "submit": "Submit Reservation",
+    "submitting": "Submitting...",
+    "submitSuccess": "Reservation submitted successfully!",
+    "submitError": "Failed to submit reservation"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "We'd love to hear from you",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "subject": "Subject",
+    "message": "Message",
+    "submitSuccess": "Message sent successfully!",
+    "submitError": "Failed to send message"
+  },
+  "footer": {
+    "copyright": "All rights reserved.",
+    "description": "Experience the finest Japanese cuisine in an elegant, traditional atmosphere."
+  }
+}

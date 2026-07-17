@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@source "../components";
+
+@theme {
+  --color-gold-50: #FBF7ED;
+  --color-gold-100: #F5EDDA;
+  --color-gold-200: #EBDBB5;
+  --color-gold-300: #DFC58B;
+  --color-gold-400: #D4AE66;
+  --color-gold-500: #C9A96E;
+  --color-gold-600: #B08B4A;
+  --color-gold-700: #8E6E3C;
+  --color-gold-800: #6B5230;
+  --color-gold-900: #4A3822;
+
+  --color-wood-50: #FAF6F1;
+  --color-wood-100: #F2EAD9;
+  --color-wood-200: #E5D4B3;
+  --color-wood-300: #D4B987;
+  --color-wood-400: #C39B5E;
+  --color-wood-500: #A87D44;
+  --color-wood-600: #8B6339;
+  --color-wood-700: #6E4C2E;
+  --color-wood-800: #523923;
+  --color-wood-900: #3A2819;
+
+  --color-background: #0F0D0B;
+  --color-background-secondary: #1A1714;
+  --color-background-tertiary: #252119;
+
+  --color-foreground: #F5F0E8;
+  --color-foreground-secondary: #C8BFA8;
+  --color-foreground-tertiary: #8A7E6B;
+
+  --color-border: #3A3228;
+  --color-border-light: #4D4235;
+
+  --font-sans: "Inter", sans-serif;
+  --font-jp: "Noto Sans JP", sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}

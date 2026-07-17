@@ -1,0 +1,48 @@
+{
+  "name": "@resto-hub/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^4.1.0",
+    "@prisma/client": "^6.5.0",
+    "@resto-hub/types": "workspace:*",
+    "@resto-hub/ui": "workspace:*",
+    "@resto-hub/utils": "workspace:*",
+    "@supabase/supabase-js": "^2.49.0",
+    "@tanstack/react-query": "^5.67.0",
+    "bcryptjs": "^3.0.2",
+    "embla-carousel-react": "^8.5.2",
+    "framer-motion": "^12.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.469.0",
+    "next": "^15.3.0",
+    "next-intl": "^4.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.0",
+    "zod": "^3.24.0",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@resto-hub/config": "workspace:*",
+    "@tailwindcss/postcss": "^4.3.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^15.3.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prisma": "^6.5.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.0"
+  }
+}

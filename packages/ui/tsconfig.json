@@ -1,0 +1,12 @@
+{
+  "extends": "@resto-hub/config/tsconfig/react-library.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@resto-hub/ui/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*"]
+}

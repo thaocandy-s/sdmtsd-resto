@@ -1,0 +1,139 @@
+{
+  "common": {
+    "siteName": "レストハブ",
+    "home": "ホーム",
+    "menu": "メニュー",
+    "drink": "ドリンク",
+    "buffet": "ビュッフェ",
+    "beerArt": "ビアアート",
+    "challenge": "型抜きチャレンジ",
+    "tourist": "観光ガイド",
+    "faq": "よくある質問",
+    "info": "店舗情報",
+    "reservation": "ご予約",
+    "contact": "お問い合わせ",
+    "privacy": "プライバシーポリシー",
+    "terms": "利用規約",
+    "search": "検索",
+    "filter": "フィルター",
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "notFound": "ページが見つかりません",
+    "backHome": "ホームに戻る",
+    "viewMore": "もっと見る",
+    "viewAll": "すべて見る",
+    "readMore": "続きを読む",
+    "submit": "送信",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "price": "価格",
+    "popular": "人気",
+    "recommended": "おすすめ",
+    "new": "新着"
+  },
+  "home": {
+    "heroTitle": "レストハブへようこそ",
+    "heroSubtitle": "本格的な日本料理を優雅な空間でお楽しみください",
+    "popularMenu": "人気メニュー",
+    "beerArtPreview": "ビアアートギャラリー",
+    "challengeSection": "型抜きチャレンジ",
+    "touristPreview": "観光ガイド",
+    "faqPreview": "よくある質問",
+    "reservationCta": "ご予約はこちら",
+    "reserveNow": "今すぐ予約"
+  },
+  "menu": {
+    "title": "フードメニュー",
+    "subtitle": "美味しい料理の数々をご覧ください",
+    "categories": "カテゴリー",
+    "allItems": "全品",
+    "detail": "メニュー詳細",
+    "ingredients": "材料",
+    "allergens": "アレルゲン",
+    "calories": "カロリー"
+  },
+  "drink": {
+    "title": "ドリンクメニュー",
+    "subtitle": "ドリンクコレクションをご覧ください",
+    "alcohol": "アルコール",
+    "volume": "容量",
+    "nonAlcoholic": "ノンアルコール"
+  },
+  "buffet": {
+    "title": "ビュッフェコース",
+    "subtitle": "食べ放題ビュッフェオプション",
+    "duration": "制限時間",
+    "minutes": "分",
+    "includes": "含む",
+    "minPeople": "最少人数",
+    "maxPeople": "最大人数"
+  },
+  "beerArt": {
+    "title": "ビアアートギャラリー",
+    "subtitle": "アーティストが描く美しいラテアート",
+    "artist": "アーティスト",
+    "customer": "お客様"
+  },
+  "challenge": {
+    "title": "型抜きチャレンジ",
+    "subtitle": "スキルを試して割引をゲットしよう",
+    "rules": "ルール",
+    "winners": "勝者ギャラリー",
+    "successHistory": "成功履歴",
+    "discount": "割引"
+  },
+  "tourist": {
+    "title": "観光ガイド",
+    "subtitle": "レストラン周辺の観光スポットを発見",
+    "nearby": "近くのスポット",
+    "website": "ウェブサイト",
+    "address": "住所",
+    "hours": "営業時間"
+  },
+  "faq": {
+    "title": "よくある質問",
+    "subtitle": "よくある質問への回答",
+    "searchPlaceholder": "質問を検索...",
+    "noResults": "一致する質問が見つかりませんでした"
+  },
+  "info": {
+    "title": "店舗情報",
+    "address": "住所",
+    "phone": "電話",
+    "email": "メール",
+    "hours": "営業時間",
+    "holidays": "定休日",
+    "map": "アクセスマップ"
+  },
+  "reservation": {
+    "title": "ご予約",
+    "subtitle": "お席をご予約ください",
+    "name": "お名前",
+    "email": "メールアドレス",
+    "phone": "電話番号",
+    "date": "日付",
+    "time": "時間",
+    "guests": "人数",
+    "course": "コース",
+    "notes": "特別なご要望",
+    "submit": "予約を送信",
+    "submitting": "送信中...",
+    "submitSuccess": "ご予約が送信されました！",
+    "submitError": "ご予約の送信に失敗しました"
+  },
+  "contact": {
+    "title": "お問い合わせ",
+    "subtitle": "お気軽にご連絡ください",
+    "name": "お名前",
+    "email": "メールアドレス",
+    "phone": "電話番号",
+    "subject": "件名",
+    "message": "メッセージ",
+    "submitSuccess": "メッセージが送信されました！",
+    "submitError": "メッセージの送信に失敗しました"
+  },
+  "footer": {
+    "copyright": "All rights reserved.",
+    "description": "本格的な日本料理を優雅で伝統的な雰囲気でお楽しみください。"
+  }
+}
