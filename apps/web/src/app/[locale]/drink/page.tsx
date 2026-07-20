@@ -2,31 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
-import Link from "next/link";
-
-interface Drink {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  price: number;
-  imageUrl: string | null;
-  isPopular: boolean;
-  alcoholPercent: number | null;
-  volume: string | null;
-  category: {
-    id: string;
-    name: string;
-    slug: string;
-  };
-}
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  _count: { drinks: number };
-}
+import { Category, Drink, GroupedCategory } from "./_components/types";
+import { CategoryFilter } from "./_components/CategoryFilter";
+import { CategorySliceSection } from "./_components/CategorySliceSection";
+import { DrinkSkeleton } from "./_components/DrinkSkeleton";
 
 export default function DrinkPage() {
   const t = useTranslations("drink");
@@ -36,128 +15,90 @@ export default function DrinkPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/drink?limit=50").then((r) => r.json()),
-      fetch("/api/drink/categories").then((r) => r.json()),
-    ])
-      .then(([drinksData, categoriesData]) => {
-        setDrinks(drinksData.data || []);
+    fetch("/api/drink/categories")
+      .then((r) => r.json())
+      .then((categoriesData) => {
         setCategories(categoriesData.data || []);
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
-    if (selectedCategory) {
-      fetch(`/api/drink?category=${selectedCategory}&limit=50`)
-        .then((r) => r.json())
-        .then((data) => setDrinks(data.data || []))
-        .catch(console.error);
-    } else {
-      fetch("/api/drink?limit=50")
-        .then((r) => r.json())
-        .then((data) => setDrinks(data.data || []))
-        .catch(console.error);
-    }
+    setLoading(true);
+    const url = selectedCategory
+      ? `/api/drink?category=${selectedCategory}&limit=100`
+      : "/api/drink?limit=100";
+
+    fetch(url)
+      .then((r) => r.json())
+      .then((data) => {
+        setDrinks(data.data || []);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, [selectedCategory]);
 
   const formatPrice = (price: number) => `¥${price.toLocaleString()}`;
+
+  // Group drinks by category slice
+  const groupedCategories: GroupedCategory[] = (
+    categories.length > 0
+      ? categories.map((cat) => ({
+          category: cat,
+          drinks: drinks.filter((d) => d.category?.id === cat.id),
+        }))
+      : Array.from(new Set(drinks.map((d) => d.category?.id))).map((catId) => {
+          const firstDrink = drinks.find((d) => d.category?.id === catId);
+          const categoryDrinks = drinks.filter((d) => d.category?.id === catId);
+          return {
+            category: firstDrink?.category || {
+              id: catId || "unknown",
+              name: "Other Drinks",
+              slug: "other",
+              description: null,
+            },
+            drinks: categoryDrinks,
+          };
+        })
+  ).filter((group) => group.drinks.length > 0);
+
+  // Append any drinks that do not belong to matched categories
+  const matchedDrinkIds = new Set(groupedCategories.flatMap((g) => g.drinks.map((d) => d.id)));
+  const remainingDrinks = drinks.filter((d) => !matchedDrinkIds.has(d.id));
+  if (remainingDrinks.length > 0) {
+    groupedCategories.push({
+      category: {
+        id: "others",
+        name: "Others",
+        slug: "others",
+        description: null,
+        _count: { drinks: remainingDrinks.length },
+      },
+      drinks: remainingDrinks,
+    });
+  }
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-12">
       <h1 className="text-4xl font-jp font-bold text-gold-400 mb-4">{t("title")}</h1>
       <p className="text-foreground-secondary mb-8">{t("subtitle")}</p>
 
-      {/* Category Filter */}
-      <div className="flex flex-wrap gap-2 mb-8">
-        <button
-          onClick={() => setSelectedCategory("")}
-          className={`px-4 py-2 rounded-full text-sm transition-colors ${
-            !selectedCategory
-              ? "bg-gold-500 text-background"
-              : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
-          }`}
-        >
-          All
-        </button>
-        {categories.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.slug)}
-            className={`px-4 py-2 rounded-full text-sm transition-colors ${
-              selectedCategory === cat.slug
-                ? "bg-gold-500 text-background"
-                : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
-            }`}
-          >
-            {cat.name} ({cat._count.drinks})
-          </button>
-        ))}
-      </div>
+      {/* Category Filter Pills */}
+      <CategoryFilter
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
 
-      {/* Drinks Grid */}
+      {/* Category Slices / Drink Menu Carousel */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div
-              key={i}
-              className="bg-background-secondary border border-border rounded-lg overflow-hidden"
-            >
-              <div className="h-48 bg-background-tertiary animate-pulse" />
-              <div className="p-4">
-                <div className="h-4 bg-background-tertiary rounded animate-pulse mb-2" />
-                <div className="h-3 bg-background-tertiary rounded animate-pulse w-2/3" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : drinks.length === 0 ? (
+        <DrinkSkeleton />
+      ) : groupedCategories.length === 0 ? (
         <p className="text-center text-foreground-secondary py-12">No drinks found</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {drinks.map((drink) => (
-            <Link
-              key={drink.id}
-              href={`/drink/${drink.slug}`}
-              className="group bg-background-secondary border border-border rounded-lg overflow-hidden hover:border-gold-500/50 transition-all"
-            >
-              <div className="relative h-48 bg-background-tertiary">
-                {drink.imageUrl ? (
-                  <img
-                    src={drink.imageUrl}
-                    alt={drink.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-foreground-tertiary">
-                    No image
-                  </div>
-                )}
-                {drink.isPopular && (
-                  <span className="absolute top-2 right-2 px-2 py-1 bg-gold-500 text-background text-xs rounded">
-                    Popular
-                  </span>
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-foreground group-hover:text-gold-400 transition-colors">
-                  {drink.name}
-                </h3>
-                {drink.description && (
-                  <p className="text-sm text-foreground-secondary mt-1 line-clamp-2">
-                    {drink.description}
-                  </p>
-                )}
-                <div className="flex items-center justify-between mt-3">
-                  <span className="text-gold-400 font-semibold">{formatPrice(drink.price)}</span>
-                  <div className="flex items-center gap-2 text-xs text-foreground-tertiary">
-                    {drink.alcoholPercent && <span>{drink.alcoholPercent}%</span>}
-                    {drink.volume && <span>{drink.volume}</span>}
-                  </div>
-                </div>
-              </div>
-            </Link>
+        <div className="space-y-12">
+          {groupedCategories.map((group) => (
+            <CategorySliceSection key={group.category.id} group={group} formatPrice={formatPrice} />
           ))}
         </div>
       )}
