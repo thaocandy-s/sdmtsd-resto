@@ -86,6 +86,27 @@ export default function DrinkMenuPage() {
     setShowModal(true);
   };
 
+  const handleDuplicate = (drink: Drink) => {
+    setEditingId(null);
+    setForm({
+      name: `${drink.name} (Copy)`,
+      slug: `${drink.slug}-copy`,
+      description: drink.description || "",
+      price: drink.price.toString(),
+      categoryId: drink.category.id,
+      imageUrl: drink.imageUrl || "",
+      isPopular: drink.isPopular,
+      status: "DRAFT",
+      sortOrder: "0",
+      alcoholPercent:
+        drink.alcoholPercent !== null && drink.alcoholPercent !== undefined
+          ? drink.alcoholPercent.toString()
+          : "",
+      volume: drink.volume || "",
+    });
+    setShowModal(true);
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure?")) return;
     try {
@@ -103,10 +124,10 @@ export default function DrinkMenuPage() {
           <h2 className="text-2xl font-bold text-foreground">Drink Menu</h2>
           <p className="text-foreground-secondary mt-1">Manage drink items and categories</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-stretch gap-3">
           <button
             onClick={() => setShowCategoryModal(true)}
-            className="flex-1 sm:flex-none text-center bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
           >
             Manage Categories
           </button>
@@ -116,7 +137,7 @@ export default function DrinkMenuPage() {
               setForm(emptyForm);
               setShowModal(true);
             }}
-            className="flex-1 sm:flex-none text-center bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center bg-gold-500 hover:bg-gold-600 text-background px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
           >
             + Add Drink
           </button>
@@ -160,6 +181,7 @@ export default function DrinkMenuPage() {
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onDuplicate={handleDuplicate}
         currentPage={currentPage}
         totalPages={totalPages}
         totalItems={totalItems}
