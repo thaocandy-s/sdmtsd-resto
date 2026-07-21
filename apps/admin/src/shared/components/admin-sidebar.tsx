@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
 import {
   Home,
   UtensilsCrossed,
@@ -21,18 +22,18 @@ import {
 import { cn } from "@resto-hub/ui";
 
 const navItems = [
-  { href: "/home-management", label: "Home Management", icon: Home },
-  { href: "/food-menu", label: "Food Menu", icon: UtensilsCrossed },
-  { href: "/drink-menu", label: "Drink Menu", icon: GlassWater },
-  { href: "/buffet-menu", label: "Buffet Menu", icon: ChefHat },
-  { href: "/beer-art", label: "Beer Art", icon: Palette },
-  { href: "/tourist-guide", label: "Tourist Guide", icon: MapPin },
-  { href: "/challenge", label: "Challenge", icon: Trophy },
-  { href: "/faq", label: "FAQ", icon: HelpCircle },
-  { href: "/restaurant-info", label: "Restaurant Info", icon: Info },
-  { href: "/reservations", label: "Reservations", icon: CalendarCheck },
-  { href: "/contact", label: "Contact Messages", icon: Mail },
-  { href: "/media-library", label: "Media Library", icon: FolderOpen },
+  { href: "/home-management", key: "homeManagement", icon: Home },
+  { href: "/food-menu", key: "foodMenu", icon: UtensilsCrossed },
+  { href: "/drink-menu", key: "drinkMenu", icon: GlassWater },
+  { href: "/buffet-menu", key: "buffetMenu", icon: ChefHat },
+  { href: "/beer-art", key: "beerArt", icon: Palette },
+  { href: "/tourist-guide", key: "touristGuide", icon: MapPin },
+  { href: "/challenge", key: "challenge", icon: Trophy },
+  { href: "/faq", key: "faq", icon: HelpCircle },
+  { href: "/restaurant-info", key: "restaurantInfo", icon: Info },
+  { href: "/reservations", key: "reservations", icon: CalendarCheck },
+  { href: "/contact", key: "contactMessages", icon: Mail },
+  { href: "/media-library", key: "mediaLibrary", icon: FolderOpen },
 ];
 
 interface AdminSidebarProps {
@@ -43,6 +44,9 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
   const pathname = usePathname();
+  const locale = useLocale();
+  const tSidebar = useTranslations("sidebar");
+  const tCommon = useTranslations("common");
 
   return (
     <>
@@ -57,7 +61,7 @@ export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
       >
         {/* Logo and close button */}
         <div className="p-4 border-b border-border flex items-center justify-between">
-          <Link href="/" onClick={onClose}>
+          <Link href={`/${locale}`} onClick={onClose}>
             <h1 className="text-xl font-bold text-gold-400">Admin CMS</h1>
             <p className="text-xs text-foreground-tertiary">Resto Hub</p>
           </Link>
@@ -73,12 +77,13 @@ export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
         <nav className="flex-1 p-2 overflow-y-auto space-y-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+            const fullHref = `/${locale}${item.href}`;
+            const isActive = pathname.startsWith(fullHref);
 
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={fullHref}
                 onClick={onClose}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
@@ -88,7 +93,7 @@ export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span className="truncate">{item.label}</span>
+                <span className="truncate">{tSidebar(item.key)}</span>
               </Link>
             );
           })}
@@ -101,7 +106,7 @@ export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
             className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-foreground-secondary hover:bg-background-tertiary hover:text-red-400 transition-colors w-full"
           >
             <LogOut className="h-4 w-4" />
-            <span>Logout</span>
+            <span>{tCommon("logout")}</span>
           </button>
         </div>
       </aside>
