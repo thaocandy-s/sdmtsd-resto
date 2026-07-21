@@ -65,9 +65,18 @@ export default function FoodMenuPage() {
   const [filterCategory, setFilterCategory] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterCategory, filterStatus]);
+
   useEffect(() => {
     loadData();
-  }, [search, filterCategory, filterStatus]);
+  }, [search, filterCategory, filterStatus, currentPage]);
 
   const loadData = async () => {
     setLoading(true);
@@ -76,13 +85,19 @@ export default function FoodMenuPage() {
       if (search) params.set("search", search);
       if (filterCategory) params.set("category", filterCategory);
       if (filterStatus) params.set("status", filterStatus);
-      params.set("limit", "100");
+      params.set("page", currentPage.toString());
+      params.set("limit", "10");
 
-      const res = await api.get<{ data: Food[]; categories: Category[] }>(
-        `/api/menu?${params.toString()}`
-      );
-      setFoods(res.data || []);
-      setCategories(res.categories || []);
+      const [foodsRes, catRes] = await Promise.all([
+        api.get<{ data: Food[]; meta: { totalPages: number; total: number } }>(
+          `/api/menu?${params.toString()}`
+        ),
+        api.get<{ data: Category[] }>("/api/menu/categories"),
+      ]);
+      setFoods(foodsRes.data || []);
+      setTotalPages(foodsRes.meta?.totalPages || 1);
+      setTotalItems(foodsRes.meta?.total || 0);
+      setCategories(catRes.data || []);
     } catch (error) {
       console.error("Load foods error:", error);
     } finally {
@@ -183,7 +198,7 @@ export default function FoodMenuPage() {
         >
           <option value="">All Categories</option>
           {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
+            <option key={cat.id} value={cat.slug}>
               {cat.name}
             </option>
           ))}
@@ -218,74 +233,105 @@ export default function FoodMenuPage() {
         </div>
       ) : (
         <div className="bg-background-secondary border border-border rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="border-b border-border">
-              <tr className="text-left">
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Image</th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Name</th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
-                  Category
-                </th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Price</th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Status</th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {foods.map((food) => (
-                <tr key={food.id} className="hover:bg-background-tertiary/50">
-                  <td className="px-4 py-3">
-                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-background-tertiary">
-                      {food.imageUrl ? (
-                        <img
-                          src={food.imageUrl}
-                          alt={food.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-foreground-tertiary text-xs">
-                          No img
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-foreground">{food.name}</span>
-                      {food.isPopular && (
-                        <span className="text-xs px-2 py-0.5 bg-gold-500/20 text-gold-400 rounded">
-                          Popular
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-foreground-secondary">{food.category.name}</td>
-                  <td className="px-4 py-3 text-foreground">¥{food.price.toLocaleString()}</td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-1 rounded ${getStatusColor(food.status)}`}>
-                      {food.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleEdit(food)}
-                        className="text-gold-400 hover:text-gold-300 text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(food.id)}
-                        className="text-red-400 hover:text-red-300 text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b border-border">
+                <tr className="text-left">
+                  <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Image</th>
+                  <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Name</th>
+                  <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
+                    Category
+                  </th>
+                  <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Price</th>
+                  <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {foods.map((food) => (
+                  <tr key={food.id} className="hover:bg-background-tertiary/50">
+                    <td className="px-4 py-3">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-background-tertiary">
+                        {food.imageUrl ? (
+                          <img
+                            src={food.imageUrl}
+                            alt={food.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-foreground-tertiary text-xs">
+                            No img
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-foreground">{food.name}</span>
+                        {food.isPopular && (
+                          <span className="text-xs px-2 py-0.5 bg-gold-500/20 text-gold-400 rounded">
+                            Popular
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-foreground-secondary">{food.category.name}</td>
+                    <td className="px-4 py-3 text-foreground">¥{food.price.toLocaleString()}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs px-2 py-1 rounded ${getStatusColor(food.status)}`}>
+                        {food.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEdit(food)}
+                          className="text-gold-400 hover:text-gold-300 text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(food.id)}
+                          className="text-red-400 hover:text-red-300 text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {totalPages > 1 && (
+            <div className="border-t border-border px-4 py-3 flex items-center justify-between">
+              <div className="text-sm text-foreground-secondary">
+                Showing page <span className="font-medium text-foreground">{currentPage}</span> of{" "}
+                <span className="font-medium text-foreground">{totalPages}</span> ({totalItems}{" "}
+                items)
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border border-border rounded text-sm text-foreground-secondary hover:text-foreground hover:bg-background-tertiary disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 border border-border rounded text-sm text-foreground-secondary hover:text-foreground hover:bg-background-tertiary disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
