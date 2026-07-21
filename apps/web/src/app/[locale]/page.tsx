@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AnimatedSection } from "@/shared/components/animated-section";
+import { formatPriceWithTax } from "@resto-hub/utils";
 
 interface Food {
   id: string;
@@ -140,7 +141,9 @@ export default function HomePage() {
                       {food.description}
                     </p>
                   )}
-                  <p className="text-gold-400 font-bold mt-2">¥{food.price.toLocaleString()}</p>
+                  <p className="text-gold-400 font-bold mt-2 text-sm">
+                    {formatPriceWithTax(food.price)}
+                  </p>
                 </div>
               </Link>
             ))}

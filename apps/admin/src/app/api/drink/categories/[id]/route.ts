@@ -4,7 +4,7 @@ import { withAuthParams } from "@/lib/auth";
 
 // PUT /api/drink/categories/[id] - Update drink category
 export const PUT = withAuthParams(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request, { params }) => {
     try {
       const body = await request.json();
       const { name, slug, description, sortOrder, isActive } = body;
@@ -47,7 +47,7 @@ export const PUT = withAuthParams(
 
 // DELETE /api/drink/categories/[id] - Delete drink category
 export const DELETE = withAuthParams(
-  async (_request: NextRequest, { params }: { params: { id: string } }) => {
+  async (_request, { params }) => {
     try {
       const existing = await prisma.drinkCategory.findUnique({
         where: { id: params.id },
