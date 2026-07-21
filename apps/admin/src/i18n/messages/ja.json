@@ -1,0 +1,57 @@
+{
+  "common": {
+    "adminTitle": "Resto Hub CMS",
+    "search": "検索...",
+    "add": "新規追加",
+    "edit": "編集",
+    "delete": "削除",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "status": "ステータス",
+    "actions": "操作",
+    "active": "有効",
+    "inactive": "無効",
+    "draft": "下書き",
+    "published": "公開中",
+    "archived": "アーカイブ",
+    "logout": "ログアウト",
+    "confirmLogout": "ログアウトの確認",
+    "logoutMessage": "Adminパネルからログアウトしてもよろしいですか？保存されていない変更は失われる可能性があります。",
+    "loggingOut": "ログアウト中...",
+    "language": "言語"
+  },
+  "sidebar": {
+    "homeManagement": "ホーム管理",
+    "foodMenu": "フードメニュー",
+    "drinkMenu": "ドリンクメニュー",
+    "buffetMenu": "ビュッフェメニュー",
+    "beerArt": "ビアアート",
+    "touristGuide": "観光ガイド",
+    "challenge": "型抜きチャレンジ",
+    "faq": "よくある質問",
+    "restaurantInfo": "店舗情報",
+    "reservations": "予約管理",
+    "contactMessages": "お問い合わせ",
+    "mediaLibrary": "メディアライブラリ"
+  },
+  "foodMenu": {
+    "title": "フードメニュー管理",
+    "subtitle": "レストランの料理メニューアイテムとカテゴリーを管理します",
+    "addFood": "料理を追加",
+    "manageCategories": "カテゴリー管理",
+    "searchPlaceholder": "料理名で検索...",
+    "categoryFilter": "全カテゴリー",
+    "statusFilter": "全ステータス",
+    "noFoods": "料理が見つかりません",
+    "noFoodsDesc": "新しい料理を追加するか、検索・フィルター条件を変更してください。"
+  },
+  "drinkMenu": {
+    "title": "ドリンクメニュー管理",
+    "subtitle": "ドリンクメニューアイテムとカテゴリーを管理します",
+    "addDrink": "ドリンクを追加",
+    "manageCategories": "カテゴリー管理",
+    "searchPlaceholder": "ドリンク名で検索...",
+    "noDrinks": "ドリンクが見つかりません"
+  }
+}
