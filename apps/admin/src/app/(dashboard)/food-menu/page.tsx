@@ -83,6 +83,24 @@ export default function FoodMenuPage() {
     setShowModal(true);
   };
 
+  const handleDuplicate = (food: Food) => {
+    setEditingId(null);
+    setForm({
+      name: `${food.name} (Copy)`,
+      slug: `${food.slug}-copy`,
+      description: food.description || "",
+      price: food.price.toString(),
+      originalPrice: food.originalPrice?.toString() || "",
+      categoryId: food.category?.id || "",
+      imageUrl: food.imageUrl || "",
+      isPopular: food.isPopular,
+      isRecommended: food.isRecommended,
+      status: "DRAFT",
+      sortOrder: food.sortOrder.toString(),
+    });
+    setShowModal(true);
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this food item?")) return;
     try {
@@ -100,10 +118,10 @@ export default function FoodMenuPage() {
           <h2 className="text-2xl font-bold text-foreground">Food Menu</h2>
           <p className="text-foreground-secondary mt-1">Manage food items and categories</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-stretch gap-3">
           <button
             onClick={() => setShowCategoryModal(true)}
-            className="flex-1 sm:flex-none text-center bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
           >
             Manage Categories
           </button>
@@ -113,7 +131,7 @@ export default function FoodMenuPage() {
               setForm(emptyForm);
               setShowModal(true);
             }}
-            className="flex-1 sm:flex-none text-center bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center bg-gold-500 hover:bg-gold-600 text-background px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
           >
             + Add Food
           </button>
@@ -158,6 +176,7 @@ export default function FoodMenuPage() {
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onDuplicate={handleDuplicate}
         currentPage={currentPage}
         totalPages={totalPages}
         totalItems={totalItems}
