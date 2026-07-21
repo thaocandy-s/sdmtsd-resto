@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Noto_Sans, Noto_Sans_JP } from "next/font/google";
 import "@resto-hub/ui/styles/globals.css";
 import { Providers } from "@/shared/providers";
 
-const inter = Inter({
+const notoSans = Noto_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-noto-sans",
+  display: "swap",
+});
+
+const notoSansJP = Noto_Sans_JP({
+  subsets: ["latin"],
+  variable: "--font-noto-jp",
   display: "swap",
 });
 
@@ -17,7 +23,7 @@ export const metadata: Metadata = {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans`}>
+      <body className={`${notoSans.variable} ${notoSansJP.variable} font-sans`}>
         <Providers>
           <div className="min-h-screen bg-background text-foreground">{children}</div>
         </Providers>

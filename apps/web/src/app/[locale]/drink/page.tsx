@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
+import { formatPriceWithTax } from "@resto-hub/utils";
 import { Category, Drink, GroupedCategory } from "./_components/types";
 import { CategoryFilter } from "./_components/CategoryFilter";
 import { CategorySliceSection } from "./_components/CategorySliceSection";
@@ -38,7 +39,7 @@ export default function DrinkPage() {
       .finally(() => setLoading(false));
   }, [selectedCategory]);
 
-  const formatPrice = (price: number) => `¥${price.toLocaleString()}`;
+  const formatPrice = (price: number) => formatPriceWithTax(price);
 
   // Group drinks by category slice
   const groupedCategories: GroupedCategory[] = (

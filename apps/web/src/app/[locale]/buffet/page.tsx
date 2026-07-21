@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { formatPriceWithTax } from "@resto-hub/utils";
 
 interface BuffetCourse {
   id: string;
@@ -31,7 +32,7 @@ export default function BuffetPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const formatPrice = (price: number) => `¥${price.toLocaleString()}`;
+  const formatPrice = (price: number) => formatPriceWithTax(price);
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-12">
