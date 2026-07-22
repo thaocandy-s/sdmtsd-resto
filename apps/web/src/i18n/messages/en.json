@@ -94,7 +94,11 @@
     "rules": "Rules",
     "winners": "Winner Gallery",
     "successHistory": "Success History",
-    "discount": "Discount"
+    "discount": "Discount",
+    "howToPlay": "How to Play",
+    "recentWinners": "Recent Winners",
+    "noWinners": "No winners yet. Be the first!",
+    "noPhoto": "No photo"
   },
   "tourist": {
     "title": "Tourist Guide",

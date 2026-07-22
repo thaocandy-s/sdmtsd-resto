@@ -94,7 +94,11 @@
     "rules": "ルール",
     "winners": "勝者ギャラリー",
     "successHistory": "成功履歴",
-    "discount": "割引"
+    "discount": "割引",
+    "howToPlay": "ルール・遊び方",
+    "recentWinners": "最近の成功者",
+    "noWinners": "まだ成功者はいません。最初の成功者になりましょう！",
+    "noPhoto": "写真なし"
   },
   "tourist": {
     "title": "観光ガイド",
