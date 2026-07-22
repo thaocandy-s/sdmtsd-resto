@@ -6,7 +6,7 @@ import { api } from "@/lib/api-client";
 import { BeerArt, FormData, emptyForm } from "./_components/types";
 import { BeerArtList } from "./_components/BeerArtList";
 import { BeerArtFormModal } from "./_components/BeerArtFormModal";
-import { ConfirmModal } from "./_components/ConfirmModal";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 export default function BeerArtPage() {
   const t = useTranslations("beerArt");

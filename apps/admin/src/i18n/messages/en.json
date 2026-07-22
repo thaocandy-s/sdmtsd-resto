@@ -168,7 +168,10 @@
     "addressLabel": "Address",
     "publishedLabel": "Published",
     "sortOrderLabel": "Sort Order",
-    "deleteConfirm": "Delete this item?"
+    "deleteConfirm": "Delete this item?",
+    "showingPage": "Showing page {page} of {totalPages} ({total} items)",
+    "previous": "Previous",
+    "next": "Next"
   },
   "imageUpload": {
     "defaultLabel": "Image",

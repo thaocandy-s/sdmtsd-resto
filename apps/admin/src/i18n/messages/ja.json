@@ -168,7 +168,10 @@
     "addressLabel": "住所",
     "publishedLabel": "公開中",
     "sortOrderLabel": "表示順",
-    "deleteConfirm": "このアイテムを削除しますか？"
+    "deleteConfirm": "このアイテムを削除しますか？",
+    "showingPage": "{totalPages} ページ中 {page} ページ目を選択中 (合計 {total} アイテム)",
+    "previous": "前へ",
+    "next": "次へ"
   },
   "imageUpload": {
     "defaultLabel": "画像",

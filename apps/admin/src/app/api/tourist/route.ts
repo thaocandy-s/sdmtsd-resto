@@ -5,17 +5,32 @@ import { withAuth } from "@/lib/auth";
 export const GET = withAuth(async (request: NextRequest) => {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get("limit") || "100");
-    const [places, categories] = await Promise.all([
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const skip = (page - 1) * limit;
+
+    const where = { deletedAt: null };
+
+    const [places, total] = await Promise.all([
       prisma.tourPlace.findMany({
-        where: { deletedAt: null },
+        where,
+        skip,
         take: limit,
         include: { category: true },
         orderBy: { sortOrder: "asc" },
       }),
-      prisma.tourCategory.findMany({ orderBy: { sortOrder: "asc" } }),
+      prisma.tourPlace.count({ where }),
     ]);
-    return NextResponse.json({ data: places, categories });
+
+    return NextResponse.json({
+      data: places,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Get tourist places error:", error);
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
