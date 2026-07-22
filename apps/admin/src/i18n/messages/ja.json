@@ -65,6 +65,7 @@
     "noDescription": "説明なし",
     "itemsCount": "個のアイテム",
     "deleteCategoryConfirm": "このカテゴリーを削除してもよろしいですか？",
+    "deleteConfirm": "このメニューを削除してもよろしいですか？",
     "imageLabel": "画像",
     "noImage": "画像なし",
     "duplicate": "複製",

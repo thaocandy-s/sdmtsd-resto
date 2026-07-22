@@ -7,6 +7,7 @@ import { Food, Category, FormData, emptyForm } from "./_components/types";
 import { FoodFormModal } from "./_components/FoodFormModal";
 import { CategoryManagerModal } from "./_components/CategoryManagerModal";
 import { FoodTable } from "./_components/FoodTable";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 export default function FoodMenuPage() {
   const tFood = useTranslations("foodMenu");
@@ -15,6 +16,9 @@ export default function FoodMenuPage() {
   const [foods, setFoods] = useState<Food[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Delete confirmation state
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -105,10 +109,15 @@ export default function FoodMenuPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this food item?")) return;
+  const handleDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await api.delete(`/api/menu/${id}`);
+      await api.delete(`/api/menu/${deleteConfirmId}`);
+      setDeleteConfirmId(null);
       loadData();
     } catch (error) {
       console.error("Delete food error:", error);
@@ -211,6 +220,14 @@ export default function FoodMenuPage() {
         onDataChange={() => {
           loadData();
         }}
+      />
+
+      <ConfirmModal
+        isOpen={deleteConfirmId !== null}
+        title={tCommon("delete")}
+        message={tFood("deleteConfirm")}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmId(null)}
       />
     </>
   );

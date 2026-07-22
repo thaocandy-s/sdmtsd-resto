@@ -65,6 +65,7 @@
     "noDescription": "No description",
     "itemsCount": "items",
     "deleteCategoryConfirm": "Are you sure you want to delete this category?",
+    "deleteConfirm": "Are you sure you want to delete this food item?",
     "imageLabel": "Image",
     "noImage": "No img",
     "duplicate": "Duplicate",
