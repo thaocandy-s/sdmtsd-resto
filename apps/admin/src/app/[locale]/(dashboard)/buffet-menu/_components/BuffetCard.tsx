@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Buffet } from "./types";
 import { ActionsMenu } from "./ActionsMenu";
 
@@ -9,13 +10,16 @@ interface BuffetCardProps {
 }
 
 export function BuffetCard({ buffet, onEdit, onDelete, onDuplicate }: BuffetCardProps) {
+  const t = useTranslations("buffetMenu");
+  const tc = useTranslations("common");
+
   const groupSizeText =
     buffet.minPeople || buffet.maxPeople
       ? buffet.minPeople && buffet.maxPeople
-        ? `${buffet.minPeople}–${buffet.maxPeople} people`
+        ? t("groupSizeFormat", { min: buffet.minPeople!, max: buffet.maxPeople! })
         : buffet.minPeople
-          ? `Min ${buffet.minPeople} people`
-          : `Max ${buffet.maxPeople} people`
+          ? t("minPeopleFormat", { min: buffet.minPeople! })
+          : t("maxPeopleFormat", { max: buffet.maxPeople! })
       : "-";
 
   return (
@@ -28,7 +32,7 @@ export function BuffetCard({ buffet, onEdit, onDelete, onDuplicate }: BuffetCard
               <img src={buffet.imageUrl} alt={buffet.name} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-foreground-tertiary text-xs">
-                No img
+                {t("noImage")}
               </div>
             )}
           </div>
@@ -40,7 +44,7 @@ export function BuffetCard({ buffet, onEdit, onDelete, onDuplicate }: BuffetCard
               </h3>
               {buffet.isPopular && (
                 <span className="text-[10px] bg-gold-500/20 text-gold-400 px-1.5 py-0.5 rounded font-medium flex-shrink-0">
-                  Popular
+                  {t("popularLabel")}
                 </span>
               )}
             </div>
@@ -67,24 +71,26 @@ export function BuffetCard({ buffet, onEdit, onDelete, onDuplicate }: BuffetCard
       {/* Information Section: Clean 2-Column Grid */}
       <div className="grid grid-cols-2 gap-y-2 gap-x-4 pt-3 border-t border-border/40 text-xs">
         <div className="flex flex-col gap-0.5">
-          <span className="text-foreground-tertiary font-medium">Price</span>
+          <span className="text-foreground-tertiary font-medium">{t("priceLabel")}</span>
           <span className="text-gold-400 font-semibold text-sm">
             ¥{buffet.price.toLocaleString()}
           </span>
         </div>
 
         <div className="flex flex-col gap-0.5">
-          <span className="text-foreground-tertiary font-medium">Duration</span>
-          <span className="text-foreground font-medium">{buffet.duration} min</span>
+          <span className="text-foreground-tertiary font-medium">{t("durationLabel")}</span>
+          <span className="text-foreground font-medium">
+            {t("durationFormat", { duration: buffet.duration })}
+          </span>
         </div>
 
         <div className="flex flex-col gap-0.5">
-          <span className="text-foreground-tertiary font-medium">Group Size</span>
+          <span className="text-foreground-tertiary font-medium">{t("groupSize")}</span>
           <span className="text-foreground font-medium">{groupSizeText}</span>
         </div>
 
         <div className="flex flex-col gap-0.5 items-start">
-          <span className="text-foreground-tertiary font-medium mb-0.5">Status</span>
+          <span className="text-foreground-tertiary font-medium mb-0.5">{tc("status")}</span>
           <span
             className={`px-2 py-0.5 rounded font-medium text-[11px] ${
               buffet.status === "PUBLISHED"
@@ -92,7 +98,7 @@ export function BuffetCard({ buffet, onEdit, onDelete, onDuplicate }: BuffetCard
                 : "bg-yellow-500/20 text-yellow-400"
             }`}
           >
-            {buffet.status}
+            {buffet.status === "PUBLISHED" ? tc("published") : tc("draft")}
           </span>
         </div>
       </div>

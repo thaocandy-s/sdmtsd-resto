@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { toSlug } from "@resto-hub/utils";
 import { ImageUpload } from "@/shared/components/image-upload";
 import { BuffetFormData, MenuItemOption } from "./types";
@@ -24,6 +25,8 @@ export function BuffetFormModal({
   onClose,
   onSubmit,
 }: BuffetFormModalProps) {
+  const t = useTranslations("buffetMenu");
+  const tc = useTranslations("common");
   const [selectedCategoryTab, setSelectedCategoryTab] = useState<"food" | "drink">("food");
   const [itemSearch, setItemSearch] = useState("");
 
@@ -64,7 +67,7 @@ export function BuffetFormModal({
       <div className="bg-background-secondary border border-border rounded-xl p-4 sm:p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 border-b border-border/50">
           <h3 className="text-lg sm:text-xl font-bold text-foreground">
-            {editingId ? "Edit Course" : "Add Course"}
+            {editingId ? t("editCourse") : t("addCourse")}
           </h3>
           <button
             onClick={onClose}
@@ -75,7 +78,9 @@ export function BuffetFormModal({
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-foreground-secondary mb-1">Name *</label>
+            <label className="block text-sm text-foreground-secondary mb-1">
+              {t("nameLabel")} *
+            </label>
             <input
               type="text"
               value={form.name}
@@ -92,7 +97,9 @@ export function BuffetFormModal({
             />
           </div>
           <div>
-            <label className="block text-sm text-foreground-secondary mb-1">Description</label>
+            <label className="block text-sm text-foreground-secondary mb-1">
+              {t("descriptionLabel")}
+            </label>
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -102,7 +109,9 @@ export function BuffetFormModal({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-foreground-secondary mb-1">Price *</label>
+              <label className="block text-sm text-foreground-secondary mb-1">
+                {t("priceLabel")} *
+              </label>
               <input
                 type="number"
                 value={form.price}
@@ -113,7 +122,7 @@ export function BuffetFormModal({
             </div>
             <div>
               <label className="block text-sm text-foreground-secondary mb-1">
-                Duration (min) *
+                {t("durationLabel")} *
               </label>
               <input
                 type="number"
@@ -126,7 +135,9 @@ export function BuffetFormModal({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-foreground-secondary mb-1">Min People</label>
+              <label className="block text-sm text-foreground-secondary mb-1">
+                {t("minPeopleLabel")}
+              </label>
               <input
                 type="number"
                 value={form.minPeople}
@@ -136,7 +147,9 @@ export function BuffetFormModal({
               />
             </div>
             <div>
-              <label className="block text-sm text-foreground-secondary mb-1">Max People</label>
+              <label className="block text-sm text-foreground-secondary mb-1">
+                {t("maxPeopleLabel")}
+              </label>
               <input
                 type="number"
                 value={form.maxPeople}
@@ -151,18 +164,16 @@ export function BuffetFormModal({
           <div className="border border-border rounded-lg p-3 sm:p-4 bg-background/50 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
               <label className="block text-sm font-medium text-foreground">
-                Includes (What's included)
+                {t("includesLabel")}
               </label>
-              <span className="text-xs text-foreground-tertiary">
-                Click menu items below to add or remove
-              </span>
+              <span className="text-xs text-foreground-tertiary">{t("includesSelectorDesc")}</span>
             </div>
 
             {/* Selected Items Display Box */}
             <div className="min-h-[48px] p-2.5 border border-border rounded-lg bg-background flex flex-wrap gap-2 items-center">
               {currentIncludesArray.length === 0 ? (
                 <span className="text-sm text-foreground-tertiary italic">
-                  No items selected yet. Pick items from the menu below.
+                  {t("noIncludesSelected")}
                 </span>
               ) : (
                 currentIncludesArray.map((item) => (
@@ -196,7 +207,7 @@ export function BuffetFormModal({
                       : "text-foreground-secondary hover:text-foreground"
                   }`}
                 >
-                  Food ({menuItems.filter((i) => i.type === "food").length})
+                  {t("foodTab", { count: menuItems.filter((i) => i.type === "food").length })}
                 </button>
                 <button
                   type="button"
@@ -207,12 +218,12 @@ export function BuffetFormModal({
                       : "text-foreground-secondary hover:text-foreground"
                   }`}
                 >
-                  Drink ({menuItems.filter((i) => i.type === "drink").length})
+                  {t("drinkTab", { count: menuItems.filter((i) => i.type === "drink").length })}
                 </button>
               </div>
               <input
                 type="text"
-                placeholder="Search menu items to include..."
+                placeholder={t("searchMenuPlaceholder")}
                 value={itemSearch}
                 onChange={(e) => setItemSearch(e.target.value)}
                 className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-gold-500"
@@ -223,7 +234,7 @@ export function BuffetFormModal({
             <div className="max-h-48 overflow-y-auto border border-border/50 rounded-lg p-2.5 flex flex-wrap gap-2 bg-background">
               {filteredMenuItems.length === 0 ? (
                 <span className="text-sm text-foreground-tertiary p-2">
-                  No {selectedCategoryTab} items found
+                  {t("noMenuItemsFound", { type: selectedCategoryTab })}
                 </span>
               ) : (
                 filteredMenuItems.map((item) => {
@@ -255,7 +266,9 @@ export function BuffetFormModal({
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-foreground-secondary mb-1">Sort Order</label>
+              <label className="block text-sm text-foreground-secondary mb-1">
+                {t("sortOrderLabel")}
+              </label>
               <input
                 type="number"
                 value={form.sortOrder}
@@ -264,14 +277,16 @@ export function BuffetFormModal({
               />
             </div>
             <div>
-              <label className="block text-sm text-foreground-secondary mb-1">Status</label>
+              <label className="block text-sm text-foreground-secondary mb-1">
+                {t("statusLabel")}
+              </label>
               <select
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
                 className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:border-gold-500"
               >
-                <option value="DRAFT">Draft</option>
-                <option value="PUBLISHED">Published</option>
+                <option value="DRAFT">{tc("draft")}</option>
+                <option value="PUBLISHED">{tc("published")}</option>
               </select>
             </div>
           </div>
@@ -282,21 +297,21 @@ export function BuffetFormModal({
               onChange={(e) => setForm({ ...form, isPopular: e.target.checked })}
               className="rounded border-border w-4 h-4 accent-gold-500"
             />
-            <span className="text-sm text-foreground font-medium">Popular</span>
+            <span className="text-sm text-foreground font-medium">{t("popularLabel")}</span>
           </label>
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
               className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2.5 rounded-lg font-medium transition-colors min-h-[44px]"
             >
-              {editingId ? "Update" : "Create"}
+              {editingId ? tc("save") : tc("add")}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="flex-1 bg-background-tertiary hover:bg-background text-foreground py-2.5 rounded-lg font-medium transition-colors min-h-[44px]"
             >
-              Cancel
+              {tc("cancel")}
             </button>
           </div>
         </form>

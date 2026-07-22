@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { Buffet, MenuItemOption, BuffetFormData, emptyBuffetForm } from "./_components/types";
 import { BuffetTable } from "./_components/BuffetTable";
 import { BuffetFormModal } from "./_components/BuffetFormModal";
 
 export default function BuffetMenuPage() {
+  const t = useTranslations("buffetMenu");
+  const tc = useTranslations("common");
   const [buffets, setBuffets] = useState<Buffet[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -129,7 +132,7 @@ export default function BuffetMenuPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
+    if (!confirm(tc("deleteConfirm"))) return;
     try {
       await api.delete(`/api/buffet/${id}`);
       loadData();
@@ -142,10 +145,8 @@ export default function BuffetMenuPage() {
     <>
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Buffet Menu</h2>
-          <p className="text-sm sm:text-base text-foreground-secondary mt-1">
-            Manage buffet courses
-          </p>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">{t("title")}</h2>
+          <p className="text-sm sm:text-base text-foreground-secondary mt-1">{t("subtitle")}</p>
         </div>
         <button
           onClick={() => {
@@ -155,7 +156,7 @@ export default function BuffetMenuPage() {
           }}
           className="w-full sm:w-auto inline-flex items-center justify-center bg-gold-500 hover:bg-gold-600 text-background px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
         >
-          + Add Course
+          + {t("addCourse")}
         </button>
       </header>
 
@@ -163,7 +164,7 @@ export default function BuffetMenuPage() {
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
         <input
           type="text"
-          placeholder="Search buffet courses..."
+          placeholder={t("searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full sm:flex-1 bg-background-secondary border border-border rounded-lg px-4 py-2.5 text-foreground placeholder-foreground-tertiary focus:outline-none focus:border-gold-500 text-sm min-h-[44px]"
@@ -173,9 +174,9 @@ export default function BuffetMenuPage() {
           onChange={(e) => setFilterStatus(e.target.value)}
           className="w-full sm:w-auto bg-background-secondary border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-gold-500 text-sm min-h-[44px]"
         >
-          <option value="">All Statuses</option>
-          <option value="DRAFT">Draft</option>
-          <option value="PUBLISHED">Published</option>
+          <option value="">{t("statusFilter")}</option>
+          <option value="DRAFT">{tc("draft")}</option>
+          <option value="PUBLISHED">{tc("published")}</option>
         </select>
       </div>
 

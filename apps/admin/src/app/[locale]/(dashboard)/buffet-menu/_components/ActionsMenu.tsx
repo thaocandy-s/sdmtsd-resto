@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface ActionsMenuProps {
   onEdit: () => void;
@@ -9,6 +10,8 @@ interface ActionsMenuProps {
 }
 
 export function ActionsMenu({ onEdit, onDelete, onDuplicate }: ActionsMenuProps) {
+  const t = useTranslations("buffetMenu");
+  const tc = useTranslations("common");
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -63,7 +66,7 @@ export function ActionsMenu({ onEdit, onDelete, onDuplicate }: ActionsMenuProps)
             className="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-background-tertiary flex items-center gap-2 transition-colors"
             role="menuitem"
           >
-            <span>Edit</span>
+            <span>{tc("edit")}</span>
           </button>
 
           {onDuplicate && (
@@ -75,7 +78,7 @@ export function ActionsMenu({ onEdit, onDelete, onDuplicate }: ActionsMenuProps)
               className="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-background-tertiary flex items-center gap-2 transition-colors"
               role="menuitem"
             >
-              <span>Duplicate</span>
+              <span>{t("duplicate")}</span>
             </button>
           )}
 
@@ -87,7 +90,7 @@ export function ActionsMenu({ onEdit, onDelete, onDuplicate }: ActionsMenuProps)
             className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors"
             role="menuitem"
           >
-            <span>Delete</span>
+            <span>{tc("delete")}</span>
           </button>
         </div>
       )}

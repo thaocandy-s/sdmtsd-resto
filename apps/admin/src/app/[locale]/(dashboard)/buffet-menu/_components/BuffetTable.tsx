@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Buffet } from "./types";
 import { BuffetCard } from "./BuffetCard";
 
@@ -24,6 +25,9 @@ export function BuffetTable({
   totalItems = 0,
   onPageChange,
 }: BuffetTableProps) {
+  const t = useTranslations("buffetMenu");
+  const tc = useTranslations("common");
+
   if (loading) {
     return (
       <div className="space-y-3">
@@ -54,7 +58,7 @@ export function BuffetTable({
   if (buffets.length === 0) {
     return (
       <div className="bg-background-secondary border border-border rounded-xl p-12 text-center">
-        <p className="text-foreground-secondary">No buffet courses found</p>
+        <p className="text-foreground-secondary">{t("noBuffets")}</p>
       </div>
     );
   }
@@ -81,19 +85,27 @@ export function BuffetTable({
             <thead className="border-b border-border">
               <tr>
                 <th className="px-4 py-3 text-sm font-medium text-foreground-secondary w-16">
-                  Image
+                  {t("imageLabel")}
                 </th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Name</th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Price</th>
                 <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
-                  Duration
+                  {t("nameLabel")}
+                </th>
+                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
+                  {t("priceLabel")}
+                </th>
+                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
+                  {t("durationLabel")}
                 </th>
                 {/* Visible only on Desktop (>=1024px) */}
                 <th className="hidden lg:table-cell px-4 py-3 text-sm font-medium text-foreground-secondary">
-                  Group Size
+                  {t("groupSize")}
                 </th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Status</th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Actions</th>
+                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
+                  {tc("status")}
+                </th>
+                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
+                  {tc("actions")}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -101,10 +113,10 @@ export function BuffetTable({
                 const groupSizeText =
                   b.minPeople || b.maxPeople
                     ? b.minPeople && b.maxPeople
-                      ? `${b.minPeople}–${b.maxPeople} people`
+                      ? t("groupSizeFormat", { min: b.minPeople!, max: b.maxPeople! })
                       : b.minPeople
-                        ? `Min ${b.minPeople} people`
-                        : `Max ${b.maxPeople} people`
+                        ? t("minPeopleFormat", { min: b.minPeople! })
+                        : t("maxPeopleFormat", { max: b.maxPeople! })
                     : "-";
 
                 return (
@@ -119,7 +131,7 @@ export function BuffetTable({
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-foreground-tertiary text-xs">
-                            No img
+                            {t("noImage")}
                           </div>
                         )}
                       </div>
@@ -133,7 +145,7 @@ export function BuffetTable({
                           {/* Desktop (>=1024px): Popular badge inline */}
                           {b.isPopular && (
                             <span className="hidden lg:inline-block text-[10px] bg-gold-500/20 text-gold-400 px-1.5 py-0.5 rounded font-medium">
-                              Popular
+                              {t("popularLabel")}
                             </span>
                           )}
                         </div>
@@ -143,11 +155,11 @@ export function BuffetTable({
                           <div className="flex items-center gap-2 flex-wrap">
                             {b.isPopular && (
                               <span className="text-[10px] bg-gold-500/20 text-gold-400 px-1.5 py-0.5 rounded font-medium">
-                                Popular
+                                {t("popularLabel")}
                               </span>
                             )}
                             <span className="text-xs text-foreground-tertiary font-medium">
-                              Group: {groupSizeText}
+                              {t("groupSize")}: {groupSizeText}
                             </span>
                           </div>
                           {b.description && (
@@ -166,7 +178,7 @@ export function BuffetTable({
 
                     {/* Duration Column */}
                     <td className="px-4 py-3 text-foreground-secondary text-sm whitespace-nowrap">
-                      {b.duration} min
+                      {t("durationFormat", { duration: b.duration })}
                     </td>
 
                     {/* Group Size Column (Desktop >=1024px only) */}
@@ -183,7 +195,7 @@ export function BuffetTable({
                             : "bg-yellow-500/20 text-yellow-400"
                         }`}
                       >
-                        {b.status}
+                        {b.status === "PUBLISHED" ? tc("published") : tc("draft")}
                       </span>
                     </td>
 
@@ -194,21 +206,21 @@ export function BuffetTable({
                           onClick={() => onEdit(b)}
                           className="text-gold-400 hover:text-gold-300 text-sm font-medium transition-colors"
                         >
-                          Edit
+                          {tc("edit")}
                         </button>
                         {onDuplicate && (
                           <button
                             onClick={() => onDuplicate(b)}
                             className="text-foreground-secondary hover:text-foreground text-sm font-medium transition-colors"
                           >
-                            Duplicate
+                            {t("duplicate")}
                           </button>
                         )}
                         <button
                           onClick={() => onDelete(b.id)}
                           className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
                         >
-                          Delete
+                          {tc("delete")}
                         </button>
                       </div>
                     </td>
@@ -224,8 +236,7 @@ export function BuffetTable({
       {totalPages > 1 && onPageChange && (
         <div className="bg-background-secondary border border-border rounded-xl md:rounded-b-lg md:rounded-t-none px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-sm text-foreground-secondary">
-            Showing page <span className="font-medium text-foreground">{currentPage}</span> of{" "}
-            <span className="font-medium text-foreground">{totalPages}</span> ({totalItems} items)
+            {t("showingPage", { page: currentPage, totalPages, total: totalItems })}
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <button
@@ -233,14 +244,14 @@ export function BuffetTable({
               disabled={currentPage === 1}
               className="flex-1 sm:flex-none px-3 py-1.5 min-h-[44px] sm:min-h-0 border border-border rounded-lg text-sm text-foreground-secondary hover:text-foreground hover:bg-background-tertiary disabled:opacity-50 disabled:pointer-events-none transition-colors flex items-center justify-center"
             >
-              Previous
+              {t("previous")}
             </button>
             <button
               onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
               disabled={currentPage === totalPages}
               className="flex-1 sm:flex-none px-3 py-1.5 min-h-[44px] sm:min-h-0 border border-border rounded-lg text-sm text-foreground-secondary hover:text-foreground hover:bg-background-tertiary disabled:opacity-50 disabled:pointer-events-none transition-colors flex items-center justify-center"
             >
-              Next
+              {t("next")}
             </button>
           </div>
         </div>
