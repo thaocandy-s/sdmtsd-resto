@@ -16,10 +16,16 @@ async function refreshAccessToken(): Promise<string | null> {
         credentials: "include",
       });
 
+      const isLoginPage =
+        typeof window !== "undefined" &&
+        (window.location.pathname === "/login" || window.location.pathname.endsWith("/login"));
+
       if (!response.ok) {
         useAuthStore.getState().clearAuth();
-        if (typeof window !== "undefined" && window.location.pathname !== "/login") {
-          window.location.href = "/login";
+        if (typeof window !== "undefined" && !isLoginPage) {
+          const localeMatch = window.location.pathname.match(/^\/(ja|en)/);
+          const locale = localeMatch ? localeMatch[1] : "en";
+          window.location.href = `/${locale}/login`;
         }
         return null;
       }
@@ -30,8 +36,13 @@ async function refreshAccessToken(): Promise<string | null> {
       return newToken;
     } catch {
       useAuthStore.getState().clearAuth();
-      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      const isLoginPage =
+        typeof window !== "undefined" &&
+        (window.location.pathname === "/login" || window.location.pathname.endsWith("/login"));
+      if (typeof window !== "undefined" && !isLoginPage) {
+        const localeMatch = window.location.pathname.match(/^\/(ja|en)/);
+        const locale = localeMatch ? localeMatch[1] : "en";
+        window.location.href = `/${locale}/login`;
       }
       return null;
     } finally {

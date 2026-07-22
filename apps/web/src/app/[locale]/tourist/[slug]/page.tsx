@@ -172,23 +172,6 @@ export default function TouristDetailPage() {
         </dl>
       </section>
 
-      {/* Google Map */}
-      {place.latitude && place.longitude && (
-        <section className="mb-8">
-          <h2 className="text-xl font-bold text-foreground mb-3">Location</h2>
-          <div className="aspect-video rounded-lg overflow-hidden bg-background-tertiary">
-            <iframe
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}&q=${place.latitude},${place.longitude}&zoom=15`}
-            />
-          </div>
-        </section>
-      )}
-
       {/* Back Link */}
       <div className="text-center">
         <Link
