@@ -218,5 +218,23 @@
     "foodTab": "Food ({count})",
     "drinkTab": "Drink ({count})",
     "durationFormat": "{duration} min"
+  },
+  "beerArt": {
+    "title": "Beer Art",
+    "subtitle": "Manage beer art gallery",
+    "addItem": "Add Item",
+    "noItems": "No beer art items found",
+    "editItem": "Edit Beer Art",
+    "titleLabel": "Title",
+    "descriptionLabel": "Description",
+    "customerNameLabel": "Customer Name",
+    "artistNameLabel": "Artist Name",
+    "publishedLabel": "Published",
+    "imageLabel": "Image",
+    "deleteConfirm": "Are you sure you want to delete this item?",
+    "noImage": "No img",
+    "showingPage": "Showing page {page} of {totalPages} ({total} items)",
+    "previous": "Previous",
+    "next": "Next"
   }
 }

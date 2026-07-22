@@ -218,5 +218,23 @@
     "foodTab": "フード ({count})",
     "drinkTab": "ドリンク ({count})",
     "durationFormat": "{duration} 分"
+  },
+  "beerArt": {
+    "title": "ビアアート",
+    "subtitle": "ビアアートギャラリーを管理します",
+    "addItem": "アートを追加",
+    "noItems": "ビアアートアイテムが見つかりません",
+    "editItem": "ビアアートの編集",
+    "titleLabel": "タイトル",
+    "descriptionLabel": "説明",
+    "customerNameLabel": "お客様名",
+    "artistNameLabel": "アーティスト名",
+    "publishedLabel": "公開済み",
+    "imageLabel": "画像",
+    "deleteConfirm": "このアイテムを削除してもよろしいですか？",
+    "noImage": "画像なし",
+    "showingPage": "{totalPages} ページ中 {page} ページ目を選択中 (合計 {total} アイテム)",
+    "previous": "前へ",
+    "next": "次へ"
   }
 }

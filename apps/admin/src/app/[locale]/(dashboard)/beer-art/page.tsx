@@ -1,51 +1,44 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
-import { ImageUpload } from "@/shared/components/image-upload";
-
-interface BeerArt {
-  id: string;
-  title: string;
-  description: string | null;
-  imageUrl: string;
-  customerName: string | null;
-  artistName: string | null;
-  isPublished: boolean;
-}
-type FormData = {
-  title: string;
-  description: string;
-  imageUrl: string;
-  customerName: string;
-  artistName: string;
-  isPublished: boolean;
-};
-const emptyForm: FormData = {
-  title: "",
-  description: "",
-  imageUrl: "",
-  customerName: "",
-  artistName: "",
-  isPublished: false,
-};
+import { BeerArt, FormData, emptyForm } from "./_components/types";
+import { BeerArtList } from "./_components/BeerArtList";
+import { BeerArtFormModal } from "./_components/BeerArtFormModal";
+import { ConfirmModal } from "./_components/ConfirmModal";
 
 export default function BeerArtPage() {
+  const t = useTranslations("beerArt");
+  const tc = useTranslations("common");
   const [items, setItems] = useState<BeerArt[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>(emptyForm);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+
+  // Delete confirmation state
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
   useEffect(() => {
     loadData();
-  }, []);
+  }, [currentPage]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const res = await api.get<{ data: BeerArt[] }>("/api/beer-art");
+      const res = await api.get<{
+        data: BeerArt[];
+        meta: { totalPages: number; total: number };
+      }>(`/api/beer-art?page=${currentPage}&limit=10`);
       setItems(res.data || []);
+      setTotalPages(res.meta?.totalPages || 1);
+      setTotalItems(res.meta?.total || 0);
     } catch (error) {
       console.error("Load beer art error:", error);
     } finally {
@@ -80,10 +73,11 @@ export default function BeerArtPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this item?")) return;
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await api.delete(`/api/beer-art/${id}`);
+      await api.delete(`/api/beer-art/${deleteConfirmId}`);
+      setDeleteConfirmId(null);
       loadData();
     } catch (error) {
       console.error("Delete error:", error);
@@ -94,8 +88,8 @@ export default function BeerArtPage() {
     <>
       <header className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Beer Art</h2>
-          <p className="text-foreground-secondary mt-1">Manage beer art gallery</p>
+          <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
+          <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
         </div>
         <button
           onClick={() => {
@@ -105,163 +99,61 @@ export default function BeerArtPage() {
           }}
           className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
         >
-          + Add Item
+          + {t("addItem")}
         </button>
       </header>
 
-      {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="aspect-square bg-background-secondary rounded-lg animate-pulse"
-            />
-          ))}
-        </div>
-      ) : items.length === 0 ? (
-        <div className="bg-background-secondary border border-border rounded-lg p-12 text-center">
-          <p className="text-foreground-secondary">No beer art items</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="bg-background-secondary border border-border rounded-lg overflow-hidden group"
-            >
-              <div className="aspect-square bg-background-tertiary">
-                {item.imageUrl && (
-                  <img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
-              <div className="p-3">
-                <h3 className="font-medium text-foreground truncate">{item.title}</h3>
-                <p className="text-xs text-foreground-secondary">
-                  {item.isPublished ? "Published" : "Draft"}
-                </p>
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => handleEdit(item)}
-                    className="text-gold-400 hover:text-gold-300 text-xs"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="text-red-400 hover:text-red-300 text-xs"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <BeerArtList
+        items={items}
+        loading={loading}
+        onEdit={handleEdit}
+        onDelete={(id) => setDeleteConfirmId(id)}
+      />
 
-      {showModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-background-secondary border border-border rounded-lg p-6 max-w-lg w-full">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-foreground">
-                {editingId ? "Edit" : "Add"} Beer Art
-              </h3>
-              <button
-                onClick={() => {
-                  setShowModal(false);
-                  setEditingId(null);
-                }}
-                className="text-foreground-secondary hover:text-foreground"
-              >
-                &times;
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm text-foreground-secondary mb-1">Title *</label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  required
-                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                />
-              </div>
-              <ImageUpload
-                value={form.imageUrl}
-                onChange={(url) => setForm({ ...form, imageUrl: url })}
-                label="Image"
-                required
-                folder="beer-art"
-              />
-              <div>
-                <label className="block text-sm text-foreground-secondary mb-1">Description</label>
-                <textarea
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  rows={2}
-                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-foreground-secondary mb-1">
-                    Customer Name
-                  </label>
-                  <input
-                    type="text"
-                    value={form.customerName}
-                    onChange={(e) => setForm({ ...form, customerName: e.target.value })}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-foreground-secondary mb-1">
-                    Artist Name
-                  </label>
-                  <input
-                    type="text"
-                    value={form.artistName}
-                    onChange={(e) => setForm({ ...form, artistName: e.target.value })}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                  />
-                </div>
-              </div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.isPublished}
-                  onChange={(e) => setForm({ ...form, isPublished: e.target.checked })}
-                  className="rounded border-border"
-                />
-                <span className="text-sm text-foreground">Published</span>
-              </label>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors"
-                >
-                  {editingId ? "Update" : "Create"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    setEditingId(null);
-                  }}
-                  className="flex-1 bg-background-tertiary hover:bg-background text-foreground py-2 rounded-lg font-medium transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+      {/* Pagination Container */}
+      {!loading && totalPages > 1 && (
+        <div className="mt-8 bg-background-secondary border border-border rounded-xl px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-sm text-foreground-secondary">
+            {t("showingPage", { page: currentPage, totalPages, total: totalItems })}
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <button
+              onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+              disabled={currentPage === 1}
+              className="flex-1 sm:flex-none px-3 py-1.5 min-h-[44px] sm:min-h-0 border border-border rounded-lg text-sm text-foreground-secondary hover:text-foreground hover:bg-background-tertiary disabled:opacity-50 disabled:pointer-events-none transition-colors flex items-center justify-center"
+            >
+              {t("previous")}
+            </button>
+            <button
+              onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="flex-1 sm:flex-none px-3 py-1.5 min-h-[44px] sm:min-h-0 border border-border rounded-lg text-sm text-foreground-secondary hover:text-foreground hover:bg-background-tertiary disabled:opacity-50 disabled:pointer-events-none transition-colors flex items-center justify-center"
+            >
+              {t("next")}
+            </button>
           </div>
         </div>
       )}
+
+      <BeerArtFormModal
+        isOpen={showModal}
+        editingId={editingId}
+        form={form}
+        setForm={setForm}
+        onClose={() => {
+          setShowModal(false);
+          setEditingId(null);
+        }}
+        onSubmit={handleSubmit}
+      />
+
+      <ConfirmModal
+        isOpen={deleteConfirmId !== null}
+        title={tc("delete")}
+        message={t("deleteConfirm")}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
     </>
   );
 }
