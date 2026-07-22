@@ -1,0 +1,57 @@
+{
+  "common": {
+    "adminTitle": "Resto Hub CMS",
+    "search": "Search...",
+    "add": "Add New",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "status": "Status",
+    "actions": "Actions",
+    "active": "Active",
+    "inactive": "Inactive",
+    "draft": "Draft",
+    "published": "Published",
+    "archived": "Archived",
+    "logout": "Logout",
+    "confirmLogout": "Confirm Logout",
+    "logoutMessage": "Are you sure you want to log out of the Admin panel? Any unsaved changes may be lost.",
+    "loggingOut": "Logging out...",
+    "language": "Language"
+  },
+  "sidebar": {
+    "homeManagement": "Home Management",
+    "foodMenu": "Food Menu",
+    "drinkMenu": "Drink Menu",
+    "buffetMenu": "Buffet Menu",
+    "beerArt": "Beer Art",
+    "touristGuide": "Tourist Guide",
+    "challenge": "Challenge",
+    "faq": "FAQ",
+    "restaurantInfo": "Restaurant Info",
+    "reservations": "Reservations",
+    "contactMessages": "Contact Messages",
+    "mediaLibrary": "Media Library"
+  },
+  "foodMenu": {
+    "title": "Food Menu Management",
+    "subtitle": "Manage restaurant food menu items and categories",
+    "addFood": "Add Food Item",
+    "manageCategories": "Manage Categories",
+    "searchPlaceholder": "Search food by name...",
+    "categoryFilter": "All Categories",
+    "statusFilter": "All Statuses",
+    "noFoods": "No food items found",
+    "noFoodsDesc": "Get started by adding a new food item or try adjusting your search filters."
+  },
+  "drinkMenu": {
+    "title": "Drink Menu Management",
+    "subtitle": "Manage restaurant beverage menu items and categories",
+    "addDrink": "Add Drink Item",
+    "manageCategories": "Manage Categories",
+    "searchPlaceholder": "Search drink by name...",
+    "noDrinks": "No drink items found"
+  }
+}
