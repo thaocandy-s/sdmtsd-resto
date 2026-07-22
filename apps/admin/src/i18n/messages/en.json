@@ -55,7 +55,16 @@
     "statusLabel": "Status",
     "sortOrderLabel": "Sort Order",
     "popularLabel": "Popular",
-    "recommendedLabel": "Recommended"
+    "recommendedLabel": "Recommended",
+    "categoriesTitle": "Food Categories",
+    "categoriesSubtitle": "Manage categories and descriptions displayed on web menu",
+    "editCategory": "Edit Category",
+    "addCategory": "Add New Category",
+    "descPlaceholder": "e.g. Traditional Japanese ramen, grilled meats, and appetizers.",
+    "descWithDisplay": "Description (Displays on web menu section)",
+    "noDescription": "No description",
+    "itemsCount": "items",
+    "deleteCategoryConfirm": "Are you sure you want to delete this category?"
   },
   "drinkMenu": {
     "title": "Drink Menu Management",

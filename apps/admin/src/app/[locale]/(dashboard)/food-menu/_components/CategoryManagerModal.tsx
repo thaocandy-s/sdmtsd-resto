@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { Category, CategoryFormData, emptyCategoryForm, toSlug } from "./types";
 
@@ -15,6 +16,8 @@ export function CategoryManagerModal({
   onClose,
   onDataChange,
 }: CategoryManagerModalProps) {
+  const t = useTranslations("foodMenu");
+  const tc = useTranslations("common");
   const [isAddingCat, setIsAddingCat] = useState(false);
   const [editingCatId, setEditingCatId] = useState<string | null>(null);
   const [catForm, setCatForm] = useState<CategoryFormData>(emptyCategoryForm);
@@ -50,7 +53,7 @@ export function CategoryManagerModal({
   };
 
   const handleCatDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this category?")) return;
+    if (!confirm(t("deleteCategoryConfirm"))) return;
     try {
       await api.delete(`/api/menu/categories/${id}`);
       onDataChange();
@@ -71,14 +74,12 @@ export function CategoryManagerModal({
       <div className="bg-background-secondary border border-border rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6">
         <div className="flex items-center justify-between border-b border-border pb-4">
           <div>
-            <h3 className="text-xl font-bold text-foreground">Food Categories</h3>
-            <p className="text-sm text-foreground-secondary mt-0.5">
-              Manage categories and descriptions displayed on web menu
-            </p>
+            <h3 className="text-xl font-bold text-foreground">{t("categoriesTitle")}</h3>
+            <p className="text-sm text-foreground-secondary mt-0.5">{t("categoriesSubtitle")}</p>
           </div>
           <button
             onClick={handleClose}
-            className="text-foreground-secondary hover:text-foreground text-xl"
+            className="text-foreground-secondary hover:text-foreground text-2xl"
           >
             &times;
           </button>
@@ -91,10 +92,12 @@ export function CategoryManagerModal({
             className="bg-background border border-border rounded-lg p-4 space-y-4"
           >
             <h4 className="font-semibold text-gold-400">
-              {editingCatId ? "Edit Category" : "Add New Category"}
+              {editingCatId ? t("editCategory") : t("addCategory")}
             </h4>
             <div>
-              <label className="block text-xs text-foreground-secondary mb-1">Name *</label>
+              <label className="block text-xs text-foreground-secondary mb-1">
+                {t("nameLabel")} *
+              </label>
               <input
                 type="text"
                 value={catForm.name}
@@ -108,18 +111,20 @@ export function CategoryManagerModal({
             </div>
             <div>
               <label className="block text-xs text-foreground-secondary mb-1">
-                Description (Displays on web menu section)
+                {t("descWithDisplay")}
               </label>
               <textarea
                 value={catForm.description}
                 onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
                 rows={2}
-                placeholder="e.g. Traditional Japanese ramen, grilled meats, and appetizers."
+                placeholder={t("descPlaceholder")}
                 className="w-full bg-background-secondary border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-gold-500"
               />
             </div>
             <div className="w-1/2">
-              <label className="block text-xs text-foreground-secondary mb-1">Sort Order</label>
+              <label className="block text-xs text-foreground-secondary mb-1">
+                {t("sortOrderLabel")}
+              </label>
               <input
                 type="number"
                 value={catForm.sortOrder}
@@ -132,7 +137,7 @@ export function CategoryManagerModal({
                 type="submit"
                 className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
               >
-                {editingCatId ? "Save Changes" : "Create Category"}
+                {editingCatId ? tc("save") : tc("add")}
               </button>
               <button
                 type="button"
@@ -143,7 +148,7 @@ export function CategoryManagerModal({
                 }}
                 className="bg-background-tertiary hover:bg-background border border-border text-foreground px-4 py-1.5 rounded-lg text-sm transition-colors"
               >
-                Cancel
+                {tc("cancel")}
               </button>
             </div>
           </form>
@@ -156,7 +161,7 @@ export function CategoryManagerModal({
             }}
             className="w-full py-2 border border-dashed border-gold-500/50 hover:border-gold-500 text-gold-400 rounded-lg text-sm font-medium transition-colors text-center"
           >
-            + Add New Category
+            + {t("addCategory")}
           </button>
         )}
 
@@ -165,10 +170,10 @@ export function CategoryManagerModal({
           <table className="w-full text-sm">
             <thead className="bg-background-tertiary border-b border-border">
               <tr className="text-left text-foreground-secondary">
-                <th className="px-4 py-2.5">Name / Slug</th>
-                <th className="px-4 py-2.5">Description</th>
-                <th className="px-4 py-2.5">Foods</th>
-                <th className="px-4 py-2.5">Actions</th>
+                <th className="px-4 py-2.5">{t("nameLabel")} / Slug</th>
+                <th className="px-4 py-2.5">{t("descriptionLabel")}</th>
+                <th className="px-4 py-2.5">{t("categoryLabel")}</th>
+                <th className="px-4 py-2.5">{tc("actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -180,11 +185,11 @@ export function CategoryManagerModal({
                   </td>
                   <td className="px-4 py-2.5 text-foreground-secondary max-w-xs truncate">
                     {cat.description || (
-                      <span className="text-foreground-tertiary italic">No description</span>
+                      <span className="text-foreground-tertiary italic">{t("noDescription")}</span>
                     )}
                   </td>
                   <td className="px-4 py-2.5 text-foreground-secondary">
-                    {cat._count?.foods ?? 0} items
+                    {cat._count?.foods ?? 0} {t("itemsCount")}
                   </td>
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-3">
@@ -192,13 +197,13 @@ export function CategoryManagerModal({
                         onClick={() => handleCatEdit(cat)}
                         className="text-gold-400 hover:text-gold-300 text-xs font-medium"
                       >
-                        Edit
+                        {tc("edit")}
                       </button>
                       <button
                         onClick={() => handleCatDelete(cat.id)}
                         className="text-red-400 hover:text-red-300 text-xs font-medium"
                       >
-                        Delete
+                        {tc("delete")}
                       </button>
                     </div>
                   </td>

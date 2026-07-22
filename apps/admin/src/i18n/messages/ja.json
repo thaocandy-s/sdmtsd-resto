@@ -55,7 +55,16 @@
     "statusLabel": "ステータス",
     "sortOrderLabel": "表示順",
     "popularLabel": "人気メニュー",
-    "recommendedLabel": "おすすめメニュー"
+    "recommendedLabel": "おすすめメニュー",
+    "categoriesTitle": "フードカテゴリー",
+    "categoriesSubtitle": "ウェブメニューに表示されるカテゴリーと説明を管理します",
+    "editCategory": "カテゴリーを編集",
+    "addCategory": "新規カテゴリーを追加",
+    "descPlaceholder": "例：伝統的な日本のラーメン、焼き肉、前菜など。",
+    "descWithDisplay": "説明 (ウェブメニューに表示されます)",
+    "noDescription": "説明なし",
+    "itemsCount": "個のアイテム",
+    "deleteCategoryConfirm": "このカテゴリーを削除してもよろしいですか？"
   },
   "drinkMenu": {
     "title": "ドリンクメニュー管理",
