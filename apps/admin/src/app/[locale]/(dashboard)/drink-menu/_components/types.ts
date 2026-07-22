@@ -64,14 +64,6 @@ export const emptyCategoryForm: CategoryFormData = {
   sortOrder: "0",
 };
 
-export const toSlug = (str: string) => {
-  return str
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[đĐ]/g, "d")
-    .replace(/[^\p{L}\p{N}\s-]/gu, "")
-    .trim()
-    .replace(/[\s_]+/g, "-")
-    .replace(/-+/g, "-");
-};
+import { toSlug } from "@resto-hub/utils";
+
+export { toSlug };

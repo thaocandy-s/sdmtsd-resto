@@ -5,18 +5,42 @@ import { withAuth } from "@/lib/auth";
 export const GET = withAuth(async (request: NextRequest) => {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get("limit") || "50");
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+    const requestedLimit = parseInt(searchParams.get("limit") || "10");
+    const limit = Math.min(Math.max(1, requestedLimit), 10);
+    const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
+
+    const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = { deletedAt: null };
     if (status) where.status = status;
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ];
+    }
 
-    const buffets = await prisma.buffetCourse.findMany({
-      where,
-      take: limit,
-      orderBy: { sortOrder: "asc" },
+    const [buffets, total] = await Promise.all([
+      prisma.buffetCourse.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { sortOrder: "asc" },
+      }),
+      prisma.buffetCourse.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      data: buffets,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
-    return NextResponse.json({ data: buffets });
   } catch (error) {
     console.error("Get buffets error:", error);
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
