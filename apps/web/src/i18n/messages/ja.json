@@ -66,7 +66,20 @@
     "minutes": "分",
     "includes": "含む",
     "minPeople": "最少人数",
-    "maxPeople": "最大人数"
+    "maxPeople": "最大人数",
+    "noCourses": "利用可能なビュッフェコースはありません",
+    "noImage": "画像なし",
+    "durationValue": "{duration} 分",
+    "durationMin": "{duration} 分",
+    "peopleRange": "{min}〜{max} 名",
+    "minPeopleVal": "最小 {count} 名",
+    "maxPeopleVal": "最大 {count} 名",
+    "moreItems": "他{count}件",
+    "notFound": "ビュッフェコースが見つかりません",
+    "backToList": "ビュッフェ一覧に戻る",
+    "perPerson": " / 名",
+    "groupSize": "人数",
+    "reserveNow": "今すぐ予約"
   },
   "beerArt": {
     "title": "ビアアートギャラリー",

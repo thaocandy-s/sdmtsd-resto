@@ -66,7 +66,20 @@
     "minutes": "minutes",
     "includes": "Includes",
     "minPeople": "Min. People",
-    "maxPeople": "Max. People"
+    "maxPeople": "Max. People",
+    "noCourses": "No buffet courses available",
+    "noImage": "No image",
+    "durationValue": "{duration} minutes",
+    "durationMin": "{duration} min",
+    "peopleRange": "{min}-{max} people",
+    "minPeopleVal": "Min {count} people",
+    "maxPeopleVal": "Max {count} people",
+    "moreItems": "+{count} more",
+    "notFound": "Buffet course not found",
+    "backToList": "Back to buffet",
+    "perPerson": "/ person",
+    "groupSize": "Group size",
+    "reserveNow": "Reserve Now"
   },
   "beerArt": {
     "title": "Beer Art Gallery",
