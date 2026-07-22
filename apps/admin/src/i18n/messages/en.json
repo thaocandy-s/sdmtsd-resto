@@ -222,7 +222,8 @@
     "maxPeopleFormat": "Max {max} people",
     "foodTab": "Food ({count})",
     "drinkTab": "Drink ({count})",
-    "durationFormat": "{duration} min"
+    "durationFormat": "{duration} min",
+    "deleteConfirm": "Are you sure you want to delete this buffet course?"
   },
   "beerArt": {
     "title": "Beer Art",

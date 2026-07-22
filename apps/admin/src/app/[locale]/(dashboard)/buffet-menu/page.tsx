@@ -6,12 +6,16 @@ import { api } from "@/lib/api-client";
 import { Buffet, MenuItemOption, BuffetFormData, emptyBuffetForm } from "./_components/types";
 import { BuffetTable } from "./_components/BuffetTable";
 import { BuffetFormModal } from "./_components/BuffetFormModal";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 export default function BuffetMenuPage() {
   const t = useTranslations("buffetMenu");
   const tc = useTranslations("common");
   const [buffets, setBuffets] = useState<Buffet[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Delete confirmation state
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -131,10 +135,15 @@ export default function BuffetMenuPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(tc("deleteConfirm"))) return;
+  const handleDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await api.delete(`/api/buffet/${id}`);
+      await api.delete(`/api/buffet/${deleteConfirmId}`);
+      setDeleteConfirmId(null);
       loadData();
     } catch (error) {
       console.error("Delete buffet error:", error);
@@ -202,6 +211,14 @@ export default function BuffetMenuPage() {
           setEditingId(null);
         }}
         onSubmit={handleSubmit}
+      />
+
+      <ConfirmModal
+        isOpen={deleteConfirmId !== null}
+        title={tc("delete")}
+        message={t("deleteConfirm")}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmId(null)}
       />
     </>
   );

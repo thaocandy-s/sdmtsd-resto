@@ -222,7 +222,8 @@
     "maxPeopleFormat": "最大 {max} 名様",
     "foodTab": "フード ({count})",
     "drinkTab": "ドリンク ({count})",
-    "durationFormat": "{duration} 分"
+    "durationFormat": "{duration} 分",
+    "deleteConfirm": "このビュッフェコースを削除してもよろしいですか？"
   },
   "beerArt": {
     "title": "ビアアート",
