@@ -19,6 +19,8 @@
   },
   "devDependencies": {
     "typescript": "^5.7.0",
-    "@resto-hub/config": "workspace:*"
+    "@types/node": "^22.10.0",
+    "@resto-hub/config": "workspace:*",
+    "@resto-hub/types": "workspace:*"
   }
 }

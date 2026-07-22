@@ -353,6 +353,12 @@ importers:
       '@resto-hub/config':
         specifier: workspace:*
         version: link:../config
+      '@resto-hub/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.1
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
