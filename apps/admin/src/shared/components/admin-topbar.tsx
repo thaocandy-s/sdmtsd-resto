@@ -4,6 +4,7 @@ import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { Bell, User, LogOut, Menu, Globe } from "lucide-react";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface AdminTopbarProps {
   onMenuClick: () => void;
@@ -44,22 +45,25 @@ export function AdminTopbar({ onMenuClick, onLogout }: AdminTopbarProps) {
           <span>{locale === "ja" ? "日本語 (JA)" : "English (EN)"}</span>
         </button>
 
-        <button className="relative p-2 rounded-md hover:bg-background-tertiary transition-colors">
+        {/* <button className="relative p-2 rounded-md hover:bg-background-tertiary transition-colors">
           <Bell className="w-5 h-5" />
           <span className="absolute top-1 right-1 w-2 h-2 bg-gold-500 rounded-full" />
-        </button>
+        </button> */}
 
-        <div className="flex items-center gap-3">
+        <Link
+          href={`/${locale}/settings`}
+          className="flex items-center gap-3 hover:bg-background-tertiary px-2 py-1.5 rounded-md transition-colors cursor-pointer"
+        >
           <div className="w-8 h-8 rounded-full bg-gold-500/20 flex items-center justify-center">
             <User className="w-4 h-4 text-gold-400" />
           </div>
-          <div className="hidden md:block">
-            <p className="text-sm font-medium">
-              {user?.firstName} {user?.lastName}
+          <div className="hidden md:block text-left">
+            <p className="text-sm font-medium text-foreground">
+              {user?.username || `${user?.firstName} ${user?.lastName}`}
             </p>
             <p className="text-xs text-foreground-secondary">{user?.roleLabel}</p>
           </div>
-        </div>
+        </Link>
 
         <button
           onClick={onLogout}

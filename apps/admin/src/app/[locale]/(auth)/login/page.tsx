@@ -64,16 +64,16 @@ function LoginForm() {
               htmlFor="email"
               className="block text-sm font-medium text-foreground-secondary mb-2"
             >
-              Email
+              Email or Username
             </label>
             <input
               id="email"
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground-tertiary focus:outline-none focus:ring-2 focus:ring-gold-500"
-              placeholder="admin@restohub.com"
+              placeholder="admin@restohub.com or username"
             />
           </div>
 

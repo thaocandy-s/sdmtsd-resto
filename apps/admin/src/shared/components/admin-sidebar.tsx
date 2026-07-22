@@ -18,6 +18,7 @@ import {
   LogOut,
   Mail,
   X,
+  Settings,
 } from "lucide-react";
 import { cn } from "@resto-hub/ui";
 
@@ -34,6 +35,7 @@ const navItems = [
   { href: "/reservations", key: "reservations", icon: CalendarCheck },
   { href: "/contact", key: "contactMessages", icon: Mail },
   { href: "/media-library", key: "mediaLibrary", icon: FolderOpen },
+  { href: "/settings", key: "settings", icon: Settings },
 ];
 
 interface AdminSidebarProps {
