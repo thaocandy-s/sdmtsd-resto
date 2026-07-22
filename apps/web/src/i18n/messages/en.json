@@ -72,7 +72,8 @@
     "title": "Beer Art Gallery",
     "subtitle": "Beautiful latte art created by our artists",
     "artist": "Artist",
-    "customer": "Customer"
+    "customer": "Customer",
+    "noItems": "No beer art gallery items yet"
   },
   "challenge": {
     "title": "Katanuki Challenge",

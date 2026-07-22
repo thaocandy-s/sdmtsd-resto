@@ -2,16 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
-import Link from "next/link";
-
-interface BeerArt {
-  id: string;
-  title: string;
-  description: string | null;
-  imageUrl: string;
-  customerName: string | null;
-  artistName: string | null;
-}
+import { BeerArtCard, BeerArt } from "./components/beer-art-card";
+import { BeerArtLightbox } from "./components/beer-art-lightbox";
 
 export default function BeerArtPage() {
   const t = useTranslations("beerArt");
@@ -42,62 +34,16 @@ export default function BeerArtPage() {
           ))}
         </div>
       ) : items.length === 0 ? (
-        <p className="text-center text-foreground-secondary py-12">No beer art gallery items yet</p>
+        <p className="text-center text-foreground-secondary py-12">{t("noItems")}</p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {items.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setSelectedItem(item)}
-              className="aspect-square bg-background-secondary border border-border rounded-lg overflow-hidden hover:border-gold-500/50 transition-all group"
-            >
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </button>
+            <BeerArtCard key={item.id} item={item} onClick={() => setSelectedItem(item)} />
           ))}
         </div>
       )}
 
-      {/* Lightbox Modal */}
-      {selectedItem && (
-        <div
-          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
-          onClick={() => setSelectedItem(null)}
-        >
-          <div className="max-w-4xl max-h-[90vh] relative" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => setSelectedItem(null)}
-              className="absolute -top-10 right-0 text-white hover:text-gold-400 text-2xl"
-            >
-              &times;
-            </button>
-            <img
-              src={selectedItem.imageUrl}
-              alt={selectedItem.title}
-              className="max-w-full max-h-[80vh] object-contain rounded-lg"
-            />
-            <div className="mt-4 text-center text-white">
-              <h3 className="text-xl font-semibold">{selectedItem.title}</h3>
-              {selectedItem.description && (
-                <p className="text-foreground-secondary mt-2">{selectedItem.description}</p>
-              )}
-              {selectedItem.customerName && (
-                <p className="text-sm text-foreground-tertiary mt-2">
-                  Customer: {selectedItem.customerName}
-                </p>
-              )}
-              {selectedItem.artistName && (
-                <p className="text-sm text-foreground-tertiary">
-                  Artist: {selectedItem.artistName}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <BeerArtLightbox item={selectedItem} onClose={() => setSelectedItem(null)} />
     </main>
   );
 }
