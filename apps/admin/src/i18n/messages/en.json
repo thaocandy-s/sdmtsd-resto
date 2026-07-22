@@ -242,5 +242,28 @@
     "showingPage": "Showing page {page} of {totalPages} ({total} items)",
     "previous": "Previous",
     "next": "Next"
+  },
+  "faq": {
+    "title": "FAQ",
+    "subtitle": "Manage frequently asked questions",
+    "addFaq": "Add FAQ",
+    "addCategory": "Add Category",
+    "editFaq": "Edit FAQ",
+    "editCategory": "Edit Category",
+    "questionsTab": "Questions",
+    "categoriesTab": "Categories",
+    "noFaqs": "No FAQ items yet",
+    "noCategories": "No categories yet",
+    "questionLabel": "Question",
+    "answerLabel": "Answer",
+    "categoryLabel": "Category",
+    "sortOrderLabel": "Sort Order",
+    "publishedLabel": "Published",
+    "noCategoryOption": "No category",
+    "nameLabel": "Name",
+    "slugLabel": "Slug",
+    "descriptionLabel": "Description",
+    "deleteConfirm": "Are you sure you want to delete this item?",
+    "orderLabel": "Order"
   }
 }

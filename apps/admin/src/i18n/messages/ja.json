@@ -242,5 +242,28 @@
     "showingPage": "{totalPages} ページ中 {page} ページ目を選択中 (合計 {total} アイテム)",
     "previous": "前へ",
     "next": "次へ"
+  },
+  "faq": {
+    "title": "FAQ",
+    "subtitle": "よくある質問を管理します",
+    "addFaq": "質問を追加",
+    "addCategory": "カテゴリーを追加",
+    "editFaq": "質問を編集",
+    "editCategory": "カテゴリーを編集",
+    "questionsTab": "質問一覧",
+    "categoriesTab": "カテゴリー",
+    "noFaqs": "質問が登録されていません",
+    "noCategories": "カテゴリーが登録されていません",
+    "questionLabel": "質問 (Question)",
+    "answerLabel": "回答 (Answer)",
+    "categoryLabel": "カテゴリー",
+    "sortOrderLabel": "表示順",
+    "publishedLabel": "公開済み",
+    "noCategoryOption": "カテゴリーなし",
+    "nameLabel": "名称",
+    "slugLabel": "スラグ",
+    "descriptionLabel": "説明",
+    "deleteConfirm": "このアイテムを削除してもよろしいですか？",
+    "orderLabel": "表示順"
   }
 }
