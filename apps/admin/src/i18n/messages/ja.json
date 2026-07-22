@@ -109,7 +109,8 @@
     "descWithDisplay": "説明 (ウェブメニューに表示されます)",
     "noDescription": "説明なし",
     "itemsCount": "個のアイテム",
-    "deleteCategoryConfirm": "このカテゴリーを削除してもよろしいですか？"
+    "deleteCategoryConfirm": "このカテゴリーを削除してもよろしいですか？",
+    "deleteConfirm": "このドリンクを削除してもよろしいですか？"
   },
   "restaurantInfo": {
     "title": "店舗情報管理",

@@ -7,6 +7,7 @@ import { Drink, Category, FormData, emptyForm } from "./_components/types";
 import { DrinkFormModal } from "./_components/DrinkFormModal";
 import { CategoryManagerModal } from "./_components/CategoryManagerModal";
 import { DrinkTable } from "./_components/DrinkTable";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 export default function DrinkMenuPage() {
   const t = useTranslations("drinkMenu");
@@ -14,6 +15,9 @@ export default function DrinkMenuPage() {
   const [drinks, setDrinks] = useState<Drink[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Delete confirmation state
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -110,10 +114,15 @@ export default function DrinkMenuPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(tc("deleteConfirm"))) return;
+  const handleDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await api.delete(`/api/drink/${id}`);
+      await api.delete(`/api/drink/${deleteConfirmId}`);
+      setDeleteConfirmId(null);
       loadData();
     } catch (error) {
       console.error("Delete drink error:", error);
@@ -215,6 +224,14 @@ export default function DrinkMenuPage() {
         onDataChange={() => {
           loadData();
         }}
+      />
+
+      <ConfirmModal
+        isOpen={deleteConfirmId !== null}
+        title={tc("delete")}
+        message={t("deleteConfirm")}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmId(null)}
       />
     </>
   );
