@@ -64,7 +64,14 @@
     "descWithDisplay": "説明 (ウェブメニューに表示されます)",
     "noDescription": "説明なし",
     "itemsCount": "個のアイテム",
-    "deleteCategoryConfirm": "このカテゴリーを削除してもよろしいですか？"
+    "deleteCategoryConfirm": "このカテゴリーを削除してもよろしいですか？",
+    "imageLabel": "画像",
+    "noImage": "画像なし",
+    "duplicate": "複製",
+    "showingPage": "{totalPages} ページ中 {page} ページ目を選択中 (合計 {total} アイテム)",
+    "previous": "前へ",
+    "next": "次へ",
+    "priceInclTax": "価格 (税込)"
   },
   "drinkMenu": {
     "title": "ドリンクメニュー管理",

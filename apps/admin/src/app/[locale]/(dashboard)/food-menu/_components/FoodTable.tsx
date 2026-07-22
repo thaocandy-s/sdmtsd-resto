@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Food } from "./types";
 import { formatPriceWithTax } from "@resto-hub/utils";
 import { StatusBadge } from "./StatusBadge";
@@ -27,6 +28,9 @@ export function FoodTable({
   totalItems,
   onPageChange,
 }: FoodTableProps) {
+  const t = useTranslations("foodMenu");
+  const tc = useTranslations("common");
+
   if (loading) {
     return (
       <div className="space-y-3">
@@ -57,7 +61,7 @@ export function FoodTable({
   if (foods.length === 0) {
     return (
       <div className="bg-background-secondary border border-border rounded-xl p-12 text-center">
-        <p className="text-foreground-secondary">No food items found</p>
+        <p className="text-foreground-secondary">{t("noFoods")}</p>
       </div>
     );
   }
@@ -84,15 +88,23 @@ export function FoodTable({
             <thead className="border-b border-border">
               <tr className="text-left">
                 <th className="px-4 py-3 text-sm font-medium text-foreground-secondary w-16">
-                  Image
+                  {t("imageLabel")}
                 </th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Name</th>
+                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
+                  {t("nameLabel")}
+                </th>
                 <th className="hidden lg:table-cell px-4 py-3 text-sm font-medium text-foreground-secondary">
-                  Category
+                  {t("categoryLabel")}
                 </th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Price</th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Status</th>
-                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">Actions</th>
+                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
+                  {t("priceLabel")}
+                </th>
+                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
+                  {tc("status")}
+                </th>
+                <th className="px-4 py-3 text-sm font-medium text-foreground-secondary">
+                  {tc("actions")}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -108,7 +120,7 @@ export function FoodTable({
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-foreground-tertiary text-xs">
-                          No img
+                          {t("noImage")}
                         </div>
                       )}
                     </div>
@@ -149,21 +161,21 @@ export function FoodTable({
                         onClick={() => onEdit(food)}
                         className="text-gold-400 hover:text-gold-300 text-sm font-medium transition-colors"
                       >
-                        Edit
+                        {tc("edit")}
                       </button>
                       {onDuplicate && (
                         <button
                           onClick={() => onDuplicate(food)}
                           className="text-foreground-secondary hover:text-foreground text-sm font-medium transition-colors"
                         >
-                          Duplicate
+                          {t("duplicate")}
                         </button>
                       )}
                       <button
                         onClick={() => onDelete(food.id)}
                         className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
                       >
-                        Delete
+                        {tc("delete")}
                       </button>
                     </div>
                   </td>
@@ -178,8 +190,7 @@ export function FoodTable({
       {totalPages > 1 && (
         <div className="bg-background-secondary border border-border rounded-xl md:rounded-b-lg md:rounded-t-none px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-sm text-foreground-secondary">
-            Showing page <span className="font-medium text-foreground">{currentPage}</span> of{" "}
-            <span className="font-medium text-foreground">{totalPages}</span> ({totalItems} items)
+            {t("showingPage", { page: currentPage, totalPages, total: totalItems })}
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <button
@@ -187,14 +198,14 @@ export function FoodTable({
               disabled={currentPage === 1}
               className="flex-1 sm:flex-none px-3 py-1.5 min-h-[44px] sm:min-h-0 border border-border rounded-lg text-sm text-foreground-secondary hover:text-foreground hover:bg-background-tertiary disabled:opacity-50 disabled:pointer-events-none transition-colors flex items-center justify-center"
             >
-              Previous
+              {t("previous")}
             </button>
             <button
               onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
               disabled={currentPage === totalPages}
               className="flex-1 sm:flex-none px-3 py-1.5 min-h-[44px] sm:min-h-0 border border-border rounded-lg text-sm text-foreground-secondary hover:text-foreground hover:bg-background-tertiary disabled:opacity-50 disabled:pointer-events-none transition-colors flex items-center justify-center"
             >
-              Next
+              {t("next")}
             </button>
           </div>
         </div>
