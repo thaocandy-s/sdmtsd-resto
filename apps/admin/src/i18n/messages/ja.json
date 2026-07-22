@@ -91,5 +91,40 @@
     "saving": "保存中...",
     "successMessage": "店舗情報が正常に更新されました！",
     "errorMessage": "店舗情報の更新に失敗しました。"
+  },
+  "touristGuide": {
+    "title": "観光ガイド",
+    "subtitle": "観光地とカテゴリーを管理します",
+    "placesTab": "観光地",
+    "categoriesTab": "カテゴリー",
+    "addPlace": "観光地を追加",
+    "addCategory": "カテゴリーを追加",
+    "editPlace": "観光地を編集",
+    "editCategory": "カテゴリーを編集",
+    "noPlaces": "観光地が登録されていません",
+    "noCategories": "カテゴリーが登録されていません",
+    "nameLabel": "名称",
+    "shortDescLabel": "短い説明",
+    "descriptionLabel": "説明",
+    "additionalImages": "追加の画像",
+    "categoryLabel": "カテゴリー",
+    "noCategoryOption": "カテゴリーなし",
+    "addressLabel": "住所",
+    "publishedLabel": "公開中",
+    "sortOrderLabel": "表示順",
+    "deleteConfirm": "このアイテムを削除しますか？"
+  },
+  "imageUpload": {
+    "defaultLabel": "画像",
+    "defaultMultiLabel": "画像一覧",
+    "remove": "削除",
+    "uploading": "アップロード中...",
+    "dragDropSingle": "ドラッグ＆ドロップまたはクリックしてアップロード",
+    "dragDropMulti": "ドラッグ＆ドロップまたはクリックして画像を追加",
+    "orPasteUrl": "またはURLを貼り付け:",
+    "pastePlaceholder": "画像のURLを貼り付けてEnterキーを押します",
+    "add": "追加",
+    "pleaseSelectImage": "画像ファイルを選択してください",
+    "uploadFailed": "アップロードに失敗しました"
   }
 }

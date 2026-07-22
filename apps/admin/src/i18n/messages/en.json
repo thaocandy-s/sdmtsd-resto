@@ -91,5 +91,40 @@
     "saving": "Saving...",
     "successMessage": "Restaurant information updated successfully!",
     "errorMessage": "Failed to update restaurant information."
+  },
+  "touristGuide": {
+    "title": "Tourist Guide",
+    "subtitle": "Manage places and categories",
+    "placesTab": "Places",
+    "categoriesTab": "Categories",
+    "addPlace": "Add Place",
+    "addCategory": "Add Category",
+    "editPlace": "Edit Place",
+    "editCategory": "Edit Category",
+    "noPlaces": "No places yet",
+    "noCategories": "No categories yet",
+    "nameLabel": "Name",
+    "shortDescLabel": "Short Description",
+    "descriptionLabel": "Description",
+    "additionalImages": "Additional Images",
+    "categoryLabel": "Category",
+    "noCategoryOption": "No category",
+    "addressLabel": "Address",
+    "publishedLabel": "Published",
+    "sortOrderLabel": "Sort Order",
+    "deleteConfirm": "Delete this item?"
+  },
+  "imageUpload": {
+    "defaultLabel": "Image",
+    "defaultMultiLabel": "Images",
+    "remove": "Remove",
+    "uploading": "Uploading...",
+    "dragDropSingle": "Drag & drop or click to upload",
+    "dragDropMulti": "Drag & drop or click to add image",
+    "orPasteUrl": "or paste URL:",
+    "pastePlaceholder": "Paste image URL and press Enter",
+    "add": "Add",
+    "pleaseSelectImage": "Please select an image file",
+    "uploadFailed": "Upload failed"
   }
 }

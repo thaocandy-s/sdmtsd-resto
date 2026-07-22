@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
+import { useTranslations } from "next-intl";
 
 /* ------------------------------------------------------------------ */
 /*  Shared upload helper                                               */
@@ -62,19 +63,22 @@ interface ImageUploadProps {
 export function ImageUpload({
   value,
   onChange,
-  label = "Image",
+  label,
   required = false,
   folder,
 }: ImageUploadProps) {
+  const t = useTranslations("imageUpload");
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const displayLabel = label || t("defaultLabel");
+
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      setError("Please select an image file");
+      setError(t("pleaseSelectImage"));
       return;
     }
     setUploading(true);
@@ -84,7 +88,7 @@ export function ImageUpload({
       const url = await uploadImage(file, folder, setProgress);
       onChange(url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      setError(err instanceof Error ? err.message : t("uploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -94,7 +98,7 @@ export function ImageUpload({
     <div>
       <div className="flex items-center justify-between mb-1">
         <label className="block text-sm text-foreground-secondary">
-          {label}
+          {displayLabel}
           {required && <span className="text-red-400"> *</span>}
         </label>
         {value && !uploading && (
@@ -103,7 +107,7 @@ export function ImageUpload({
             onClick={() => onChange("")}
             className="text-xs text-red-400 hover:text-red-300"
           >
-            Remove
+            {t("remove")}
           </button>
         )}
       </div>
@@ -121,7 +125,7 @@ export function ImageUpload({
             <div className="h-full bg-gold-500 transition-all" style={{ width: `${progress}%` }} />
           </div>
           <p className="text-xs text-foreground-secondary mt-1 text-center">
-            Uploading… {progress}%
+            {t("uploading")} {progress}%
           </p>
         </div>
       )}
@@ -160,11 +164,11 @@ export function ImageUpload({
                 e.target.value = "";
               }}
             />
-            <p className="text-sm text-foreground-secondary">Drag &amp; drop or click to upload</p>
+            <p className="text-sm text-foreground-secondary">{t("dragDropSingle")}</p>
           </div>
 
           <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs text-foreground-tertiary">or paste URL:</span>
+            <span className="text-xs text-foreground-tertiary">{t("orPasteUrl")}</span>
             <input
               type="text"
               value={value}
@@ -190,12 +194,8 @@ interface MultiImageUploadProps {
   folder?: string;
 }
 
-export function MultiImageUpload({
-  value,
-  onChange,
-  label = "Images",
-  folder,
-}: MultiImageUploadProps) {
+export function MultiImageUpload({ value, onChange, label, folder }: MultiImageUploadProps) {
+  const t = useTranslations("imageUpload");
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
@@ -203,9 +203,11 @@ export function MultiImageUpload({
   const [urlInput, setUrlInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const displayLabel = label || t("defaultMultiLabel");
+
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      setError("Please select an image file");
+      setError(t("pleaseSelectImage"));
       return;
     }
     setUploading(true);
@@ -215,7 +217,7 @@ export function MultiImageUpload({
       const url = await uploadImage(file, folder, setProgress);
       onChange([...value, url]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      setError(err instanceof Error ? err.message : t("uploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -235,7 +237,7 @@ export function MultiImageUpload({
 
   return (
     <div>
-      <label className="block text-sm text-foreground-secondary mb-1">{label}</label>
+      <label className="block text-sm text-foreground-secondary mb-1">{displayLabel}</label>
 
       {value.length > 0 && (
         <div className="grid grid-cols-4 gap-2 mb-2">
@@ -264,7 +266,7 @@ export function MultiImageUpload({
             <div className="h-full bg-gold-500 transition-all" style={{ width: `${progress}%` }} />
           </div>
           <p className="text-xs text-foreground-secondary mt-1 text-center">
-            Uploading… {progress}%
+            {t("uploading")} {progress}%
           </p>
         </div>
       )}
@@ -303,9 +305,7 @@ export function MultiImageUpload({
                 e.target.value = "";
               }}
             />
-            <p className="text-sm text-foreground-secondary">
-              Drag &amp; drop or click to add image
-            </p>
+            <p className="text-sm text-foreground-secondary">{t("dragDropMulti")}</p>
           </div>
 
           <div className="flex items-center gap-2 mt-2">
@@ -319,7 +319,7 @@ export function MultiImageUpload({
                   addUrl();
                 }
               }}
-              placeholder="Paste image URL and press Enter"
+              placeholder={t("pastePlaceholder")}
               className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-gold-500"
             />
             <button
@@ -327,7 +327,7 @@ export function MultiImageUpload({
               onClick={addUrl}
               className="bg-background-tertiary hover:bg-background border border-border px-3 py-1.5 rounded-lg text-sm text-foreground"
             >
-              Add
+              {t("add")}
             </button>
           </div>
         </>
