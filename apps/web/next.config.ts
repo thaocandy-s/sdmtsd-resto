@@ -34,6 +34,9 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
+    if (process.env.NODE_ENV !== "production" && process.env.VERCEL !== "1") {
+      return [];
+    }
     const ADMIN_URL = process.env.ADMIN_URL || "https://sdmtsd-resto-admin.vercel.app";
     return [
       {
