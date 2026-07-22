@@ -53,5 +53,43 @@
     "manageCategories": "カテゴリー管理",
     "searchPlaceholder": "ドリンク名で検索...",
     "noDrinks": "ドリンクが見つかりません"
+  },
+  "restaurantInfo": {
+    "title": "店舗情報管理",
+    "subtitle": "店舗の詳細情報、営業時間、SNSリンク、Googleマップの位置情報を管理します",
+    "name": "店舗名",
+    "slug": "スラッグ",
+    "description": "説明",
+    "address": "住所",
+    "phone": "電話番号",
+    "email": "メールアドレス",
+    "mapLocationTitle": "マップの位置情報 (Googleマップ)",
+    "mapInstruction": "Googleマップで店舗を検索し、ブラウザのアドレスバーからフルURLをコピーしてここに貼り付けてください。",
+    "pastePlaceholder": "https://www.google.com/maps/place/...",
+    "extract": "情報を抽出",
+    "extractedData": "抽出されたマップデータ",
+    "clearMapData": "マップデータをクリア",
+    "livePreview": "ライブプレビュー (ウェブサイトでの実際の表示です):",
+    "mapPlaceholder": "上の入力欄にGoogleマップのリンクを貼り付けるとプレビューが表示されます",
+    "openingHoursTitle": "営業時間",
+    "openingHoursDesc": "曜日ごとの営業時間を設定します:",
+    "from": "開店:",
+    "to": "〜",
+    "closed": "定休日 (Closed)",
+    "days": {
+      "monday": "月曜日 (Monday)",
+      "tuesday": "火曜日 (Tuesday)",
+      "wednesday": "水曜日 (Wednesday)",
+      "thursday": "木曜日 (Thursday)",
+      "friday": "金曜日 (Friday)",
+      "saturday": "土曜日 (Saturday)",
+      "sunday": "日曜日 (Sunday)"
+    },
+    "socialLinksTitle": "SNSリンク (Follow Us)",
+    "active": "有効",
+    "saveChanges": "変更を保存",
+    "saving": "保存中...",
+    "successMessage": "店舗情報が正常に更新されました！",
+    "errorMessage": "店舗情報の更新に失敗しました。"
   }
 }

@@ -64,9 +64,11 @@ model Restaurant {
   address      String?
   phone        String?
   email        String?
-  latitude     Float?
-  longitude    Float?
-  openingHours Json?
+  latitude       Float?
+  longitude      Float?
+  googlePlaceId  String?
+  googleMapQuery String?
+  openingHours   Json?
   holidays     Json?
   socialLinks  Json?
   isActive     Boolean  @default(true)
