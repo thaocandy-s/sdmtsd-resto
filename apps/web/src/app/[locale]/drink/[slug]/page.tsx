@@ -59,13 +59,15 @@ export default function DrinkDetailPage() {
   if (!drink) {
     return (
       <main className="max-w-4xl mx-auto px-4 py-12 text-center">
-        <h1 className="text-2xl font-bold text-foreground mb-4">Drink not found</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-4">{t("notFound")}</h1>
         <Link href="/drink" className="text-gold-400 hover:text-gold-300">
-          Back to drinks
+          {t("backToList")}
         </Link>
       </main>
     );
   }
+
+  const tCommon = useTranslations("common");
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">
@@ -73,7 +75,7 @@ export default function DrinkDetailPage() {
         href="/drink"
         className="inline-flex items-center text-gold-400 hover:text-gold-300 mb-6"
       >
-        &larr; Back to drinks
+        &larr; {t("backToList")}
       </Link>
 
       <div className="grid md:grid-cols-2 gap-8">
@@ -82,7 +84,7 @@ export default function DrinkDetailPage() {
             <img src={drink.imageUrl} alt={drink.name} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-foreground-tertiary">
-              No image available
+              {t("noImageAvailable")}
             </div>
           )}
         </div>
@@ -93,7 +95,9 @@ export default function DrinkDetailPage() {
               {drink.category.name}
             </span>
             {drink.isPopular && (
-              <span className="px-2 py-1 bg-red-500/10 text-red-400 text-xs rounded">Popular</span>
+              <span className="px-2 py-1 bg-red-500/10 text-red-400 text-xs rounded font-medium">
+                {tCommon("popular")}
+              </span>
             )}
           </div>
 
@@ -115,12 +119,13 @@ export default function DrinkDetailPage() {
           <div className="space-y-2">
             {drink.alcoholPercent && (
               <p className="text-foreground-secondary">
-                <span className="text-foreground">Alcohol:</span> {drink.alcoholPercent}%
+                <span className="text-foreground">{t("alcoholLabel")}:</span> {drink.alcoholPercent}
+                %
               </p>
             )}
             {drink.volume && (
               <p className="text-foreground-secondary">
-                <span className="text-foreground">Volume:</span> {drink.volume}
+                <span className="text-foreground">{t("volumeLabel")}:</span> {drink.volume}
               </p>
             )}
           </div>

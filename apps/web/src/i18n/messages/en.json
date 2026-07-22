@@ -57,7 +57,17 @@
     "subtitle": "Explore our beverage collection",
     "alcohol": "Alcohol",
     "volume": "Volume",
-    "nonAlcoholic": "Non-Alcoholic"
+    "nonAlcoholic": "Non-Alcoholic",
+    "all": "All",
+    "noDrinks": "No drinks found",
+    "otherDrinks": "Other Drinks",
+    "others": "Others",
+    "noImage": "No image",
+    "noImageAvailable": "No image available",
+    "notFound": "Drink not found",
+    "backToList": "Back to drinks",
+    "alcoholLabel": "Alcohol",
+    "volumeLabel": "Volume"
   },
   "buffet": {
     "title": "Buffet Courses",
@@ -66,13 +76,27 @@
     "minutes": "minutes",
     "includes": "Includes",
     "minPeople": "Min. People",
-    "maxPeople": "Max. People"
+    "maxPeople": "Max. People",
+    "noCourses": "No buffet courses available",
+    "noImage": "No image",
+    "durationValue": "{duration} minutes",
+    "durationMin": "{duration} min",
+    "peopleRange": "{min}-{max} people",
+    "minPeopleVal": "Min {count} people",
+    "maxPeopleVal": "Max {count} people",
+    "moreItems": "+{count} more",
+    "notFound": "Buffet course not found",
+    "backToList": "Back to buffet",
+    "perPerson": "/ person",
+    "groupSize": "Group size",
+    "reserveNow": "Reserve Now"
   },
   "beerArt": {
     "title": "Beer Art Gallery",
     "subtitle": "Beautiful latte art created by our artists",
     "artist": "Artist",
-    "customer": "Customer"
+    "customer": "Customer",
+    "noItems": "No beer art gallery items yet"
   },
   "challenge": {
     "title": "Katanuki Challenge",
@@ -80,7 +104,11 @@
     "rules": "Rules",
     "winners": "Winner Gallery",
     "successHistory": "Success History",
-    "discount": "Discount"
+    "discount": "Discount",
+    "howToPlay": "How to Play",
+    "recentWinners": "Recent Winners",
+    "noWinners": "No winners yet. Be the first!",
+    "noPhoto": "No photo"
   },
   "tourist": {
     "title": "Tourist Guide",
