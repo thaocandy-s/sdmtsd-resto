@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  basePath: "/admin",
   transpilePackages: ["@resto-hub/ui", "@resto-hub/types", "@resto-hub/utils"],
   images: {
     remotePatterns: [

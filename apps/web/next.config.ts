@@ -33,6 +33,19 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    const ADMIN_URL = process.env.ADMIN_URL || "https://sdmtsd-resto-admin.vercel.app";
+    return [
+      {
+        source: "/admin",
+        destination: `${ADMIN_URL}/admin`,
+      },
+      {
+        source: "/admin/:path*",
+        destination: `${ADMIN_URL}/admin/:path*`,
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
