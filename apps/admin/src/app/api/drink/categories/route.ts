@@ -19,7 +19,7 @@ export const POST = withAuth(
   async (request: NextRequest) => {
     try {
       const body = await request.json();
-      const { name, slug, sortOrder, isActive } = body;
+      const { name, slug, description, sortOrder, isActive } = body;
       if (!name || !slug)
         return NextResponse.json({ message: "Name and slug are required" }, { status: 400 });
 
@@ -27,7 +27,13 @@ export const POST = withAuth(
       if (existing) return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
 
       const category = await prisma.drinkCategory.create({
-        data: { name, slug, sortOrder: sortOrder || 0, isActive: isActive !== false },
+        data: {
+          name,
+          slug,
+          description: description || null,
+          sortOrder: sortOrder ? parseInt(sortOrder) : 0,
+          isActive: isActive !== false,
+        },
       });
       return NextResponse.json({ data: category }, { status: 201 });
     } catch (error) {

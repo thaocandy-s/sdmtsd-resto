@@ -5,6 +5,26 @@ export function formatPrice(price: number, currency = "JPY"): string {
   }).format(price);
 }
 
+export function formatPriceWithTax(price: number, taxRate = 0.1, currency = "JPY"): string {
+  const taxIncluded = Math.round(price * (1 + taxRate));
+
+  const formattedBase = new Intl.NumberFormat("ja-JP", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
+
+  const formattedTaxIncluded = new Intl.NumberFormat("ja-JP", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(taxIncluded);
+
+  return `${formattedBase} (税込 ${formattedTaxIncluded})`;
+}
+
 export function formatDate(date: string | Date, locale = "ja-JP"): string {
   return new Intl.DateTimeFormat(locale, {
     year: "numeric",

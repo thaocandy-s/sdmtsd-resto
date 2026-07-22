@@ -32,7 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Skip auth bootstrap on the login page to avoid refresh -> redirect loop
-    if (pathname === "/login") {
+    const isLoginPage = pathname === "/login" || pathname.endsWith("/login");
+    if (isLoginPage) {
       setLoading(false);
       return;
     }

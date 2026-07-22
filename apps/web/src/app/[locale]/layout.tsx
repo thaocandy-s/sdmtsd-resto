@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import { Inter, Noto_Sans_JP } from "next/font/google";
+import { Noto_Sans, Noto_Sans_JP } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Header } from "@/shared/components/header";
 import { Footer } from "@/shared/components/footer";
+import { MobileBottomNav } from "@/shared/components/mobile-bottom-nav";
 
-const inter = Inter({
+const notoSans = Noto_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-noto-sans",
   display: "swap",
 });
 
@@ -46,12 +47,13 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className="dark" suppressHydrationWarning>
-      <body className={`${inter.variable} ${notoSansJP.variable} font-sans`}>
+      <body className={`${notoSans.variable} ${notoSansJP.variable} font-sans`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <div className="min-h-screen bg-background text-foreground">
+          <div className="min-h-screen bg-background text-foreground pb-16 lg:pb-0">
             <Header />
             <div className="pt-16">{children}</div>
             <Footer />
+            <MobileBottomNav />
           </div>
         </NextIntlClientProvider>
       </body>

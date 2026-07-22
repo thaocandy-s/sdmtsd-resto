@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { formatPriceWithTax } from "@resto-hub/utils";
 
 interface Food {
   id: string;
@@ -55,7 +56,7 @@ export default function FoodDetailPage() {
     }
   }, [slug]);
 
-  const formatPrice = (price: number) => `¥${price.toLocaleString()}`;
+  const formatPrice = (price: number) => formatPriceWithTax(price);
 
   if (loading) {
     return (

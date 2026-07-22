@@ -1,0 +1,221 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { api } from "@/lib/api-client";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { Rule, Winner, RuleForm, WinnerForm, emptyRule, emptyWinner } from "./_components/types";
+import { RuleList } from "./_components/RuleList";
+import { WinnerList } from "./_components/WinnerList";
+import { RuleFormModal } from "./_components/RuleFormModal";
+import { WinnerFormModal } from "./_components/WinnerFormModal";
+
+export default function ChallengePage() {
+  const t = useTranslations("challenge");
+  const tc = useTranslations("common");
+
+  const [tab, setTab] = useState<"rules" | "winners">("rules");
+  const [rules, setRules] = useState<Rule[]>([]);
+  const [winners, setWinners] = useState<Winner[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Modal State
+  const [showRuleModal, setShowRuleModal] = useState(false);
+  const [showWinnerModal, setShowWinnerModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Form states
+  const [ruleForm, setRuleForm] = useState<RuleForm>(emptyRule);
+  const [winnerForm, setWinnerForm] = useState<WinnerForm>(emptyWinner);
+
+  // Delete Confirm State
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: "rules" | "winners";
+    id: string;
+  } | null>(null);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get<{ data: { rules: Rule[]; winners: Winner[] } }>("/api/challenge");
+      setRules(res.data.rules || []);
+      setWinners(res.data.winners || []);
+    } catch (error) {
+      console.error("Load error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRuleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingId) await api.put(`/api/challenge/rules/${editingId}`, ruleForm);
+      else await api.post("/api/challenge/rules", ruleForm);
+      setShowRuleModal(false);
+      setEditingId(null);
+      setRuleForm(emptyRule);
+      loadData();
+    } catch (error) {
+      console.error("Save error:", error);
+    }
+  };
+
+  const handleWinnerSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingId) await api.put(`/api/challenge/winners/${editingId}`, winnerForm);
+      else await api.post("/api/challenge/winners", winnerForm);
+      setShowWinnerModal(false);
+      setEditingId(null);
+      setWinnerForm(emptyWinner);
+      loadData();
+    } catch (error) {
+      console.error("Save error:", error);
+    }
+  };
+
+  const handleEditRule = (item: Rule) => {
+    setEditingId(item.id);
+    setRuleForm({
+      title: item.title,
+      description: item.description,
+      sortOrder: item.sortOrder,
+      isActive: item.isActive,
+    });
+    setShowRuleModal(true);
+  };
+
+  const handleEditWinner = (item: Winner) => {
+    setEditingId(item.id);
+    setWinnerForm({
+      participantName: item.participantName,
+      imageUrl: item.imageUrl || "",
+      challengeName: item.challengeName || "",
+      discountAwarded: item.discountAwarded || "",
+      completedAt: item.completedAt.split("T")[0],
+      isPublished: item.isPublished,
+    });
+    setShowWinnerModal(true);
+  };
+
+  const handleDeleteTrigger = (type: "rules" | "winners", id: string) => {
+    setDeleteTarget({ type, id });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await api.delete(`/api/challenge/${deleteTarget.type}/${deleteTarget.id}`);
+      setDeleteTarget(null);
+      loadData();
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
+  };
+
+  return (
+    <>
+      <header className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
+          <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
+        </div>
+        <button
+          onClick={() => {
+            setEditingId(null);
+            if (tab === "rules") {
+              setRuleForm(emptyRule);
+              setShowRuleModal(true);
+            } else {
+              setWinnerForm(emptyWinner);
+              setShowWinnerModal(true);
+            }
+          }}
+          className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
+        >
+          + {tab === "rules" ? t("addRule") : t("addWinner")}
+        </button>
+      </header>
+
+      <div className="flex gap-4 mb-6 border-b border-border">
+        <button
+          onClick={() => setTab("rules")}
+          className={`pb-3 px-1 font-medium transition-colors ${
+            tab === "rules"
+              ? "text-gold-500 border-b-2 border-gold-500"
+              : "text-foreground-secondary hover:text-foreground"
+          }`}
+        >
+          {t("rulesTab")} ({rules.length})
+        </button>
+        <button
+          onClick={() => setTab("winners")}
+          className={`pb-3 px-1 font-medium transition-colors ${
+            tab === "winners"
+              ? "text-gold-500 border-b-2 border-gold-500"
+              : "text-foreground-secondary hover:text-foreground"
+          }`}
+        >
+          {t("winnersTab")} ({winners.length})
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-16 bg-background-secondary rounded-lg animate-pulse" />
+          ))}
+        </div>
+      ) : tab === "rules" ? (
+        <RuleList
+          rules={rules}
+          onEdit={handleEditRule}
+          onDelete={(id) => handleDeleteTrigger("rules", id)}
+        />
+      ) : (
+        <WinnerList
+          winners={winners}
+          onEdit={handleEditWinner}
+          onDelete={(id) => handleDeleteTrigger("winners", id)}
+        />
+      )}
+
+      <RuleFormModal
+        isOpen={showRuleModal}
+        editingId={editingId}
+        form={ruleForm}
+        setForm={setRuleForm}
+        onClose={() => {
+          setShowRuleModal(false);
+          setEditingId(null);
+        }}
+        onSubmit={handleRuleSubmit}
+      />
+
+      <WinnerFormModal
+        isOpen={showWinnerModal}
+        editingId={editingId}
+        form={winnerForm}
+        setForm={setWinnerForm}
+        onClose={() => {
+          setShowWinnerModal(false);
+          setEditingId(null);
+        }}
+        onSubmit={handleWinnerSubmit}
+      />
+
+      <ConfirmModal
+        isOpen={deleteTarget !== null}
+        title={tc("delete")}
+        message={t("deleteConfirm")}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+    </>
+  );
+}

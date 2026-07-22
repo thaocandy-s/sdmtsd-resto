@@ -13,6 +13,7 @@ datasource db {
 model User {
   id           String    @id @default(uuid())
   email        String    @unique
+  username     String?   @unique
   passwordHash String
   firstName    String
   lastName     String
@@ -64,9 +65,11 @@ model Restaurant {
   address      String?
   phone        String?
   email        String?
-  latitude     Float?
-  longitude    Float?
-  openingHours Json?
+  latitude       Float?
+  longitude      Float?
+  googlePlaceId  String?
+  googleMapQuery String?
+  openingHours   Json?
   holidays     Json?
   socialLinks  Json?
   isActive     Boolean  @default(true)
@@ -144,14 +147,15 @@ model Food {
 // ===== DRINK MENU =====
 
 model DrinkCategory {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  sortOrder Int      @default(0)
-  isActive  Boolean  @default(true)
-  drinks    Drink[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  drinks      Drink[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Drink {

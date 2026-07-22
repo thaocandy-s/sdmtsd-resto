@@ -8,6 +8,7 @@ export const GET = withAuth(async (_request, { user }) => {
     select: {
       id: true,
       email: true,
+      username: true,
       firstName: true,
       lastName: true,
       role: {
@@ -30,6 +31,7 @@ export const GET = withAuth(async (_request, { user }) => {
     data: {
       id: dbUser.id,
       email: dbUser.email,
+      username: dbUser.username,
       firstName: dbUser.firstName,
       lastName: dbUser.lastName,
       role: dbUser.role.name,

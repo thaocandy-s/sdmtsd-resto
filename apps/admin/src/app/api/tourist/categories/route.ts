@@ -2,13 +2,41 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
 
-export const GET = withAuth(async () => {
+export const GET = withAuth(async (request: NextRequest) => {
   try {
-    const categories = await prisma.tourCategory.findMany({
-      include: { _count: { select: { places: true } } },
-      orderBy: { sortOrder: "asc" },
+    const { searchParams } = new URL(request.url);
+    const all = searchParams.get("all") === "true";
+
+    if (all) {
+      const categories = await prisma.tourCategory.findMany({
+        orderBy: { sortOrder: "asc" },
+      });
+      return NextResponse.json({ data: categories });
+    }
+
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const skip = (page - 1) * limit;
+
+    const [categories, total] = await Promise.all([
+      prisma.tourCategory.findMany({
+        include: { _count: { select: { places: true } } },
+        skip,
+        take: limit,
+        orderBy: { sortOrder: "asc" },
+      }),
+      prisma.tourCategory.count(),
+    ]);
+
+    return NextResponse.json({
+      data: categories,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
-    return NextResponse.json({ data: categories });
   } catch (error) {
     console.error("Get tour categories error:", error);
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });

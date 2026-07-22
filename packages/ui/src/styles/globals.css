@@ -36,8 +36,8 @@
   --color-border: #3A3228;
   --color-border-light: #4D4235;
 
-  --font-sans: "Inter", sans-serif;
-  --font-jp: "Noto Sans JP", sans-serif;
+  --font-sans: var(--font-noto-sans), "Noto Sans", var(--font-noto-jp), "Noto Sans JP", sans-serif;
+  --font-jp: var(--font-noto-jp), "Noto Sans JP", sans-serif;
 }
 
 @layer base {
@@ -46,5 +46,21 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
+  }
+
+  /* Custom Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-background);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gold-500);
   }
 }

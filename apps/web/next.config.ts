@@ -33,6 +33,30 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    if (process.env.NODE_ENV !== "production" && process.env.VERCEL !== "1") {
+      return [];
+    }
+    const ADMIN_URL = process.env.ADMIN_URL || "https://sdmtsd-resto-admin.vercel.app";
+    return [
+      {
+        source: "/admin",
+        destination: `${ADMIN_URL}/admin`,
+      },
+      {
+        source: "/admin/:path*",
+        destination: `${ADMIN_URL}/admin/:path*`,
+      },
+      {
+        source: "/:locale(ja|en)/admin",
+        destination: `${ADMIN_URL}/admin/:locale`,
+      },
+      {
+        source: "/:locale(ja|en)/admin/:path*",
+        destination: `${ADMIN_URL}/admin/:locale/:path*`,
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
