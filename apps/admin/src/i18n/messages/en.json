@@ -53,5 +53,43 @@
     "manageCategories": "Manage Categories",
     "searchPlaceholder": "Search drink by name...",
     "noDrinks": "No drink items found"
+  },
+  "restaurantInfo": {
+    "title": "Restaurant Information",
+    "subtitle": "Manage restaurant details, opening hours, social links and location map",
+    "name": "Name",
+    "slug": "Slug",
+    "description": "Description",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "mapLocationTitle": "Map Location (Google Maps)",
+    "mapInstruction": "Go to Google Maps, find your restaurant, then copy the full URL from the browser address bar and paste it here.",
+    "pastePlaceholder": "https://www.google.com/maps/place/...",
+    "extract": "Extract",
+    "extractedData": "Extracted Map Data",
+    "clearMapData": "Clear map data",
+    "livePreview": "Live Preview (this is exactly how it will appear on the website):",
+    "mapPlaceholder": "Paste a Google Maps link above to see the map preview",
+    "openingHoursTitle": "Opening Hours",
+    "openingHoursDesc": "Configure business hours for each day of the week:",
+    "from": "From:",
+    "to": "to",
+    "closed": "Closed",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "socialLinksTitle": "Follow Us / Social Links",
+    "active": "Active",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "successMessage": "Restaurant information updated successfully!",
+    "errorMessage": "Failed to update restaurant information."
   }
 }
