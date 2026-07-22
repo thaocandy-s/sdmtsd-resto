@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Drink } from "./types";
 import { formatPriceWithTax } from "@resto-hub/utils";
 import { StatusBadge } from "./StatusBadge";
@@ -12,6 +13,8 @@ interface DrinkCardProps {
 }
 
 export function DrinkCard({ drink, onEdit, onDelete, onDuplicate }: DrinkCardProps) {
+  const t = useTranslations("drinkMenu");
+
   return (
     <div className="bg-background-secondary border border-border rounded-xl p-4 flex flex-col gap-3 shadow-sm hover:border-border/80 transition-colors">
       {/* Top Header Row: Thumbnail + Info + Actions */}
@@ -22,7 +25,7 @@ export function DrinkCard({ drink, onEdit, onDelete, onDuplicate }: DrinkCardPro
               <img src={drink.imageUrl} alt={drink.name} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-foreground-tertiary text-xs">
-                No img
+                {t("noImage")}
               </div>
             )}
           </div>
@@ -61,7 +64,7 @@ export function DrinkCard({ drink, onEdit, onDelete, onDuplicate }: DrinkCardPro
 
       {/* Bottom Row: Price */}
       <div className="flex items-center justify-between text-sm font-medium pt-1">
-        <span className="text-foreground-secondary text-xs">Price (incl. tax)</span>
+        <span className="text-foreground-secondary text-xs">{t("priceInclTax")}</span>
         <span className="text-gold-400 font-semibold text-base">
           {formatPriceWithTax(drink.price)}
         </span>

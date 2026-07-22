@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 
 interface StatusBadgeProps {
   status: string;
@@ -6,6 +7,8 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
+  const tc = useTranslations("common");
+
   const getStatusColor = (statusStr: string) => {
     switch (statusStr) {
       case "PUBLISHED":
@@ -17,13 +20,26 @@ export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
     }
   };
 
+  const getStatusLabel = (statusStr: string) => {
+    switch (statusStr) {
+      case "PUBLISHED":
+        return tc("published");
+      case "DRAFT":
+        return tc("draft");
+      case "ARCHIVED":
+        return tc("archived");
+      default:
+        return statusStr;
+    }
+  };
+
   return (
     <span
       className={`text-xs px-2.5 py-0.5 font-medium rounded-md inline-block whitespace-nowrap ${getStatusColor(
         status
       )} ${className}`}
     >
-      {status}
+      {getStatusLabel(status)}
     </span>
   );
 }

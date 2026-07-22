@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { Drink, Category, FormData, emptyForm } from "./_components/types";
 import { DrinkFormModal } from "./_components/DrinkFormModal";
@@ -8,6 +9,8 @@ import { CategoryManagerModal } from "./_components/CategoryManagerModal";
 import { DrinkTable } from "./_components/DrinkTable";
 
 export default function DrinkMenuPage() {
+  const t = useTranslations("drinkMenu");
+  const tc = useTranslations("common");
   const [drinks, setDrinks] = useState<Drink[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,7 +111,7 @@ export default function DrinkMenuPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
+    if (!confirm(tc("deleteConfirm"))) return;
     try {
       await api.delete(`/api/drink/${id}`);
       loadData();
@@ -121,15 +124,15 @@ export default function DrinkMenuPage() {
     <>
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Drink Menu</h2>
-          <p className="text-foreground-secondary mt-1">Manage drink items and categories</p>
+          <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
+          <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
         </div>
         <div className="flex flex-wrap items-stretch gap-3">
           <button
             onClick={() => setShowCategoryModal(true)}
             className="flex-1 sm:flex-none inline-flex items-center justify-center bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
           >
-            Manage Categories
+            {t("manageCategories")}
           </button>
           <button
             onClick={() => {
@@ -139,7 +142,7 @@ export default function DrinkMenuPage() {
             }}
             className="flex-1 sm:flex-none inline-flex items-center justify-center bg-gold-500 hover:bg-gold-600 text-background px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
           >
-            + Add Drink
+            + {t("addDrink")}
           </button>
         </div>
       </header>
@@ -148,7 +151,7 @@ export default function DrinkMenuPage() {
       <div className="flex flex-wrap gap-4 mb-6">
         <input
           type="text"
-          placeholder="Search drinks..."
+          placeholder={t("searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground placeholder-foreground-tertiary focus:outline-none focus:border-gold-500"
@@ -158,7 +161,7 @@ export default function DrinkMenuPage() {
           onChange={(e) => setFilterCategory(e.target.value)}
           className="bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
         >
-          <option value="">All Categories</option>
+          <option value="">{t("categoryFilter")}</option>
           {categories.map((cat) => (
             <option key={cat.id} value={cat.slug}>
               {cat.name}
@@ -170,9 +173,9 @@ export default function DrinkMenuPage() {
           onChange={(e) => setFilterStatus(e.target.value)}
           className="bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
         >
-          <option value="">All Status</option>
-          <option value="DRAFT">Draft</option>
-          <option value="PUBLISHED">Published</option>
+          <option value="">{t("statusFilter")}</option>
+          <option value="DRAFT">{tc("draft")}</option>
+          <option value="PUBLISHED">{tc("published")}</option>
         </select>
       </div>
 
