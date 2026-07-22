@@ -265,5 +265,28 @@
     "descriptionLabel": "説明",
     "deleteConfirm": "このアイテムを削除してもよろしいですか？",
     "orderLabel": "表示順"
+  },
+  "challenge": {
+    "title": "型抜きチャレンジ",
+    "subtitle": "チャレンジのルールと当選者リストを管理します",
+    "addRule": "ルールを追加",
+    "addWinner": "当選者を追加",
+    "editRule": "ルールを編集",
+    "editWinner": "当選者を編集",
+    "rulesTab": "ルール",
+    "winnersTab": "当選者一覧",
+    "noRules": "ルールが登録されていません",
+    "noWinners": "当選者が登録されていません",
+    "ruleTitleLabel": "タイトル",
+    "ruleDescriptionLabel": "説明",
+    "winnerNameLabel": "参加者名",
+    "winnerChallengeLabel": "型抜きの種類",
+    "winnerAwardLabel": "獲得割引",
+    "completedAtLabel": "達成日",
+    "sortOrderLabel": "表示順",
+    "activeLabel": "有効",
+    "publishedLabel": "公開中",
+    "imageLabel": "画像URL",
+    "deleteConfirm": "このアイテムを削除してもよろしいですか？"
   }
 }

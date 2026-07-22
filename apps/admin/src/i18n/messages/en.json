@@ -265,5 +265,28 @@
     "descriptionLabel": "Description",
     "deleteConfirm": "Are you sure you want to delete this item?",
     "orderLabel": "Order"
+  },
+  "challenge": {
+    "title": "Katanuki Challenge",
+    "subtitle": "Manage challenge rules and winners list",
+    "addRule": "Add Rule",
+    "addWinner": "Add Winner",
+    "editRule": "Edit Rule",
+    "editWinner": "Edit Winner",
+    "rulesTab": "Rules",
+    "winnersTab": "Winners",
+    "noRules": "No rules yet",
+    "noWinners": "No winners yet",
+    "ruleTitleLabel": "Title",
+    "ruleDescriptionLabel": "Description",
+    "winnerNameLabel": "Participant Name",
+    "winnerChallengeLabel": "Challenge Name",
+    "winnerAwardLabel": "Discount Awarded",
+    "completedAtLabel": "Completed At",
+    "sortOrderLabel": "Sort Order",
+    "activeLabel": "Active",
+    "publishedLabel": "Published",
+    "imageLabel": "Image URL",
+    "deleteConfirm": "Are you sure you want to delete this item?"
   }
 }
