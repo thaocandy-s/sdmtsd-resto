@@ -57,7 +57,17 @@
     "subtitle": "Explore our beverage collection",
     "alcohol": "Alcohol",
     "volume": "Volume",
-    "nonAlcoholic": "Non-Alcoholic"
+    "nonAlcoholic": "Non-Alcoholic",
+    "all": "All",
+    "noDrinks": "No drinks found",
+    "otherDrinks": "Other Drinks",
+    "others": "Others",
+    "noImage": "No image",
+    "noImageAvailable": "No image available",
+    "notFound": "Drink not found",
+    "backToList": "Back to drinks",
+    "alcoholLabel": "Alcohol",
+    "volumeLabel": "Volume"
   },
   "buffet": {
     "title": "Buffet Courses",

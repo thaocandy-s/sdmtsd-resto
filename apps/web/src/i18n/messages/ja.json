@@ -57,7 +57,17 @@
     "subtitle": "ドリンクコレクションをご覧ください",
     "alcohol": "アルコール",
     "volume": "容量",
-    "nonAlcoholic": "ノンアルコール"
+    "nonAlcoholic": "ノンアルコール",
+    "all": "全品",
+    "noDrinks": "ドリンクが見つかりませんでした",
+    "otherDrinks": "その他ドリンク",
+    "others": "その他",
+    "noImage": "画像なし",
+    "noImageAvailable": "画像はありません",
+    "notFound": "ドリンクが見つかりませんでした",
+    "backToList": "ドリンク一覧に戻る",
+    "alcoholLabel": "アルコール度数",
+    "volumeLabel": "容量"
   },
   "buffet": {
     "title": "ビュッフェコース",
