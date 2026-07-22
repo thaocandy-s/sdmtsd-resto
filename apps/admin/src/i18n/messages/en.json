@@ -44,7 +44,18 @@
     "categoryFilter": "All Categories",
     "statusFilter": "All Statuses",
     "noFoods": "No food items found",
-    "noFoodsDesc": "Get started by adding a new food item or try adjusting your search filters."
+    "noFoodsDesc": "Get started by adding a new food item or try adjusting your search filters.",
+    "editFood": "Edit Food Item",
+    "nameLabel": "Name",
+    "descriptionLabel": "Description",
+    "priceLabel": "Price",
+    "originalPriceLabel": "Original Price",
+    "categoryLabel": "Category",
+    "selectCategory": "Select category",
+    "statusLabel": "Status",
+    "sortOrderLabel": "Sort Order",
+    "popularLabel": "Popular",
+    "recommendedLabel": "Recommended"
   },
   "drinkMenu": {
     "title": "Drink Menu Management",

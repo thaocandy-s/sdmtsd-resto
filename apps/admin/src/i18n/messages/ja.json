@@ -44,7 +44,18 @@
     "categoryFilter": "全カテゴリー",
     "statusFilter": "全ステータス",
     "noFoods": "料理が見つかりません",
-    "noFoodsDesc": "新しい料理を追加するか、検索・フィルター条件を変更してください。"
+    "noFoodsDesc": "新しい料理を追加するか、検索・フィルター条件を変更してください。",
+    "editFood": "料理の編集",
+    "nameLabel": "料理名",
+    "descriptionLabel": "説明",
+    "priceLabel": "価格",
+    "originalPriceLabel": "元の価格",
+    "categoryLabel": "カテゴリー",
+    "selectCategory": "カテゴリーを選択",
+    "statusLabel": "ステータス",
+    "sortOrderLabel": "表示順",
+    "popularLabel": "人気メニュー",
+    "recommendedLabel": "おすすめメニュー"
   },
   "drinkMenu": {
     "title": "ドリンクメニュー管理",
