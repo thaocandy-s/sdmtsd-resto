@@ -35,7 +35,8 @@ export function middleware(request: NextRequest) {
     const localeMatch = pathname.match(/^\/(ja|en)/);
     const locale = localeMatch ? localeMatch[1] : "ja";
 
-    const loginUrl = new URL(`/${locale}/login`, request.url);
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = `/${locale}/login`;
     loginUrl.searchParams.set("redirect", pathnameWithoutLocale);
     return NextResponse.redirect(loginUrl);
   }
@@ -44,5 +45,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/", "/(ja|en)/:path*", "/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

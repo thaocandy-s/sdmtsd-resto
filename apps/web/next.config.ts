@@ -47,6 +47,14 @@ const nextConfig: NextConfig = {
         source: "/admin/:path*",
         destination: `${ADMIN_URL}/admin/:path*`,
       },
+      {
+        source: "/:locale(ja|en)/admin",
+        destination: `${ADMIN_URL}/admin/:locale`,
+      },
+      {
+        source: "/:locale(ja|en)/admin/:path*",
+        destination: `${ADMIN_URL}/admin/:locale/:path*`,
+      },
     ];
   },
 };
