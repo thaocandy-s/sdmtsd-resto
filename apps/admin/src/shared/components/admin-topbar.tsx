@@ -25,7 +25,7 @@ export function AdminTopbar({ onMenuClick, onLogout }: AdminTopbarProps) {
   };
 
   return (
-    <header className="h-16 border-b border-border bg-background-secondary flex items-center justify-between px-4 md:px-6">
+    <header className="sticky top-0 z-30 h-16 border-b border-border bg-background-secondary flex items-center justify-between px-4 md:px-6">
       <button
         onClick={onMenuClick}
         className="p-2 -ml-2 rounded-md hover:bg-background-tertiary text-foreground-secondary lg:hidden"
