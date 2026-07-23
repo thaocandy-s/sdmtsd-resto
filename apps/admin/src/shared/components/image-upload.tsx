@@ -21,7 +21,11 @@ export function uploadImage(
     if (folder) formData.append("folder", folder);
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/media/upload");
+    const basePath =
+      typeof window !== "undefined" && window.location.pathname.startsWith("/admin")
+        ? "/admin"
+        : "";
+    xhr.open("POST", `${basePath}/api/media/upload`);
     const token = useAuthStore.getState().accessToken;
     if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     xhr.withCredentials = true;

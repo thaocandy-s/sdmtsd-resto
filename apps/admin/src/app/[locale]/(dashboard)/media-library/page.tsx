@@ -77,7 +77,11 @@ function uploadWithProgress(
 ): Promise<{ data: Media[] }> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/media/upload");
+    const basePath =
+      typeof window !== "undefined" && window.location.pathname.startsWith("/admin")
+        ? "/admin"
+        : "";
+    xhr.open("POST", `${basePath}/api/media/upload`);
     if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     xhr.withCredentials = true;
     xhr.upload.onprogress = (e) => {
