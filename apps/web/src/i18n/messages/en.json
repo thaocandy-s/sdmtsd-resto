@@ -128,7 +128,16 @@
     "nearby": "Nearby Attractions",
     "website": "Website",
     "address": "Address",
-    "hours": "Opening Hours"
+    "hours": "Opening Hours",
+    "all": "All",
+    "noPlaces": "No tourist attractions found",
+    "noImage": "No image",
+    "notFound": "Attraction not found",
+    "backToList": "Back to Tourist Guide",
+    "about": "About",
+    "info": "Information",
+    "phone": "Phone",
+    "visitWebsite": "Visit Website"
   },
   "faq": {
     "title": "Frequently Asked Questions",

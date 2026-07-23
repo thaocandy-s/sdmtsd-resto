@@ -128,7 +128,16 @@
     "nearby": "近くのスポット",
     "website": "ウェブサイト",
     "address": "住所",
-    "hours": "営業時間"
+    "hours": "営業時間",
+    "all": "すべて",
+    "noPlaces": "観光スポットが見つかりませんでした",
+    "noImage": "画像なし",
+    "notFound": "スポットが見つかりませんでした",
+    "backToList": "観光ガイド一覧に戻る",
+    "about": "スポットについて",
+    "info": "詳細情報",
+    "phone": "電話番号",
+    "visitWebsite": "ウェブサイトを見る"
   },
   "faq": {
     "title": "よくある質問",
