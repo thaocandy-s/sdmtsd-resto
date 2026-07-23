@@ -30,7 +30,10 @@
     "price": "Price",
     "popular": "Popular",
     "recommended": "Recommended",
-    "new": "New"
+    "new": "New",
+    "previous": "Previous",
+    "next": "Next",
+    "showingPage": "Showing page {page} / {totalPages} ({total} total)"
   },
   "home": {
     "heroTitle": "Welcome to Resto Hub",
