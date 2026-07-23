@@ -7,8 +7,6 @@ interface Stats {
   totalBuffets: number;
   totalContacts: number;
   unreadContacts: number;
-  todayPageViews: number;
-  totalPageViews: number;
 }
 
 interface DashboardStatsGridProps {

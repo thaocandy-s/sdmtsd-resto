@@ -7,6 +7,7 @@ import { routing } from "@/i18n/routing";
 import { Header } from "@/shared/components/header";
 import { Footer } from "@/shared/components/footer";
 import { MobileBottomNav } from "@/shared/components/mobile-bottom-nav";
+import { TrackPageView } from "@/shared/components/TrackPageView";
 
 const notoSans = Noto_Sans({
   subsets: ["latin"],
@@ -86,6 +87,7 @@ export default async function LocaleLayout({
             <div className="pt-16">{children}</div>
             <Footer initialInfo={footerInfo} />
             <MobileBottomNav />
+            <TrackPageView />
           </div>
         </NextIntlClientProvider>
       </body>
