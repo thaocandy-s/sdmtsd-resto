@@ -42,7 +42,7 @@ export function AdminTopbar({ onMenuClick, onLogout }: AdminTopbarProps) {
           title="Switch Language"
         >
           <Globe className="w-3.5 h-3.5 text-gold-400" />
-          <span>{locale === "ja" ? "日本語 (JA)" : "English (EN)"}</span>
+          <span>{locale === "ja" ? "English (EN)" : "日本語 (JA)"}</span>
         </button>
 
         {/* <button className="relative p-2 rounded-md hover:bg-background-tertiary transition-colors">

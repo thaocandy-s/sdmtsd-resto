@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { useTranslations } from "next-intl";
+import { getApiUrl } from "@/lib/api-client";
 
 /* ------------------------------------------------------------------ */
 /*  Shared upload helper                                               */
@@ -107,7 +108,7 @@ export function ImageUpload({
       {value && (
         <div className="mb-2 w-full h-32 bg-background-tertiary rounded-lg overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={value} alt="Preview" className="w-full h-full object-cover" />
+          <img src={getApiUrl(value)} alt="Preview" className="w-full h-full object-cover" />
         </div>
       )}
 
@@ -249,7 +250,11 @@ export function MultiImageUpload({
               className="relative aspect-square bg-background-tertiary rounded-lg overflow-hidden"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+              <img
+                src={getApiUrl(url)}
+                alt={`Image ${i + 1}`}
+                className="w-full h-full object-cover"
+              />
               <button
                 type="button"
                 onClick={() => removeAt(i)}
