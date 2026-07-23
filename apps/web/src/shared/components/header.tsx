@@ -14,17 +14,25 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [phone, setPhone] = useState<string>("+81-3-1234-5678");
   const [logoUrl, setLogoUrl] = useState<string>("/images/logo.png");
+  const [logoSubtitle, setLogoSubtitle] = useState<string>("鉄板・もんじゃ・居酒屋");
+  const [restaurantName, setRestaurantName] = useState<string>("三代目土信田商店");
   const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     fetch("/api/info")
       .then((res) => res.json())
       .then((data) => {
-        if (data?.data?.phone) {
-          setPhone(data.data.phone);
-        }
-        if (data?.data?.logoUrl) {
-          setLogoUrl(data.data.logoUrl);
+        if (data?.data) {
+          if (data.data.phone) setPhone(data.data.phone);
+          if (data.data.logoUrl) setLogoUrl(data.data.logoUrl);
+
+          // Support explicit null or empty values by checking if key exists
+          if ("logoSubtitle" in data.data) {
+            setLogoSubtitle(data.data.logoSubtitle || "");
+          }
+          if ("name" in data.data) {
+            setRestaurantName(data.data.name || "");
+          }
         }
       })
       .catch(console.error);
@@ -75,10 +83,28 @@ export function Header() {
         {/* Logo */}
         <Link
           href={`/${locale}`}
-          className="flex items-center gap-2"
+          className="flex items-center gap-1.5 sm:gap-2"
           onClick={() => setIsOpen(false)}
         >
-          <img src={logoUrl} alt={t("siteName")} className="h-10 w-auto object-contain" />
+          <img
+            src={logoUrl}
+            alt={t("siteName")}
+            className="h-10 w-auto object-contain flex-shrink-0"
+          />
+          {(logoSubtitle || restaurantName) && (
+            <div className="flex flex-col text-left leading-none font-jp font-medium select-none ml-1.5 lg:hidden flex-shrink-0">
+              {logoSubtitle && (
+                <span className="text-[9px] sm:text-[10.5px] text-foreground-secondary tracking-tight">
+                  {logoSubtitle}
+                </span>
+              )}
+              {restaurantName && (
+                <span className="text-[12px] sm:text-[14px] text-gold-400 font-bold tracking-tighter mt-0.5">
+                  {restaurantName}
+                </span>
+              )}
+            </div>
+          )}
         </Link>
 
         {/* Desktop Navigation */}

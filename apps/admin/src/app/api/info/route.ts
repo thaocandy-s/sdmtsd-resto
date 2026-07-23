@@ -32,6 +32,7 @@ export const PUT = withAuth(
         socialLinks,
         logoUrl,
         faviconUrl,
+        logoSubtitle,
         isActive,
       } = body;
 
@@ -56,6 +57,7 @@ export const PUT = withAuth(
             socialLinks,
             logoUrl,
             faviconUrl,
+            logoSubtitle,
             isActive,
           },
         });
@@ -77,6 +79,7 @@ export const PUT = withAuth(
             socialLinks,
             logoUrl,
             faviconUrl,
+            logoSubtitle,
             isActive: isActive !== false,
           },
         });

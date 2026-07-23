@@ -19,7 +19,10 @@ export default function DrinkPage() {
     fetch("/api/drink/categories")
       .then((r) => r.json())
       .then((categoriesData) => {
-        setCategories(categoriesData.data || []);
+        const activeCats = (categoriesData.data || []).filter(
+          (cat: Category) => (cat._count?.drinks ?? 0) > 0
+        );
+        setCategories(activeCats);
       })
       .catch(console.error);
   }, []);

@@ -36,9 +36,12 @@ export default function HomeManagementPage() {
   const [restaurantInfo, setRestaurantInfo] = useState<any>(null);
   const [logoUrl, setLogoUrl] = useState("");
   const [faviconUrl, setFaviconUrl] = useState("");
+  const [logoSubtitle, setLogoSubtitle] = useState("");
+  const [restaurantName, setRestaurantName] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [faviconFile, setFaviconFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   useEffect(() => {
     loadData();
@@ -57,6 +60,8 @@ export default function HomeManagementPage() {
       setRestaurantInfo(infoRes.data || null);
       setLogoUrl(infoRes.data?.logoUrl || "");
       setFaviconUrl(infoRes.data?.faviconUrl || "");
+      setLogoSubtitle(infoRes.data?.logoSubtitle || "鉄板・もんじゃ・居酒屋");
+      setRestaurantName(infoRes.data?.name || "三代目土信田商店");
     } catch (error) {
       console.error("Load data error:", error);
     } finally {
@@ -81,19 +86,25 @@ export default function HomeManagementPage() {
         ...restaurantInfo,
         logoUrl: finalLogoUrl,
         faviconUrl: finalFaviconUrl,
+        logoSubtitle: logoSubtitle,
+        name: restaurantName,
       });
 
-      alert(t("saveSuccess"));
+      setToast({ type: "success", message: t("saveSuccess") });
+      setTimeout(() => setToast(null), 3000);
 
       const infoRes = await api.get<{ data: any }>("/api/info");
       setRestaurantInfo(infoRes.data);
       setLogoUrl(infoRes.data?.logoUrl || "");
       setFaviconUrl(infoRes.data?.faviconUrl || "");
+      setLogoSubtitle(infoRes.data?.logoSubtitle || "鉄板・もんじゃ・居酒屋");
+      setRestaurantName(infoRes.data?.name || "三代目土信田商店");
       setLogoFile(null);
       setFaviconFile(null);
     } catch (err: any) {
       console.error(err);
-      alert(err.message || t("saveFailed"));
+      setToast({ type: "error", message: err.message || t("saveFailed") });
+      setTimeout(() => setToast(null), 3000);
     } finally {
       setSaving(false);
     }
@@ -180,11 +191,27 @@ export default function HomeManagementPage() {
           faviconUrl={faviconUrl}
           setFaviconUrl={setFaviconUrl}
           setFaviconFile={setFaviconFile}
+          logoSubtitle={logoSubtitle}
+          setLogoSubtitle={setLogoSubtitle}
+          restaurantName={restaurantName}
+          setRestaurantName={setRestaurantName}
           handleSaveAssets={handleSaveAssets}
           saving={saving}
         />
       ) : (
         <EventTab events={events} onDelete={deleteEvent} />
+      )}
+
+      {toast && (
+        <div
+          className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg border shadow-lg transition-all animate-in fade-in slide-in-from-bottom-4 duration-300 ${
+            toast.type === "success"
+              ? "bg-emerald-950/90 border-emerald-500/50 text-emerald-200"
+              : "bg-rose-950/90 border-rose-500/50 text-rose-200"
+          }`}
+        >
+          <span className="text-sm font-medium">{toast.message}</span>
+        </div>
       )}
     </>
   );

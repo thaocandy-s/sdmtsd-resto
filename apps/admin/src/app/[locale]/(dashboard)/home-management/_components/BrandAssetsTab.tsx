@@ -8,6 +8,10 @@ interface BrandAssetsTabProps {
   faviconUrl: string;
   setFaviconUrl: (url: string) => void;
   setFaviconFile: (file: File | null) => void;
+  logoSubtitle: string;
+  setLogoSubtitle: (text: string) => void;
+  restaurantName: string;
+  setRestaurantName: (text: string) => void;
   handleSaveAssets: () => void;
   saving: boolean;
 }
@@ -19,6 +23,10 @@ export function BrandAssetsTab({
   faviconUrl,
   setFaviconUrl,
   setFaviconFile,
+  logoSubtitle,
+  setLogoSubtitle,
+  restaurantName,
+  setRestaurantName,
   handleSaveAssets,
   saving,
 }: BrandAssetsTabProps) {
@@ -30,6 +38,30 @@ export function BrandAssetsTab({
       <h3 className="text-lg font-medium text-foreground mb-4 font-jp">{t("brandingTitle")}</h3>
 
       <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">Restaurant Name</label>
+          <input
+            type="text"
+            value={restaurantName}
+            onChange={(e) => setRestaurantName(e.target.value)}
+            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-gold-500"
+            placeholder="e.g. 三代目土信田商店"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Logo Subtitle (Mobile Header Subtitle)
+          </label>
+          <input
+            type="text"
+            value={logoSubtitle}
+            onChange={(e) => setLogoSubtitle(e.target.value)}
+            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-gold-500"
+            placeholder="e.g. 鉄板・もんじゃ・居酒屋"
+          />
+        </div>
+
         <ImageUpload
           label={t("logoLabel")}
           value={logoUrl}
