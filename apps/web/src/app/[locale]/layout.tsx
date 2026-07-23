@@ -20,13 +20,26 @@ const notoSansJP = Noto_Sans_JP({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Resto Hub - Japanese Restaurant",
-    template: "%s | Resto Hub",
-  },
-  description: "Experience authentic Japanese cuisine in an elegant, traditional atmosphere.",
-};
+import { prisma } from "@/lib/prisma";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const restaurant = await prisma.restaurant.findFirst({
+    where: { isActive: true },
+  });
+  return {
+    title: {
+      default: restaurant?.name || "Resto Hub - Japanese Restaurant",
+      template: `%s | ${restaurant?.name || "Resto Hub"}`,
+    },
+    description:
+      restaurant?.description ||
+      "Experience authentic Japanese cuisine in an elegant, traditional atmosphere.",
+    icons: {
+      icon: restaurant?.faviconUrl || "/favicon.ico",
+      shortcut: restaurant?.faviconUrl || "/favicon.ico",
+    },
+  };
+}
 
 type Locale = "en" | "ja";
 

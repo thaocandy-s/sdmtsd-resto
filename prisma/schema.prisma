@@ -58,23 +58,26 @@ model RefreshToken {
 // ===== RESTAURANT =====
 
 model Restaurant {
-  id           String   @id @default(uuid())
-  name         String
-  slug         String   @unique
-  description  String?
-  address      String?
-  phone        String?
-  email        String?
+  id             String   @id @default(uuid())
+  name           String
+  slug           String   @unique
+  description    String?
+  address        String?
+  phone          String?
+  email          String?
   latitude       Float?
   longitude      Float?
   googlePlaceId  String?
   googleMapQuery String?
   openingHours   Json?
-  holidays     Json?
-  socialLinks  Json?
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  holidays       Json?
+  socialLinks    Json?
+  logoUrl        String?
+  faviconUrl     String?
+  logoSubtitle   String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 // ===== HOME / BANNERS =====

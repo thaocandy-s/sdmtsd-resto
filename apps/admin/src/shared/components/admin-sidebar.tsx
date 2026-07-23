@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -32,9 +33,9 @@ const navItems = [
   { href: "/challenge", key: "challenge", icon: Trophy },
   { href: "/faq", key: "faq", icon: HelpCircle },
   { href: "/restaurant-info", key: "restaurantInfo", icon: Info },
-  { href: "/reservations", key: "reservations", icon: CalendarCheck },
+  // { href: "/reservations", key: "reservations", icon: CalendarCheck },
   { href: "/contact", key: "contactMessages", icon: Mail },
-  { href: "/media-library", key: "mediaLibrary", icon: FolderOpen },
+  // { href: "/media-library", key: "mediaLibrary", icon: FolderOpen },
   { href: "/settings", key: "settings", icon: Settings },
 ];
 
@@ -49,6 +50,18 @@ export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
   const locale = useLocale();
   const tSidebar = useTranslations("sidebar");
   const tCommon = useTranslations("common");
+  const [logoUrl, setLogoUrl] = useState<string>("/images/logo.png");
+
+  useEffect(() => {
+    fetch("/api/info")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.data?.logoUrl) {
+          setLogoUrl(data.data.logoUrl);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   return (
     <>
@@ -63,9 +76,11 @@ export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
       >
         {/* Logo and close button */}
         <div className="p-4 border-b border-border flex items-center justify-between">
-          <Link href={`/${locale}`} onClick={onClose}>
-            <h1 className="text-xl font-bold text-gold-400">Admin CMS</h1>
-            <p className="text-xs text-foreground-tertiary">Resto Hub</p>
+          <Link href={`/${locale}`} onClick={onClose} className="flex items-center gap-2">
+            <img src={logoUrl} alt="Logo" className="h-9 w-auto object-contain" />
+            <div className="flex flex-col">
+              <h1 className="text-sm font-bold text-gold-400 leading-tight">Admin CMS</h1>
+            </div>
           </Link>
           <button
             onClick={onClose}

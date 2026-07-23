@@ -19,10 +19,19 @@ const notoSansJP = Noto_Sans_JP({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Admin | Resto Hub",
-  description: "Restaurant Management System - Admin Dashboard",
-};
+import { prisma } from "@/lib/prisma";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const restaurant = await prisma.restaurant.findFirst();
+  return {
+    title: "Admin | " + (restaurant?.name || "Resto Hub"),
+    description: "Restaurant Management System - Admin Dashboard",
+    icons: {
+      icon: restaurant?.faviconUrl || "/favicon.ico",
+      shortcut: restaurant?.faviconUrl || "/favicon.ico",
+    },
+  };
+}
 
 type Locale = "en" | "ja";
 

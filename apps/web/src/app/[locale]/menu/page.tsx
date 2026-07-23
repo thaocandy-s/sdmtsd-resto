@@ -19,7 +19,10 @@ export default function MenuPage() {
     fetch("/api/menu/categories")
       .then((r) => r.json())
       .then((categoriesData) => {
-        setCategories(categoriesData.data || []);
+        const activeCats = (categoriesData.data || []).filter(
+          (cat: Category) => (cat._count?.foods ?? 0) > 0
+        );
+        setCategories(activeCats);
       })
       .catch(console.error);
   }, []);

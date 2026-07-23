@@ -41,7 +41,13 @@
     "touristPreview": "Tourist Guide",
     "faqPreview": "Frequently Asked Questions",
     "reservationCta": "Make a Reservation",
-    "reserveNow": "Reserve Now"
+    "reserveNow": "Reserve Now",
+    "challengeSubtitle": "Test your skills and win amazing discounts!",
+    "noPopularFoods": "No popular items yet",
+    "noBeerArts": "No beer art gallery yet",
+    "noTourPlaces": "No tourist places yet",
+    "noFaqs": "No FAQs yet",
+    "noImage": "No image"
   },
   "menu": {
     "title": "Food Menu",
@@ -191,10 +197,18 @@
     "subject": "Subject",
     "message": "Message",
     "submitSuccess": "Message sent successfully!",
-    "submitError": "Failed to send message"
+    "submitError": "Failed to send message",
+    "successTitle": "Message Sent!",
+    "successDesc": "Thank you for your message. We will get back to you soon.",
+    "sendAnother": "Send another message",
+    "sending": "Sending...",
+    "sendMessage": "Send Message"
   },
   "footer": {
     "copyright": "All rights reserved.",
-    "description": "Experience the finest Japanese cuisine in an elegant, traditional atmosphere."
+    "description": "Experience the finest Japanese cuisine in an elegant, traditional atmosphere.",
+    "quickLinks": "Quick Links",
+    "information": "Information",
+    "followUs": "Follow Us"
   }
 }
