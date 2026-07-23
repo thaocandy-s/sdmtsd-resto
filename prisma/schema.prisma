@@ -403,6 +403,31 @@ model AuditLog {
 
 // ===== ANALYTICS =====
 
+// Aggregated daily statistics — one row per day, UPSERT pattern
+// Provides ~300x storage reduction vs raw PageView rows
+model DailyStatistic {
+  id                String   @id @default(uuid())
+  date              DateTime @unique @db.Date
+  pageViews         Int      @default(0)
+  uniqueVisitors    Int      @default(0)
+  homeViews         Int      @default(0)
+  menuViews         Int      @default(0)
+  drinkViews        Int      @default(0)
+  buffetViews       Int      @default(0)
+  beerArtViews      Int      @default(0)
+  challengeViews    Int      @default(0)
+  touristViews      Int      @default(0)
+  infoViews         Int      @default(0)
+  faqViews          Int      @default(0)
+  contactViews      Int      @default(0)
+  reservationViews  Int      @default(0)
+  reservationClicks Int      @default(0)
+  contactClicks     Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Raw visit logs — short retention for debugging (auto-cleaned after 90 days)
 model PageView {
   id        String   @id @default(uuid())
   path      String

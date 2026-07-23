@@ -7,85 +7,114 @@ export const GET = withAuth(
     try {
       const { searchParams } = new URL(request.url);
       const days = parseInt(searchParams.get("days") || "30");
-      const startDate = new Date();
+
+      // Calculate date boundaries for current and comparison periods
+      const now = new Date();
+      now.setUTCHours(0, 0, 0, 0);
+
+      const startDate = new Date(now);
       startDate.setDate(startDate.getDate() - days);
 
-      const [
-        totalViews,
-        uniquePages,
-        topPages,
-        viewsByDay,
-        topReferrers,
-        topCountries,
-        recentViews,
-      ] = await Promise.all([
-        prisma.pageView.count({ where: { createdAt: { gte: startDate } } }),
-        prisma.pageView
-          .groupBy({ by: ["path"], where: { createdAt: { gte: startDate } }, _count: true })
-          .then((r) => r.length),
-        prisma.pageView.groupBy({
-          by: ["path"],
-          where: { createdAt: { gte: startDate } },
-          _count: { path: true },
-          orderBy: { _count: { path: "desc" } },
-          take: 20,
+      const prevStartDate = new Date(startDate);
+      prevStartDate.setDate(prevStartDate.getDate() - days);
+
+      const [currentPeriod, previousPeriod, dailyData] = await Promise.all([
+        // Current period totals — aggregate DailyStatistic rows for selected range
+        prisma.dailyStatistic.aggregate({
+          where: { date: { gte: startDate, lte: now } },
+          _sum: {
+            pageViews: true,
+            uniqueVisitors: true,
+            homeViews: true,
+            menuViews: true,
+            drinkViews: true,
+            buffetViews: true,
+            beerArtViews: true,
+            challengeViews: true,
+            touristViews: true,
+            infoViews: true,
+            faqViews: true,
+            contactViews: true,
+            reservationViews: true,
+            reservationClicks: true,
+            contactClicks: true,
+          },
         }),
-        prisma.pageView.groupBy({
-          by: ["path"],
-          where: { createdAt: { gte: startDate } },
-          _count: { path: true },
-          orderBy: { _count: { path: "desc" } },
-          take: 10,
+
+        // Previous period totals — for period-over-period comparison
+        prisma.dailyStatistic.aggregate({
+          where: { date: { gte: prevStartDate, lt: startDate } },
+          _sum: {
+            pageViews: true,
+            uniqueVisitors: true,
+          },
         }),
-        prisma.pageView.groupBy({
-          by: ["referrer"],
-          where: { createdAt: { gte: startDate }, referrer: { not: null } },
-          _count: { referrer: true },
-          orderBy: { _count: { referrer: "desc" } },
-          take: 10,
-        }),
-        prisma.pageView.groupBy({
-          by: ["country"],
-          where: { createdAt: { gte: startDate }, country: { not: null } },
-          _count: { country: true },
-          orderBy: { _count: { country: "desc" } },
-          take: 10,
-        }),
-        prisma.pageView.findMany({
-          where: { createdAt: { gte: startDate } },
-          take: 20,
-          orderBy: { createdAt: "desc" },
+
+        // Daily data points for trend chart — already bucketed by day
+        prisma.dailyStatistic.findMany({
+          where: { date: { gte: startDate, lte: now } },
+          orderBy: { date: "asc" },
+          select: {
+            date: true,
+            pageViews: true,
+            uniqueVisitors: true,
+            homeViews: true,
+            menuViews: true,
+            drinkViews: true,
+            buffetViews: true,
+            beerArtViews: true,
+            challengeViews: true,
+            touristViews: true,
+            infoViews: true,
+            faqViews: true,
+            contactViews: true,
+            reservationViews: true,
+            reservationClicks: true,
+            contactClicks: true,
+          },
         }),
       ]);
 
-      const popularFoods = await prisma.food.findMany({
-        where: { deletedAt: null, status: "PUBLISHED", isPopular: true },
-        take: 10,
-        orderBy: { sortOrder: "asc" },
-        include: { category: true },
-      });
+      const sum = currentPeriod._sum;
+      const prevSum = previousPeriod._sum;
 
-      const popularDrinks = await prisma.drink.findMany({
-        where: { deletedAt: null, status: "PUBLISHED", isPopular: true },
-        take: 10,
-        orderBy: { sortOrder: "asc" },
-        include: { category: true },
-      });
+      // Calculate period-over-period change percentage
+      const prevPageViews = prevSum.pageViews ?? 0;
+      const currPageViews = sum.pageViews ?? 0;
+      const changePercent =
+        prevPageViews > 0
+          ? Math.round(((currPageViews - prevPageViews) / prevPageViews) * 100)
+          : currPageViews > 0
+            ? 100
+            : 0;
+
+      // Build section breakdown sorted by views (descending)
+      const sectionBreakdown = [
+        { section: "home", views: sum.homeViews ?? 0 },
+        { section: "menu", views: sum.menuViews ?? 0 },
+        { section: "drink", views: sum.drinkViews ?? 0 },
+        { section: "buffet", views: sum.buffetViews ?? 0 },
+        { section: "beerArt", views: sum.beerArtViews ?? 0 },
+        { section: "challenge", views: sum.challengeViews ?? 0 },
+        { section: "tourist", views: sum.touristViews ?? 0 },
+        { section: "info", views: sum.infoViews ?? 0 },
+        { section: "faq", views: sum.faqViews ?? 0 },
+        { section: "contact", views: sum.contactViews ?? 0 },
+        { section: "reservation", views: sum.reservationViews ?? 0 },
+      ].sort((a, b) => b.views - a.views);
 
       return NextResponse.json({
         data: {
-          totalViews,
-          uniquePages,
-          topPages: topPages.map((p) => ({ path: p.path, views: p._count.path })),
-          viewsByDay: viewsByDay.map((v) => ({ path: v.path, views: v._count.path })),
-          topReferrers: topReferrers.map((r) => ({
-            referrer: r.referrer,
-            count: r._count.referrer,
-          })),
-          topCountries: topCountries.map((c) => ({ country: c.country, count: c._count.country })),
-          recentViews,
-          popularFoods,
-          popularDrinks,
+          summary: {
+            totalPageViews: currPageViews,
+            uniqueVisitors: sum.uniqueVisitors ?? 0,
+            reservationClicks: sum.reservationClicks ?? 0,
+            contactClicks: sum.contactClicks ?? 0,
+            changePercent,
+            prevPageViews,
+          },
+          sectionBreakdown,
+          dailyData,
         },
       });
     } catch (error) {

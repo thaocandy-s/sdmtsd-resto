@@ -19,7 +19,10 @@ interface DashboardStats {
   totalContacts: number;
   unreadContacts: number;
   todayPageViews: number;
+  todayUniqueVisitors: number;
+  weekPageViews: number;
   totalPageViews: number;
+  totalUniqueVisitors: number;
 }
 
 interface Contact {
