@@ -20,7 +20,9 @@
     "logoutMessage": "Are you sure you want to log out of the Admin panel? Any unsaved changes may be lost.",
     "loggingOut": "Logging out...",
     "language": "Language",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "previous": "Previous",
+    "next": "Next"
   },
   "sidebar": {
     "homeManagement": "Home Management",
