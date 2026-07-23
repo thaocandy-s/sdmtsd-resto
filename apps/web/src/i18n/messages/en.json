@@ -50,7 +50,19 @@
     "detail": "Menu Detail",
     "ingredients": "Ingredients",
     "allergens": "Allergens",
-    "calories": "Calories"
+    "calories": "Calories",
+    "all": "All",
+    "noItems": "No menu items found",
+    "recommended": "Recommended",
+    "recommendedDesc": "Chef's special recommended dishes.",
+    "others": "Others",
+    "otherMenu": "Other Menu Items",
+    "notFound": "Food not found",
+    "backToList": "Back to menu",
+    "noImageAvailable": "No image available",
+    "noImage": "No image",
+    "popular": "Popular",
+    "relatedItems": "You might also like"
   },
   "drink": {
     "title": "Drink Menu",

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Category } from "./types";
 
 interface CategoryFilterProps {
@@ -13,6 +14,7 @@ export function CategoryFilter({
   selectedCategory,
   onSelectCategory,
 }: CategoryFilterProps) {
+  const t = useTranslations("menu");
   return (
     <div className="flex flex-wrap gap-2 mb-10">
       <button
@@ -23,7 +25,7 @@ export function CategoryFilter({
             : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
         }`}
       >
-        All
+        {t("all")}
       </button>
       {categories.map((cat) => (
         <button

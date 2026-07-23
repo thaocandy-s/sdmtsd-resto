@@ -50,7 +50,19 @@
     "detail": "メニュー詳細",
     "ingredients": "材料",
     "allergens": "アレルゲン",
-    "calories": "カロリー"
+    "calories": "カロリー",
+    "all": "すべて",
+    "noItems": "メニューが見つかりませんでした",
+    "recommended": "おすすめ",
+    "recommendedDesc": "シェフの特別おすすめ料理です。",
+    "others": "その他",
+    "otherMenu": "その他のメニュー",
+    "notFound": "メニューが見つかりませんでした",
+    "backToList": "メニュー一覧に戻る",
+    "noImageAvailable": "画像がありません",
+    "noImage": "画像なし",
+    "popular": "人気",
+    "relatedItems": "こちらもおすすめ"
   },
   "drink": {
     "title": "ドリンクメニュー",
