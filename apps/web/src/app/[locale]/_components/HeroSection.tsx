@@ -95,6 +95,34 @@ export function HeroSection() {
     setCurrentIndex((prev) => (prev + 1) % banners.length);
   };
 
+  // Touch swiping handlers for mobile devices
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrev();
+    }
+  };
+
   if (banners.length === 0) {
     // Basic fallback header if database banners are empty or deleted
     return (
@@ -119,9 +147,12 @@ export function HeroSection() {
 
   return (
     <section
-      className="relative min-h-[85vh] w-full overflow-hidden bg-black flex items-center"
+      className="relative min-h-[85vh] w-full overflow-hidden bg-black flex items-center touch-pan-y"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
     >
       {/* Slides Container */}
       <div className="absolute inset-0 w-full h-full">
