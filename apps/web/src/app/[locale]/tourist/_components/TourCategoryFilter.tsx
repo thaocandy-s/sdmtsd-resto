@@ -15,6 +15,10 @@ export function TourCategoryFilter({
   onSelectCategory,
 }: TourCategoryFilterProps) {
   const t = useTranslations("tourist");
+  const activeCategories = categories.filter((cat) => cat._count.places > 0);
+
+  if (activeCategories.length === 0) return null;
+
   return (
     <div className="flex flex-wrap gap-2 mb-8">
       <button
@@ -27,7 +31,7 @@ export function TourCategoryFilter({
       >
         {t("all")}
       </button>
-      {categories.map((cat) => (
+      {activeCategories.map((cat) => (
         <button
           key={cat.id}
           onClick={() => onSelectCategory(cat.slug)}
