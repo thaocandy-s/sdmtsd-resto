@@ -15,9 +15,9 @@ const notoSans = Noto_Sans({
 });
 
 const notoSansJP = Noto_Sans_JP({
-  subsets: ["latin"],
   variable: "--font-noto-jp",
   display: "swap",
+  preload: false,
 });
 
 import { prisma } from "@/lib/prisma";
@@ -56,16 +56,35 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const messages = await getMessages();
+  const [messages, restaurant] = await Promise.all([
+    getMessages(),
+    prisma.restaurant.findFirst({ where: { isActive: true } }),
+  ]);
+
+  const headerInfo = restaurant
+    ? {
+        phone: restaurant.phone,
+        logoUrl: restaurant.logoUrl,
+        logoSubtitle: restaurant.logoSubtitle,
+        name: restaurant.name,
+      }
+    : undefined;
+
+  const footerInfo = restaurant
+    ? {
+        logoUrl: restaurant.logoUrl,
+        socialLinks: restaurant.socialLinks,
+      }
+    : undefined;
 
   return (
     <html lang={locale} className="dark" suppressHydrationWarning>
       <body className={`${notoSans.variable} ${notoSansJP.variable} font-sans`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <div className="min-h-screen bg-background text-foreground pb-16 lg:pb-0">
-            <Header />
+            <Header initialInfo={headerInfo} />
             <div className="pt-16">{children}</div>
-            <Footer />
+            <Footer initialInfo={footerInfo} />
             <MobileBottomNav />
           </div>
         </NextIntlClientProvider>

@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import Image from "next/image";
 import { AnimatedSection } from "@/shared/components/animated-section";
 import { formatPriceWithTax } from "@resto-hub/utils";
 
@@ -52,9 +53,12 @@ export function PopularMenuSection({ popularFoods, loading }: PopularMenuSection
             >
               <div className="relative h-48 bg-background-tertiary">
                 {food.imageUrl ? (
-                  <img
+                  <Image
                     src={food.imageUrl}
                     alt={food.name}
+                    width={400}
+                    height={200}
+                    sizes="(max-width: 768px) 100vw, 33vw"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (

@@ -6,11 +6,21 @@ import { FooterLinks } from "./FooterLinks";
 import { FooterSocial } from "./FooterSocial";
 import { FooterCopyright } from "./FooterCopyright";
 
-export function Footer() {
-  const [socialLinks, setSocialLinks] = useState<Record<string, string> | null>(null);
-  const [logoUrl, setLogoUrl] = useState<string>("/images/logo.png");
+interface FooterProps {
+  initialInfo?: {
+    logoUrl?: string | null;
+    socialLinks?: any; // Json
+  };
+}
+
+export function Footer({ initialInfo }: FooterProps) {
+  const [socialLinks, setSocialLinks] = useState<Record<string, string> | null>(
+    initialInfo?.socialLinks ? (initialInfo.socialLinks as Record<string, string>) : null
+  );
+  const [logoUrl, setLogoUrl] = useState<string>(initialInfo?.logoUrl || "/images/logo.png");
 
   useEffect(() => {
+    if (initialInfo) return;
     fetch("/api/info")
       .then((r) => r.json())
       .then((data) => {
@@ -22,7 +32,7 @@ export function Footer() {
         }
       })
       .catch(console.error);
-  }, []);
+  }, [initialInfo]);
 
   const validSocialLinks = Object.entries(socialLinks || {}).filter(
     ([_, url]) => typeof url === "string" && url.trim().length > 0

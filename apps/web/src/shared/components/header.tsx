@@ -4,21 +4,38 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X, Phone, Globe } from "lucide-react";
 
-export function Header() {
+interface HeaderProps {
+  initialInfo?: {
+    phone?: string | null;
+    logoUrl?: string | null;
+    logoSubtitle?: string | null;
+    name?: string | null;
+  };
+}
+
+export function Header({ initialInfo }: HeaderProps) {
   const t = useTranslations("common");
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [phone, setPhone] = useState<string>("+81-3-1234-5678");
-  const [logoUrl, setLogoUrl] = useState<string>("/images/logo.png");
-  const [logoSubtitle, setLogoSubtitle] = useState<string>("鉄板・もんじゃ・居酒屋");
-  const [restaurantName, setRestaurantName] = useState<string>("三代目土信田商店");
+  const [phone, setPhone] = useState<string>(initialInfo?.phone || "+81-3-1234-5678");
+  const [logoUrl, setLogoUrl] = useState<string>(initialInfo?.logoUrl || "/images/logo.png");
+  const [logoSubtitle, setLogoSubtitle] = useState<string>(
+    initialInfo && "logoSubtitle" in initialInfo
+      ? initialInfo.logoSubtitle || ""
+      : "鉄板・もんじゃ・居酒屋"
+  );
+  const [restaurantName, setRestaurantName] = useState<string>(
+    initialInfo && "name" in initialInfo ? initialInfo.name || "" : "三代目土信田商店"
+  );
   const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    if (initialInfo) return;
     fetch("/api/info")
       .then((res) => res.json())
       .then((data) => {
@@ -36,7 +53,7 @@ export function Header() {
         }
       })
       .catch(console.error);
-  }, []);
+  }, [initialInfo]);
 
   useEffect(() => {
     setIsOpen(false);
@@ -86,9 +103,12 @@ export function Header() {
           className="flex items-center gap-1.5 sm:gap-2"
           onClick={() => setIsOpen(false)}
         >
-          <img
+          <Image
             src={logoUrl}
             alt={t("siteName")}
+            width={120}
+            height={40}
+            priority
             className="h-10 w-auto object-contain flex-shrink-0"
           />
           {(logoSubtitle || restaurantName) && (

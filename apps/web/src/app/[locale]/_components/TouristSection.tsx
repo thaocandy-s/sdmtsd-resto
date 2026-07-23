@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import Image from "next/image";
 import { AnimatedSection } from "@/shared/components/animated-section";
 
 interface TourPlace {
@@ -52,9 +53,12 @@ export function TouristSection({ tourPlaces, loading }: TouristSectionProps) {
               >
                 <div className="h-40 bg-background-tertiary">
                   {place.imageUrl ? (
-                    <img
+                    <Image
                       src={place.imageUrl}
                       alt={place.name}
+                      width={400}
+                      height={160}
+                      sizes="(max-width: 768px) 100vw, 33vw"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (

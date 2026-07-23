@@ -1,90 +1,91 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import { HeroSection } from "./_components/HeroSection";
 import { PopularMenuSection } from "./_components/PopularMenuSection";
 import { BeerArtSection } from "./_components/BeerArtSection";
 import { ChallengeSection } from "./_components/ChallengeSection";
 import { TouristSection } from "./_components/TouristSection";
 import { FaqSection } from "./_components/FaqSection";
+import { prisma } from "@/lib/prisma";
 
-interface Food {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  price: number;
-  imageUrl: string | null;
-  isPopular: boolean;
-}
+export const revalidate = 3600; // Cache page static response for 1 hour (ISR)
 
-interface BeerArt {
-  id: string;
-  title: string;
-  imageUrl: string;
-}
+export default async function HomePage() {
+  const [banners, popularFoods, beerArts, tourPlaces, faqs] = await Promise.all([
+    prisma.heroBanner.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: "asc" },
+    }),
+    prisma.food.findMany({
+      where: { isPopular: true, status: "PUBLISHED" },
+      take: 3,
+      orderBy: { sortOrder: "asc" },
+    }),
+    prisma.beerArt.findMany({
+      where: { isPublished: true },
+      take: 4,
+      orderBy: { sortOrder: "asc" },
+    }),
+    prisma.tourPlace.findMany({
+      where: { isPublished: true },
+      take: 3,
+      orderBy: { sortOrder: "asc" },
+    }),
+    prisma.faq.findMany({
+      where: { isPublished: true },
+      take: 3,
+      orderBy: { sortOrder: "asc" },
+    }),
+  ]);
 
-interface TourPlace {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  imageUrl: string | null;
-}
+  const serializedBanners = banners.map((b) => ({
+    id: b.id,
+    title: b.title,
+    subtitle: b.subtitle,
+    imageUrl: b.imageUrl,
+  }));
 
-interface Faq {
-  id: string;
-  question: string;
-  answer: string;
-}
+  const serializedPopularFoods = popularFoods.map((f) => ({
+    id: f.id,
+    name: f.name,
+    slug: f.slug,
+    description: f.description,
+    price: f.price,
+    imageUrl: f.imageUrl,
+    isPopular: f.isPopular,
+  }));
 
-export default function HomePage() {
-  const [popularFoods, setPopularFoods] = useState<Food[]>([]);
-  const [beerArts, setBeerArts] = useState<BeerArt[]>([]);
-  const [tourPlaces, setTourPlaces] = useState<TourPlace[]>([]);
-  const [faqs, setFaqs] = useState<Faq[]>([]);
-  const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const serializedBeerArts = beerArts.map((b) => ({
+    id: b.id,
+    title: b.title,
+    imageUrl: b.imageUrl,
+  }));
 
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/menu?isPopular=true&limit=3&status=published").then((r) => r.json()),
-      fetch("/api/beer-art?limit=4").then((r) => r.json()),
-      fetch("/api/tourist?limit=3").then((r) => r.json()),
-      fetch("/api/faq?limit=3").then((r) => r.json()),
-    ])
-      .then(([foodsData, beerArtData, touristData, faqData]) => {
-        setPopularFoods(foodsData.data || []);
-        setBeerArts(beerArtData.data || []);
-        setTourPlaces(touristData.data || []);
-        setFaqs(faqData.data || []);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+  const serializedTourPlaces = tourPlaces.map((t) => ({
+    id: t.id,
+    name: t.name,
+    slug: t.slug,
+    description: t.description,
+    imageUrl: t.imageUrl,
+  }));
 
-  const toggleFaq = (id: string) => {
-    setExpandedFaqId(expandedFaqId === id ? null : id);
-  };
+  const serializedFaqs = faqs.map((f) => ({
+    id: f.id,
+    question: f.question,
+    answer: f.answer,
+  }));
 
   return (
     <main>
-      <HeroSection />
+      <HeroSection initialBanners={serializedBanners} />
 
-      <PopularMenuSection popularFoods={popularFoods} loading={loading} />
+      <PopularMenuSection popularFoods={serializedPopularFoods} loading={false} />
 
-      <BeerArtSection beerArts={beerArts} loading={loading} />
+      <BeerArtSection beerArts={serializedBeerArts} loading={false} />
 
       <ChallengeSection />
 
-      <TouristSection tourPlaces={tourPlaces} loading={loading} />
+      <TouristSection tourPlaces={serializedTourPlaces} loading={false} />
 
-      <FaqSection
-        faqs={faqs}
-        expandedFaqId={expandedFaqId}
-        toggleFaq={toggleFaq}
-        loading={loading}
-      />
+      <FaqSection faqs={serializedFaqs} loading={false} />
     </main>
   );
 }
