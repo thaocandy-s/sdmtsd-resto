@@ -1,13 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Phone } from "lucide-react";
 
 export function Header() {
   const t = useTranslations("common");
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [phone, setPhone] = useState<string>("+81-3-1234-5678");
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    fetch("/api/info")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.data?.phone) {
+          setPhone(data.data.phone);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   const navItems = [
     { href: "/menu", label: t("menu") },
@@ -21,13 +55,14 @@ export function Header() {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <header
+      ref={headerRef}
+      className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border"
+    >
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-jp font-bold text-gold-400">
-            {t("siteName")}
-          </span>
+        <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
+          <span className="text-xl font-jp font-bold text-gold-400">{t("siteName")}</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -43,24 +78,25 @@ export function Header() {
           ))}
         </nav>
 
-        {/* CTA + Language */}
-        <div className="hidden lg:flex items-center gap-4">
-          <Link
-            href="/reservation"
-            className="bg-gold-500 hover:bg-gold-600 text-background text-sm font-semibold px-4 py-2 rounded-md transition-colors"
+        {/* CTA + Mobile Menu Button */}
+        <div className="flex items-center gap-3 lg:gap-4">
+          <a
+            href={`tel:${phone}`}
+            className="flex items-center gap-2 bg-gold-500 hover:bg-gold-600 text-background text-xs lg:text-sm font-semibold px-3 py-1.5 lg:px-4 lg:py-2 rounded-md transition-colors"
           >
-            {t("reservation")}
-          </Link>
-        </div>
+            <Phone className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
+            <span>{t("phoneCall")}</span>
+          </a>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="lg:hidden text-foreground-secondary hover:text-gold-400 transition-colors"
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="lg:hidden text-foreground-secondary hover:text-gold-400 transition-colors"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation */}
@@ -77,13 +113,6 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
-            <Link
-              href="/reservation"
-              onClick={() => setIsOpen(false)}
-              className="block py-2 text-gold-400 font-semibold"
-            >
-              {t("reservation")}
-            </Link>
           </nav>
         </div>
       )}
