@@ -1,13 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useState, useEffect, useRef } from "react";
+import { useTranslations, useLocale } from "next-intl";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Phone, Globe } from "lucide-react";
 
 export function Header() {
   const t = useTranslations("common");
+  const locale = useLocale();
+  const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [phone, setPhone] = useState<string>("+81-3-1234-5678");
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    fetch("/api/info")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.data?.phone) {
+          setPhone(data.data.phone);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const toggleLanguage = () => {
+    const nextLocale = locale === "ja" ? "en" : "ja";
+    const newPath = pathname.replace(`/${locale}`, `/${nextLocale}`);
+    router.push(newPath);
+  };
 
   const navItems = [
     { href: "/menu", label: t("menu") },
@@ -21,13 +63,14 @@ export function Header() {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <header
+      ref={headerRef}
+      className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border"
+    >
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-jp font-bold text-gold-400">
-            {t("siteName")}
-          </span>
+        <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
+          <span className="text-xl font-jp font-bold text-gold-400">{t("siteName")}</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -43,24 +86,35 @@ export function Header() {
           ))}
         </nav>
 
-        {/* CTA + Language */}
-        <div className="hidden lg:flex items-center gap-4">
-          <Link
-            href="/reservation"
-            className="bg-gold-500 hover:bg-gold-600 text-background text-sm font-semibold px-4 py-2 rounded-md transition-colors"
+        {/* CTA + Language Switcher + Mobile Menu Button */}
+        <div className="flex items-center gap-3 lg:gap-4">
+          {/* Language Switcher */}
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold border border-border bg-background hover:bg-background-tertiary text-foreground transition-colors cursor-pointer"
+            title="Switch Language"
           >
-            {t("reservation")}
-          </Link>
-        </div>
+            <Globe className="w-3.5 h-3.5 text-gold-400" />
+            <span>{locale === "ja" ? "EN" : "JA"}</span>
+          </button>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="lg:hidden text-foreground-secondary hover:text-gold-400 transition-colors"
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+          <a
+            href={`tel:${phone}`}
+            className="flex items-center gap-2 bg-gold-500 hover:bg-gold-600 text-background text-xs lg:text-sm font-semibold px-3 py-1.5 lg:px-4 lg:py-2 rounded-md transition-colors"
+          >
+            <Phone className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
+            <span>{t("phoneCall")}</span>
+          </a>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="lg:hidden text-foreground-secondary hover:text-gold-400 transition-colors"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation */}
@@ -77,13 +131,23 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
-            <Link
-              href="/reservation"
-              onClick={() => setIsOpen(false)}
-              className="block py-2 text-gold-400 font-semibold"
-            >
-              {t("reservation")}
-            </Link>
+
+            {/* Language Switcher in Mobile Nav */}
+            <div className="pt-2 border-t border-border">
+              <button
+                onClick={() => {
+                  toggleLanguage();
+                  setIsOpen(false);
+                }}
+                className="flex w-full items-center justify-between py-2 text-foreground-secondary hover:text-gold-400 transition-colors"
+              >
+                <span className="text-sm font-medium">Language</span>
+                <span className="text-xs bg-background px-2.5 py-1.5 rounded border border-border text-foreground font-semibold flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-gold-400" />
+                  {locale === "ja" ? "English (EN)" : "日本語 (JA)"}
+                </span>
+              </button>
+            </div>
           </nav>
         </div>
       )}

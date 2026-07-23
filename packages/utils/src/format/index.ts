@@ -1,4 +1,12 @@
 export function formatPrice(price: number, currency = "JPY"): string {
+  if (currency === "JPY") {
+    const formatted = new Intl.NumberFormat("ja-JP", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+    return `${formatted}円`;
+  }
+
   return new Intl.NumberFormat("ja-JP", {
     style: "currency",
     currency,
@@ -7,6 +15,20 @@ export function formatPrice(price: number, currency = "JPY"): string {
 
 export function formatPriceWithTax(price: number, taxRate = 0.1, currency = "JPY"): string {
   const taxIncluded = Math.round(price * (1 + taxRate));
+
+  if (currency === "JPY") {
+    const formattedBase = new Intl.NumberFormat("ja-JP", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+
+    const formattedTaxIncluded = new Intl.NumberFormat("ja-JP", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(taxIncluded);
+
+    return `${formattedBase}円 (${formattedTaxIncluded}円)`;
+  }
 
   const formattedBase = new Intl.NumberFormat("ja-JP", {
     style: "currency",
