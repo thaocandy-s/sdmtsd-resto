@@ -292,7 +292,8 @@
     "activeLabel": "有効",
     "publishedLabel": "公開中",
     "imageLabel": "画像URL",
-    "deleteConfirm": "このアイテムを削除してもよろしいですか？"
+    "deleteConfirm": "このアイテムを削除してもよろしいですか？",
+    "showingPage": "ページを表示中: {page} / {totalPages} (合計: {total} 件)"
   },
   "settings": {
     "title": "アカウント設定",

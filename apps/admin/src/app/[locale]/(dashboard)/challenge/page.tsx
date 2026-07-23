@@ -35,6 +35,7 @@ export default function ChallengePage() {
   // Form states
   const [ruleForm, setRuleForm] = useState<RuleForm>(emptyRule);
   const [winnerForm, setWinnerForm] = useState<WinnerForm>(emptyWinner);
+  const [winnerImageFile, setWinnerImageFile] = useState<File | null>(null);
 
   // Delete Confirm State
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -114,11 +115,21 @@ export default function ChallengePage() {
   const handleWinnerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (editingId) await api.put(`/api/challenge/winners/${editingId}`, winnerForm);
-      else await api.post("/api/challenge/winners", winnerForm);
+      let finalImageUrl = winnerForm.imageUrl;
+      if (winnerImageFile) {
+        finalImageUrl = await uploadImage(winnerImageFile, "challenge");
+      }
+      const payload = {
+        ...winnerForm,
+        imageUrl: finalImageUrl,
+      };
+
+      if (editingId) await api.put(`/api/challenge/winners/${editingId}`, payload);
+      else await api.post("/api/challenge/winners", payload);
       setShowWinnerModal(false);
       setEditingId(null);
       setWinnerForm(emptyWinner);
+      setWinnerImageFile(null);
       loadData();
     } catch (error) {
       console.error("Save error:", error);
@@ -146,6 +157,7 @@ export default function ChallengePage() {
       completedAt: item.completedAt.split("T")[0],
       isPublished: item.isPublished,
     });
+    setWinnerImageFile(null);
     setShowWinnerModal(true);
   };
 
@@ -248,7 +260,11 @@ export default function ChallengePage() {
           {!loading && totalWinnersPages > 1 && (
             <div className="mt-8 bg-background-secondary border border-border rounded-xl px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="text-sm text-foreground-secondary">
-                Showing page {winnersPage} / {totalWinnersPages} ({totalWinners} total)
+                {t("showingPage", {
+                  page: winnersPage,
+                  totalPages: totalWinnersPages,
+                  total: totalWinners,
+                })}
               </div>
               <div className="flex gap-2 w-full sm:w-auto">
                 <button
@@ -291,8 +307,11 @@ export default function ChallengePage() {
         onClose={() => {
           setShowWinnerModal(false);
           setEditingId(null);
+          setWinnerImageFile(null);
         }}
         onSubmit={handleWinnerSubmit}
+        imageFile={winnerImageFile}
+        setImageFile={setWinnerImageFile}
       />
 
       <ConfirmModal
