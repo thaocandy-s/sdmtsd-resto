@@ -163,7 +163,7 @@ export default function RestaurantInfoPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-background-secondary border border-border rounded-lg p-6 space-y-6 max-w-4xl"
+        className="bg-background-secondary border border-border rounded-lg p-4 sm:p-6 space-y-6 max-w-4xl"
       >
         {/* Basic Info Section */}
         <BasicInfoSection form={form} setForm={setForm} />
@@ -178,8 +178,8 @@ export default function RestaurantInfoPage() {
         <SocialLinksSection form={form} setForm={setForm} />
 
         {/* Footer */}
-        <div className="pt-4 border-t border-border flex items-center justify-between">
-          <label className="flex items-center gap-2 cursor-pointer">
+        <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <label className="flex items-center gap-2 cursor-pointer py-1">
             <input
               type="checkbox"
               checked={form.isActive}
@@ -192,7 +192,7 @@ export default function RestaurantInfoPage() {
           <button
             type="submit"
             disabled={saving}
-            className="bg-gold-500 hover:bg-gold-600 disabled:opacity-50 text-background px-6 py-2 rounded-lg font-medium transition-colors"
+            className="bg-gold-500 hover:bg-gold-600 disabled:opacity-50 text-background px-6 py-2.5 rounded-lg font-medium transition-colors w-full sm:w-auto text-center flex items-center justify-center h-[42px] sm:h-auto"
           >
             {saving ? t("saving") : t("saveChanges")}
           </button>

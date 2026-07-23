@@ -166,7 +166,7 @@ export function MapLocationSection({ form, setForm }: MapLocationSectionProps) {
       <div className="bg-background p-4 rounded-lg border border-border/80 space-y-3">
         <label className="block text-sm font-medium text-foreground">{t("mapInstruction")}</label>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={mapLinkInput}
@@ -175,7 +175,7 @@ export function MapLocationSection({ form, setForm }: MapLocationSectionProps) {
               setTimeout(() => handleParseMapLink(), 50);
             }}
             placeholder={t("pastePlaceholder")}
-            className="flex-1 bg-background-secondary border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-gold-500 text-sm font-mono"
+            className="flex-1 bg-background-secondary border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-gold-500 text-sm font-mono w-full"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
@@ -186,7 +186,7 @@ export function MapLocationSection({ form, setForm }: MapLocationSectionProps) {
           <button
             type="button"
             onClick={handleParseMapLink}
-            className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap"
+            className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap w-full sm:w-auto flex items-center justify-center h-[42px] sm:h-auto"
           >
             {t("extract")}
           </button>
