@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Drink } from "./types";
 
 interface DrinkCardProps {
@@ -9,6 +10,9 @@ interface DrinkCardProps {
 }
 
 export function DrinkCard({ drink, formatPrice }: DrinkCardProps) {
+  const t = useTranslations("drink");
+  const tCommon = useTranslations("common");
+
   return (
     <Link
       href={`/drink/${drink.slug}`}
@@ -24,12 +28,12 @@ export function DrinkCard({ drink, formatPrice }: DrinkCardProps) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-foreground-tertiary">
-              No image
+              {t("noImage")}
             </div>
           )}
           {drink.isPopular && (
             <span className="absolute top-2 right-2 px-2 py-1 bg-gold-500 text-background text-xs rounded font-medium">
-              Popular
+              {tCommon("popular")}
             </span>
           )}
         </div>

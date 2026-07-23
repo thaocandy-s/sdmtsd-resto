@@ -54,7 +54,7 @@ export default function MenuPage() {
           return {
             category: firstFood?.category || {
               id: catId || "unknown",
-              name: "Other Menu Items",
+              name: t("otherMenu"),
               slug: "other",
               description: null,
             },
@@ -70,7 +70,7 @@ export default function MenuPage() {
     baseGroupedCategories.push({
       category: {
         id: "others",
-        name: "Others",
+        name: t("others"),
         slug: "others",
         description: null,
         _count: { foods: remainingFoods.length },
@@ -87,9 +87,9 @@ export default function MenuPage() {
     groupedCategories.push({
       category: {
         id: "recommended-section",
-        name: "Recommended",
+        name: t("recommended"),
         slug: "recommended",
-        description: "Chef's special recommended dishes.",
+        description: t("recommendedDesc"),
         _count: { foods: recommendedFoods.length },
       },
       foods: recommendedFoods,
@@ -114,7 +114,7 @@ export default function MenuPage() {
       {loading ? (
         <FoodSkeleton />
       ) : groupedCategories.length === 0 ? (
-        <p className="text-center text-foreground-secondary py-12">No menu items found</p>
+        <p className="text-center text-foreground-secondary py-12">{t("noItems")}</p>
       ) : (
         <div className="space-y-12">
           {groupedCategories.map((group) => (

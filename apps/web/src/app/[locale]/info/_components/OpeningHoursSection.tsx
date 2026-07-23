@@ -22,14 +22,14 @@ export function OpeningHoursSection({ restaurant }: OpeningHoursSectionProps) {
             if (!hours) return null;
             return (
               <div key={day} className="flex justify-between text-foreground-secondary">
-                <span className="capitalize">{day}</span>
+                <span>{t(day)}</span>
                 <span>{hours as string}</span>
               </div>
             );
           })}
         </div>
       ) : (
-        <p className="text-foreground-secondary">Please contact us for opening hours</p>
+        <p className="text-foreground-secondary">{t("noHours")}</p>
       )}
     </section>
   );

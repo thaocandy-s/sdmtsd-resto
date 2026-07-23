@@ -54,7 +54,7 @@ export default function DrinkPage() {
           return {
             category: firstDrink?.category || {
               id: catId || "unknown",
-              name: "Other Drinks",
+              name: t("otherDrinks"),
               slug: "other",
               description: null,
             },
@@ -70,7 +70,7 @@ export default function DrinkPage() {
     groupedCategories.push({
       category: {
         id: "others",
-        name: "Others",
+        name: t("others"),
         slug: "others",
         description: null,
         _count: { drinks: remainingDrinks.length },
@@ -95,7 +95,7 @@ export default function DrinkPage() {
       {loading ? (
         <DrinkSkeleton />
       ) : groupedCategories.length === 0 ? (
-        <p className="text-center text-foreground-secondary py-12">No drinks found</p>
+        <p className="text-center text-foreground-secondary py-12">{t("noDrinks")}</p>
       ) : (
         <div className="space-y-12">
           {groupedCategories.map((group) => (

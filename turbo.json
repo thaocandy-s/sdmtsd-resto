@@ -5,7 +5,20 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": ["ADMIN_URL"]
+      "env": [
+        "ADMIN_URL",
+        "DATABASE_URL",
+        "DIRECT_URL",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "JWT_SECRET",
+        "JWT_REFRESH_SECRET",
+        "JWT_EXPIRES_IN",
+        "JWT_REFRESH_EXPIRES_IN",
+        "NEXT_PUBLIC_WEB_URL",
+        "NEXT_PUBLIC_ADMIN_URL"
+      ]
     },
     "dev": {
       "cache": false,

@@ -1,27 +1,29 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Category } from "./types";
 
-interface CategoryFilterProps {
-  categories: Category[];
+interface FaqCategory {
+  id: string;
+  name: string;
+  slug: string;
+  _count: { faqs: number };
+}
+
+interface FaqFilterProps {
+  categories: FaqCategory[];
   selectedCategory: string;
   onSelectCategory: (slug: string) => void;
 }
 
-export function CategoryFilter({
-  categories,
-  selectedCategory,
-  onSelectCategory,
-}: CategoryFilterProps) {
-  const t = useTranslations("menu");
+export function FaqFilter({ categories, selectedCategory, onSelectCategory }: FaqFilterProps) {
+  const t = useTranslations("faq");
   return (
-    <div className="flex flex-wrap gap-2 mb-10">
+    <div className="flex flex-wrap gap-2 mb-8">
       <button
         onClick={() => onSelectCategory("")}
         className={`px-4 py-2 rounded-full text-sm transition-colors ${
           !selectedCategory
-            ? "bg-gold-500 text-background font-medium"
+            ? "bg-gold-500 text-background"
             : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
         }`}
       >
@@ -33,11 +35,11 @@ export function CategoryFilter({
           onClick={() => onSelectCategory(cat.slug)}
           className={`px-4 py-2 rounded-full text-sm transition-colors ${
             selectedCategory === cat.slug
-              ? "bg-gold-500 text-background font-medium"
+              ? "bg-gold-500 text-background"
               : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
           }`}
         >
-          {cat.name} ({cat._count?.foods ?? 0})
+          {cat.name} ({cat._count.faqs})
         </button>
       ))}
     </div>
