@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
-import { ImageUpload, MultiImageUpload } from "@/shared/components/image-upload";
+import { ImageUpload, MultiImageUpload, uploadImage } from "@/shared/components/image-upload";
 import { toSlug } from "@resto-hub/utils";
 import { Place, PlaceForm, emptyPlace, Category } from "./types";
 
@@ -25,24 +25,31 @@ export function PlaceFormModal({
   const t = useTranslations("touristGuide");
   const tc = useTranslations("common");
   const [form, setForm] = useState<PlaceForm>(emptyPlace);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (editingId && initialData) {
-      setForm({
-        name: initialData.name,
-        slug: initialData.slug,
-        description: initialData.description || "",
-        shortDescription: "",
-        imageUrl: initialData.imageUrl || "",
-        images: initialData.images || [],
-        categoryId: initialData.category?.id || "",
-        address: "",
-        latitude: "",
-        longitude: "",
-        isPublished: initialData.isPublished,
-      });
-    } else {
-      setForm(emptyPlace);
+    if (isOpen) {
+      setImageFile(null);
+      setGalleryFiles([]);
+      if (editingId && initialData) {
+        setForm({
+          name: initialData.name,
+          slug: initialData.slug,
+          description: initialData.description || "",
+          shortDescription: "",
+          imageUrl: initialData.imageUrl || "",
+          images: initialData.images || [],
+          categoryId: initialData.category?.id || "",
+          address: "",
+          latitude: "",
+          longitude: "",
+          isPublished: initialData.isPublished,
+        });
+      } else {
+        setForm(emptyPlace);
+      }
     }
   }, [editingId, initialData, isOpen]);
 
@@ -50,13 +57,37 @@ export function PlaceFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = {
-      ...form,
-      latitude: form.latitude ? parseFloat(form.latitude) : null,
-      longitude: form.longitude ? parseFloat(form.longitude) : null,
-      categoryId: form.categoryId || null,
-    };
+    setIsSaving(true);
     try {
+      let finalImageUrl = form.imageUrl;
+      if (imageFile) {
+        finalImageUrl = await uploadImage(imageFile, "tourist-guide");
+      }
+
+      let blobCounter = 0;
+      const finalImages = [];
+      for (const url of form.images) {
+        if (url.startsWith("blob:")) {
+          const fileToUpload = galleryFiles[blobCounter];
+          if (fileToUpload) {
+            const uploadedUrl = await uploadImage(fileToUpload, "tourist-guide");
+            finalImages.push(uploadedUrl);
+          }
+          blobCounter++;
+        } else {
+          finalImages.push(url);
+        }
+      }
+
+      const payload = {
+        ...form,
+        imageUrl: finalImageUrl,
+        images: finalImages,
+        latitude: form.latitude ? parseFloat(form.latitude) : null,
+        longitude: form.longitude ? parseFloat(form.longitude) : null,
+        categoryId: form.categoryId || null,
+      };
+
       if (editingId) {
         await api.put(`/api/tourist/${editingId}`, payload);
       } else {
@@ -66,6 +97,8 @@ export function PlaceFormModal({
       onClose();
     } catch (error) {
       console.error("Save place error:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -127,12 +160,19 @@ export function PlaceFormModal({
           </div>
           <ImageUpload
             value={form.imageUrl}
-            onChange={(url) => setForm({ ...form, imageUrl: url })}
+            onChange={(url, file) => {
+              setForm({ ...form, imageUrl: url });
+              setImageFile(file || null);
+            }}
             folder="tourist-guide"
           />
           <MultiImageUpload
             value={form.images}
-            onChange={(urls) => setForm({ ...form, images: urls })}
+            files={galleryFiles}
+            onChange={(urls, files) => {
+              setForm({ ...form, images: urls });
+              setGalleryFiles(files);
+            }}
             label={t("additionalImages")}
             folder="tourist-guide"
           />
@@ -177,9 +217,16 @@ export function PlaceFormModal({
           <div className="flex gap-3 pt-4">
             <button
               type="submit"
-              className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors"
+              disabled={isSaving}
+              className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {editingId ? tc("save") : tc("add")}
+              {isSaving
+                ? editingId
+                  ? tc("save") + "..."
+                  : tc("add") + "..."
+                : editingId
+                  ? tc("save")
+                  : tc("add")}
             </button>
             <button
               type="button"

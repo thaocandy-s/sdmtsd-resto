@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
-import { ImageUpload } from "@/shared/components/image-upload";
+import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
 import { Category, FormData, toSlug } from "./types";
 import { formatPriceWithTax } from "@resto-hub/utils";
 
@@ -25,10 +25,13 @@ export function DrinkFormModal({
   const t = useTranslations("drinkMenu");
   const tc = useTranslations("common");
   const [form, setForm] = useState<FormData>(initialForm);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setForm(initialForm);
+      setImageFile(null);
     }
   }, [initialForm, isOpen]);
 
@@ -36,15 +39,28 @@ export function DrinkFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
+      let finalImageUrl = form.imageUrl;
+      if (imageFile) {
+        finalImageUrl = await uploadImage(imageFile, "drink-menu");
+      }
+
+      const payload = {
+        ...form,
+        imageUrl: finalImageUrl,
+      };
+
       if (editingId) {
-        await api.put(`/api/drink/${editingId}`, form);
+        await api.put(`/api/drink/${editingId}`, payload);
       } else {
-        await api.post("/api/drink", form);
+        await api.post("/api/drink", payload);
       }
       onSubmitSuccess();
     } catch (error) {
       console.error("Save drink error:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -103,7 +119,7 @@ export function DrinkFormModal({
               />
               {parseFloat(form.price) > 0 && (
                 <p className="text-xs text-gold-400 mt-1">
-                  Preview: {formatPriceWithTax(parseFloat(form.price))}
+                  {t("pricePreview")}: {formatPriceWithTax(parseFloat(form.price))}
                 </p>
               )}
             </div>
@@ -128,7 +144,10 @@ export function DrinkFormModal({
           </div>
           <ImageUpload
             value={form.imageUrl}
-            onChange={(url) => setForm({ ...form, imageUrl: url })}
+            onChange={(url, file) => {
+              setForm({ ...form, imageUrl: url });
+              setImageFile(file || null);
+            }}
             folder="drink-menu"
           />
           <div className="grid grid-cols-2 gap-4">
@@ -186,9 +205,16 @@ export function DrinkFormModal({
           <div className="flex gap-3 pt-4">
             <button
               type="submit"
-              className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors"
+              disabled={isSaving}
+              className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {editingId ? tc("save") : tc("add")}
+              {isSaving
+                ? editingId
+                  ? tc("save") + "..."
+                  : tc("add") + "..."
+                : editingId
+                  ? tc("save")
+                  : tc("add")}
             </button>
             <button
               type="button"

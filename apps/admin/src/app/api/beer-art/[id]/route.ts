@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
+import { deleteMediaByUrl } from "@/lib/supabase";
 
 export const PUT = withAuthParams(
   async (request, { params }) => {
@@ -8,6 +9,10 @@ export const PUT = withAuthParams(
       const body = await request.json();
       const existing = await prisma.beerArt.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Item not found" }, { status: 404 });
+
+      if (body.imageUrl !== undefined && body.imageUrl !== existing.imageUrl) {
+        await deleteMediaByUrl(existing.imageUrl);
+      }
 
       const item = await prisma.beerArt.update({
         where: { id: params.id },
@@ -36,6 +41,9 @@ export const DELETE = withAuthParams(
     try {
       const existing = await prisma.beerArt.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Item not found" }, { status: 404 });
+      if (existing.imageUrl) {
+        await deleteMediaByUrl(existing.imageUrl);
+      }
       await prisma.beerArt.update({ where: { id: params.id }, data: { deletedAt: new Date() } });
       return NextResponse.json({ message: "Item deleted successfully" });
     } catch (error) {

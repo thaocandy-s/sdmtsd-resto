@@ -88,6 +88,7 @@
     "nameLabel": "ドリンク名",
     "descriptionLabel": "説明",
     "priceLabel": "価格",
+    "pricePreview": "プレビュー",
     "categoryLabel": "カテゴリー",
     "selectCategory": "カテゴリーを選択",
     "statusLabel": "ステータス",

@@ -7,6 +7,7 @@ import { Buffet, MenuItemOption, BuffetFormData, emptyBuffetForm } from "./_comp
 import { BuffetTable } from "./_components/BuffetTable";
 import { BuffetFormModal } from "./_components/BuffetFormModal";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { uploadImage } from "@/shared/components/image-upload";
 
 export default function BuffetMenuPage() {
   const t = useTranslations("buffetMenu");
@@ -30,6 +31,8 @@ export default function BuffetMenuPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<BuffetFormData>(emptyBuffetForm);
   const [menuItems, setMenuItems] = useState<MenuItemOption[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     loadMenuItems();
@@ -89,9 +92,16 @@ export default function BuffetMenuPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
+      let finalImageUrl = form.imageUrl;
+      if (imageFile) {
+        finalImageUrl = await uploadImage(imageFile, "buffet-menu");
+      }
+
       const payload = {
         ...form,
+        imageUrl: finalImageUrl,
         includes: form.includes
           ? form.includes
               .split("\n")
@@ -104,9 +114,12 @@ export default function BuffetMenuPage() {
       setShowModal(false);
       setEditingId(null);
       setForm(emptyBuffetForm);
+      setImageFile(null);
       loadData();
     } catch (error) {
       console.error("Save buffet error:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -132,6 +145,7 @@ export default function BuffetMenuPage() {
       sortOrder: buffet.sortOrder?.toString() || "0",
       status: buffet.status,
     });
+    setImageFile(null);
     setShowModal(true);
   };
 
@@ -161,6 +175,7 @@ export default function BuffetMenuPage() {
           onClick={() => {
             setEditingId(null);
             setForm(emptyBuffetForm);
+            setImageFile(null);
             setShowModal(true);
           }}
           className="w-full sm:w-auto inline-flex items-center justify-center bg-gold-500 hover:bg-gold-600 text-background px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
@@ -209,8 +224,12 @@ export default function BuffetMenuPage() {
         onClose={() => {
           setShowModal(false);
           setEditingId(null);
+          setImageFile(null);
         }}
         onSubmit={handleSubmit}
+        imageFile={imageFile}
+        setImageFile={setImageFile}
+        isSaving={isSaving}
       />
 
       <ConfirmModal
