@@ -32,7 +32,7 @@ export function MobileBottomNav() {
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={item.href === "/" ? `/${locale}` : `/${locale}${item.href}`}
                 className={`relative -translate-y-5 flex flex-col items-center justify-center w-14 h-14 rounded-full border shadow-lg transition-all duration-300 ${
                   isActive
                     ? "bg-gold-500 text-background border-gold-500 shadow-gold-500/30 scale-110"
@@ -48,7 +48,7 @@ export function MobileBottomNav() {
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={`/${locale}${item.href}`}
               className={`flex flex-col items-center justify-center py-1.5 px-2 sm:px-3.5 rounded-full text-xs font-medium transition-all duration-300 ${
                 isActive
                   ? "text-gold-400 bg-gold-500/15 border border-gold-500/30 shadow-inner"
