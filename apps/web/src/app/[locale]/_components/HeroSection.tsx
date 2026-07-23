@@ -1,6 +1,9 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
+import Image from "next/image";
 
 interface Banner {
   id: string;
@@ -10,10 +13,13 @@ interface Banner {
   showLogo?: boolean;
 }
 
-export function HeroSection() {
+interface HeroSectionProps {
+  initialBanners?: Banner[];
+}
+
+export function HeroSection({ initialBanners }: HeroSectionProps) {
   const t = useTranslations("home");
   const locale = useLocale();
-  const [banners, setBanners] = useState<Banner[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -47,27 +53,43 @@ export function HeroSection() {
     return { title, subtitle };
   };
 
+  const formatBanners = (rawBanners: Banner[]) => {
+    return rawBanners.map((b, index) => {
+      const { title: translatedTitle, subtitle: translatedSubtitle } = translateBanner(
+        b.title,
+        b.subtitle
+      );
+      return {
+        ...b,
+        title: translatedTitle,
+        subtitle: translatedSubtitle,
+        showLogo:
+          index === 0 &&
+          (b.title.includes("三代目土信田商店") ||
+            b.title.includes("Toshida Shouten") ||
+            translatedTitle.includes("Toshida Shouten")),
+      };
+    });
+  };
+
+  const [banners, setBanners] = useState<Banner[]>(() => {
+    if (initialBanners && initialBanners.length > 0) {
+      return formatBanners(initialBanners);
+    }
+    return [];
+  });
+
   useEffect(() => {
+    if (initialBanners && initialBanners.length > 0) {
+      setBanners(formatBanners(initialBanners));
+      return;
+    }
     fetch("/api/banners")
       .then((res) => res.json())
       .then((data) => {
         const activeBanners = (data?.data || []).filter((b: any) => b.isActive);
         if (activeBanners.length > 0) {
-          const formatted = activeBanners.map((b: any, index: number) => {
-            const { title: translatedTitle, subtitle: translatedSubtitle } = translateBanner(
-              b.title,
-              b.subtitle
-            );
-            return {
-              ...b,
-              title: translatedTitle,
-              subtitle: translatedSubtitle,
-              showLogo:
-                index === 0 &&
-                (b.title.includes("三代目土信田商店") || b.title.includes("Toshida Shouten")),
-            };
-          });
-          setBanners(formatted);
+          setBanners(formatBanners(activeBanners));
         } else {
           setBanners([]);
         }
@@ -76,7 +98,7 @@ export function HeroSection() {
         console.error("Failed to load banners:", err);
         setBanners([]);
       });
-  }, [locale]);
+  }, [locale, initialBanners]);
 
   // Autoplay
   useEffect(() => {
@@ -130,7 +152,13 @@ export function HeroSection() {
         <div className="text-center px-4 z-20">
           <div className="mb-6 flex justify-center">
             <div className="bg-background-secondary/80 backdrop-blur-md p-3 rounded-full border border-border/40 shadow-xl max-w-[100px]">
-              <img src="/images/logo.png" alt="Logo" className="w-full h-auto" />
+              <Image
+                src="/images/logo.png"
+                alt="Logo"
+                width={100}
+                height={100}
+                className="w-full h-auto"
+              />
             </div>
           </div>
           <h1 className="text-4xl md:text-6xl font-jp font-bold text-gold-400 mb-6 drop-shadow-lg">
@@ -167,9 +195,13 @@ export function HeroSection() {
             >
               {/* Image with Dark Vignette Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/60 z-10" />
-              <img
+              <Image
                 src={banner.imageUrl}
                 alt={banner.title}
+                fill
+                priority={index === 0}
+                loading={index === 0 ? "eager" : "lazy"}
+                sizes="100vw"
                 className="w-full h-full object-cover object-center transform scale-105 transition-transform duration-[6000ms] ease-out"
                 style={{
                   transform: isActive ? "scale(1)" : "scale(1.05)",
@@ -181,7 +213,13 @@ export function HeroSection() {
                 {banner.showLogo && (
                   <div className="mb-6 flex justify-center animate-fade-in">
                     <div className="bg-background-secondary/80 backdrop-blur-md p-3 rounded-full border border-border/40 shadow-xl max-w-[100px] md:max-w-[120px]">
-                      <img src="/images/logo.png" alt="Logo" className="w-full h-auto" />
+                      <Image
+                        src="/images/logo.png"
+                        alt="Logo"
+                        width={120}
+                        height={120}
+                        className="w-full h-auto"
+                      />
                     </div>
                   </div>
                 )}

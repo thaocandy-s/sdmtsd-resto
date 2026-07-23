@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import Image from "next/image";
 import { AnimatedSection } from "@/shared/components/animated-section";
 
 interface BeerArt {
@@ -41,7 +42,14 @@ export function BeerArtSection({ beerArts, loading }: BeerArtSectionProps) {
                 key={art.id}
                 className="aspect-square bg-background-tertiary rounded-lg overflow-hidden hover:scale-105 transition-transform"
               >
-                <img src={art.imageUrl} alt={art.title} className="w-full h-full object-cover" />
+                <Image
+                  src={art.imageUrl}
+                  alt={art.title}
+                  width={300}
+                  height={300}
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="w-full h-full object-cover"
+                />
               </div>
             ))}
           </div>

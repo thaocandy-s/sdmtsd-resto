@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { AnimatedSection } from "@/shared/components/animated-section";
@@ -10,14 +13,17 @@ interface Faq {
 
 interface FaqSectionProps {
   faqs: Faq[];
-  expandedFaqId: string | null;
-  toggleFaq: (id: string) => void;
-  loading: boolean;
+  loading?: boolean;
 }
 
-export function FaqSection({ faqs, expandedFaqId, toggleFaq, loading }: FaqSectionProps) {
+export function FaqSection({ faqs, loading = false }: FaqSectionProps) {
   const t = useTranslations("home");
   const tc = useTranslations("common");
+  const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null);
+
+  const toggleFaq = (id: string) => {
+    setExpandedFaqId(expandedFaqId === id ? null : id);
+  };
 
   return (
     <AnimatedSection className="py-20 px-4 max-w-4xl mx-auto">
