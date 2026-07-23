@@ -69,7 +69,11 @@ export function Header() {
     >
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
+        <Link
+          href={`/${locale}`}
+          className="flex items-center gap-2"
+          onClick={() => setIsOpen(false)}
+        >
           <span className="text-xl font-jp font-bold text-gold-400">{t("siteName")}</span>
         </Link>
 
@@ -78,7 +82,7 @@ export function Header() {
           {navItems.map((item) => (
             <Link
               key={item.href}
-              href={item.href}
+              href={`/${locale}${item.href}`}
               className="text-sm text-foreground-secondary hover:text-gold-400 transition-colors"
             >
               {item.label}
@@ -125,7 +129,7 @@ export function Header() {
             {navItems.map((item) => (
               <Link
                 key={item.href}
-                href={item.href}
+                href={`/${locale}${item.href}`}
                 onClick={() => setIsOpen(false)}
                 className="block py-2 text-foreground-secondary hover:text-gold-400 transition-colors"
               >
