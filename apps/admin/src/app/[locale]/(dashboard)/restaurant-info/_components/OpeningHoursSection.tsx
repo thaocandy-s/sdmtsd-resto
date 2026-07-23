@@ -115,13 +115,13 @@ export function OpeningHoursSection({ form, setForm }: OpeningHoursSectionProps)
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs text-foreground-secondary">{t("from")}</span>
                     <select
                       value={openTime}
                       onChange={(e) => handleTimeChange(key, "open", e.target.value)}
-                      className="bg-background border border-border rounded-lg px-2.5 py-1 text-foreground focus:outline-none focus:border-gold-500 text-xs font-mono"
+                      className="bg-background border border-border rounded-lg px-2 py-1 text-foreground focus:outline-none focus:border-gold-500 text-xs font-mono"
                     >
                       {TIME_OPTIONS.map((time) => (
                         <option key={time} value={time}>
@@ -137,7 +137,7 @@ export function OpeningHoursSection({ form, setForm }: OpeningHoursSectionProps)
                     <select
                       value={closeTime}
                       onChange={(e) => handleTimeChange(key, "close", e.target.value)}
-                      className="bg-background border border-border rounded-lg px-2.5 py-1 text-foreground focus:outline-none focus:border-gold-500 text-xs font-mono"
+                      className="bg-background border border-border rounded-lg px-2 py-1 text-foreground focus:outline-none focus:border-gold-500 text-xs font-mono"
                     >
                       {TIME_OPTIONS.map((time) => (
                         <option key={time} value={time}>
@@ -147,7 +147,7 @@ export function OpeningHoursSection({ form, setForm }: OpeningHoursSectionProps)
                     </select>
                   </div>
 
-                  <span className="inline-block ml-2 px-2 py-0.5 bg-green-500/10 text-green-400 text-[11px] rounded font-mono">
+                  <span className="inline-block ml-1 px-2 py-0.5 bg-green-500/10 text-green-400 text-[11px] rounded font-mono whitespace-nowrap">
                     {openTime} - {closeTime}
                   </span>
                 </div>

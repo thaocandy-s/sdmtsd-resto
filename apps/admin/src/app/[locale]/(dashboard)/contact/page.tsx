@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { MessageTable } from "./_components/MessageTable";
 import { MessageDetailModal } from "./_components/MessageDetailModal";
 
@@ -65,14 +66,22 @@ export default function ContactPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(t("deleteConfirm"))) return;
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  const handleDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await api.delete(`/api/contact/${id}`);
+      await api.delete(`/api/contact/${deleteConfirmId}`);
       loadData();
       setSelectedContact(null);
     } catch (error) {
       console.error("Delete error:", error);
+    } finally {
+      setDeleteConfirmId(null);
     }
   };
 
@@ -138,6 +147,14 @@ export default function ContactPage() {
           onDelete={handleDelete}
         />
       )}
+
+      <ConfirmModal
+        isOpen={deleteConfirmId !== null}
+        title={t("delete")}
+        message={t("deleteConfirm")}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
     </>
   );
 }

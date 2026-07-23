@@ -19,7 +19,8 @@
     "confirmLogout": "Confirm Logout",
     "logoutMessage": "Are you sure you want to log out of the Admin panel? Any unsaved changes may be lost.",
     "loggingOut": "Logging out...",
-    "language": "Language"
+    "language": "Language",
+    "saving": "Saving..."
   },
   "sidebar": {
     "homeManagement": "Home Management",
@@ -330,7 +331,8 @@
     "bannerSortOrder": "Sort Order",
     "bannerStatus": "Active Status",
     "bannerCtaLabel": "CTA Label (optional)",
-    "bannerCtaUrl": "CTA URL (optional)"
+    "bannerCtaUrl": "CTA URL (optional)",
+    "delete": "Delete"
   },
   "contact": {
     "title": "Messages",
@@ -351,7 +353,8 @@
     "phoneLabel": "Phone",
     "messageLabel": "Message",
     "receivedLabel": "Received",
-    "deleteConfirm": "Are you sure you want to delete this message?"
+    "deleteConfirm": "Are you sure you want to delete this message?",
+    "delete": "Delete"
   },
   "dashboard": {
     "title": "Dashboard",

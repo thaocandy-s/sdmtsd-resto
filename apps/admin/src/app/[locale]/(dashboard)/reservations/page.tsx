@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api-client";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 interface Reservation {
   id: string;
@@ -49,13 +50,21 @@ export default function ReservationsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  const handleDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await api.delete(`/api/reservations/${id}`);
+      await api.delete(`/api/reservations/${deleteConfirmId}`);
       loadData();
     } catch (error) {
       console.error("Delete error:", error);
+    } finally {
+      setDeleteConfirmId(null);
     }
   };
 
@@ -167,6 +176,13 @@ export default function ReservationsPage() {
           </table>
         </div>
       )}
+      <ConfirmModal
+        isOpen={deleteConfirmId !== null}
+        title="Delete Reservation"
+        message="Are you sure you want to delete this reservation?"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
     </>
   );
 }

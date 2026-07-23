@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { DashboardStatsGrid } from "./_components/DashboardStatsGrid";
 import { DashboardPageViews } from "./_components/DashboardPageViews";
 import { RecentMessagesWidget } from "./_components/RecentMessagesWidget";
@@ -101,14 +102,22 @@ export default function DashboardPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(tContact("deleteConfirm"))) return;
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  const handleDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await api.delete(`/api/contact/${id}`);
+      await api.delete(`/api/contact/${deleteConfirmId}`);
       loadData();
       setSelectedContact(null);
     } catch (error) {
       console.error("Delete error:", error);
+    } finally {
+      setDeleteConfirmId(null);
     }
   };
 
@@ -162,6 +171,14 @@ export default function DashboardPage() {
           onDelete={handleDelete}
         />
       )}
+
+      <ConfirmModal
+        isOpen={deleteConfirmId !== null}
+        title={tContact("delete")}
+        message={tContact("deleteConfirm")}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
     </>
   );
 }

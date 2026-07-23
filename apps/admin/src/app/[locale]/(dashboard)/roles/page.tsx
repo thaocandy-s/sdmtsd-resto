@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api-client";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 interface Permission {
   id: string;
@@ -98,21 +99,26 @@ export default function RolesPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (role: Role) => {
+  const [deleteConfirmRole, setDeleteConfirmRole] = useState<Role | null>(null);
+
+  const handleDelete = (role: Role) => {
     if (role.name === "ADMIN") {
       alert("Cannot delete ADMIN role");
       return;
     }
-    if (!confirm(`Are you sure you want to delete the role "${role.label}"?`)) {
-      return;
-    }
+    setDeleteConfirmRole(role);
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmRole) return;
     try {
-      await api.delete(`/roles/${role.id}`);
+      await api.delete(`/roles/${deleteConfirmRole.id}`);
       fetchRoles();
     } catch (error) {
       console.error("Failed to delete role:", error);
       alert("Failed to delete role");
+    } finally {
+      setDeleteConfirmRole(null);
     }
   };
 
@@ -344,6 +350,13 @@ export default function RolesPage() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        isOpen={deleteConfirmRole !== null}
+        title="Delete Role"
+        message={`Are you sure you want to delete the role "${deleteConfirmRole?.label}"?`}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmRole(null)}
+      />
     </div>
   );
 }

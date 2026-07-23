@@ -19,7 +19,8 @@
     "confirmLogout": "ログアウトの確認",
     "logoutMessage": "Adminパネルからログアウトしてもよろしいですか？保存されていない変更は失われる可能性があります。",
     "loggingOut": "ログアウト中...",
-    "language": "言語"
+    "language": "言語",
+    "saving": "保存中..."
   },
   "sidebar": {
     "homeManagement": "ホーム管理",
@@ -330,7 +331,8 @@
     "bannerSortOrder": "表示順",
     "bannerStatus": "有効状態",
     "bannerCtaLabel": "CTAラベル (任意)",
-    "bannerCtaUrl": "CTAリンク (任意)"
+    "bannerCtaUrl": "CTAリンク (任意)",
+    "delete": "削除"
   },
   "contact": {
     "title": "メッセージ一覧",
@@ -351,7 +353,8 @@
     "phoneLabel": "電話番号",
     "messageLabel": "メッセージ本文",
     "receivedLabel": "受信日時",
-    "deleteConfirm": "このメッセージを削除してもよろしいですか？"
+    "deleteConfirm": "このメッセージを削除してもよろしいですか？",
+    "delete": "削除"
   },
   "dashboard": {
     "title": "ダッシュボード",
