@@ -50,7 +50,19 @@
     "detail": "Menu Detail",
     "ingredients": "Ingredients",
     "allergens": "Allergens",
-    "calories": "Calories"
+    "calories": "Calories",
+    "all": "All",
+    "noItems": "No menu items found",
+    "recommended": "Recommended",
+    "recommendedDesc": "Chef's special recommended dishes.",
+    "others": "Others",
+    "otherMenu": "Other Menu Items",
+    "notFound": "Food not found",
+    "backToList": "Back to menu",
+    "noImageAvailable": "No image available",
+    "noImage": "No image",
+    "popular": "Popular",
+    "relatedItems": "You might also like"
   },
   "drink": {
     "title": "Drink Menu",
@@ -116,13 +128,23 @@
     "nearby": "Nearby Attractions",
     "website": "Website",
     "address": "Address",
-    "hours": "Opening Hours"
+    "hours": "Opening Hours",
+    "all": "All",
+    "noPlaces": "No tourist attractions found",
+    "noImage": "No image",
+    "notFound": "Attraction not found",
+    "backToList": "Back to Tourist Guide",
+    "about": "About",
+    "info": "Information",
+    "phone": "Phone",
+    "visitWebsite": "Visit Website"
   },
   "faq": {
     "title": "Frequently Asked Questions",
     "subtitle": "Find answers to common questions",
     "searchPlaceholder": "Search questions...",
-    "noResults": "No matching questions found"
+    "noResults": "No matching questions found",
+    "all": "All"
   },
   "info": {
     "title": "Restaurant Information",
@@ -131,7 +153,17 @@
     "email": "Email",
     "hours": "Opening Hours",
     "holidays": "Holidays",
-    "map": "Location Map"
+    "map": "Location Map",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "noHours": "Please contact us for opening hours",
+    "mapNotAvailable": "Map not available",
+    "followUs": "Follow Us"
   },
   "reservation": {
     "title": "Make a Reservation",

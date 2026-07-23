@@ -15,10 +15,14 @@ export function RestaurantAddressSection({ restaurant }: RestaurantAddressSectio
       <h2 className="text-lg font-semibold text-gold-400 mb-2">{t("address")}</h2>
       <p className="text-foreground-secondary">{restaurant?.address || "Tokyo, Japan"}</p>
       {restaurant?.phone && (
-        <p className="text-foreground-secondary mt-2">Tel: {restaurant.phone}</p>
+        <p className="text-foreground-secondary mt-2">
+          {t("phone")}: {restaurant.phone}
+        </p>
       )}
       {restaurant?.email && (
-        <p className="text-foreground-secondary mt-2">Email: {restaurant.email}</p>
+        <p className="text-foreground-secondary mt-2">
+          {t("email")}: {restaurant.email}
+        </p>
       )}
     </section>
   );

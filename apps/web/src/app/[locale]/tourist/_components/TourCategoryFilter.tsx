@@ -1,27 +1,27 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Category } from "./types";
+import { TourCategory } from "./types";
 
-interface CategoryFilterProps {
-  categories: Category[];
+interface TourCategoryFilterProps {
+  categories: TourCategory[];
   selectedCategory: string;
   onSelectCategory: (slug: string) => void;
 }
 
-export function CategoryFilter({
+export function TourCategoryFilter({
   categories,
   selectedCategory,
   onSelectCategory,
-}: CategoryFilterProps) {
-  const t = useTranslations("menu");
+}: TourCategoryFilterProps) {
+  const t = useTranslations("tourist");
   return (
-    <div className="flex flex-wrap gap-2 mb-10">
+    <div className="flex flex-wrap gap-2 mb-8">
       <button
         onClick={() => onSelectCategory("")}
         className={`px-4 py-2 rounded-full text-sm transition-colors ${
           !selectedCategory
-            ? "bg-gold-500 text-background font-medium"
+            ? "bg-gold-500 text-background"
             : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
         }`}
       >
@@ -33,11 +33,11 @@ export function CategoryFilter({
           onClick={() => onSelectCategory(cat.slug)}
           className={`px-4 py-2 rounded-full text-sm transition-colors ${
             selectedCategory === cat.slug
-              ? "bg-gold-500 text-background font-medium"
+              ? "bg-gold-500 text-background"
               : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
           }`}
         >
-          {cat.name} ({cat._count?.foods ?? 0})
+          {cat.name} ({cat._count.places})
         </button>
       ))}
     </div>

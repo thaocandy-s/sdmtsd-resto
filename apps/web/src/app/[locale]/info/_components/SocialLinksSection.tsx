@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Restaurant } from "./types";
 
 interface SocialLinksSectionProps {
@@ -7,6 +8,7 @@ interface SocialLinksSectionProps {
 }
 
 export function SocialLinksSection({ restaurant }: SocialLinksSectionProps) {
+  const t = useTranslations("info");
   const validLinks = Object.entries(restaurant?.socialLinks || {}).filter(
     ([_, url]) => typeof url === "string" && url.trim().length > 0
   );
@@ -17,7 +19,7 @@ export function SocialLinksSection({ restaurant }: SocialLinksSectionProps) {
 
   return (
     <section className="bg-background-secondary border border-border rounded-lg p-6">
-      <h2 className="text-lg font-semibold text-gold-400 mb-2">Follow Us</h2>
+      <h2 className="text-lg font-semibold text-gold-400 mb-2">{t("followUs")}</h2>
       <div className="flex flex-wrap gap-4">
         {validLinks.map(([platform, url]) => (
           <a
