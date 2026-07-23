@@ -132,7 +132,17 @@
     "email": "メール",
     "hours": "営業時間",
     "holidays": "定休日",
-    "map": "アクセスマップ"
+    "map": "アクセスマップ",
+    "monday": "月曜日",
+    "tuesday": "火曜日",
+    "wednesday": "水曜日",
+    "thursday": "木曜日",
+    "friday": "金曜日",
+    "saturday": "土曜日",
+    "sunday": "日曜日",
+    "noHours": "営業時間についてはお問い合わせください",
+    "mapNotAvailable": "地図が利用できません",
+    "followUs": "SNSをフォロー"
   },
   "reservation": {
     "title": "ご予約",

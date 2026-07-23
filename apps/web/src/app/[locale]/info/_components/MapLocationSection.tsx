@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Restaurant } from "./types";
 
 interface MapLocationSectionProps {
@@ -8,38 +8,46 @@ interface MapLocationSectionProps {
 }
 
 /** Build the Google Maps pb-embed URL that renders the full Place Card. */
-function buildPbEmbedUrl(placeId: string, placeName: string, lat: number, lng: number): string {
+function buildPbEmbedUrl(
+  placeId: string,
+  placeName: string,
+  lat: number,
+  lng: number,
+  locale: string
+): string {
   const pid = encodeURIComponent(placeId);
   const pn = encodeURIComponent(placeName);
+  const lang = locale === "ja" ? "ja" : "en";
   return (
     `https://www.google.com/maps/embed?pb=` +
     `!1m14!1m8!1m3!1d3241` +
     `!2d${lng}!3d${lat}` +
     `!3m2!1i1024!2i768!4f13.1` +
     `!3m3!1m2!1s${pid}!2s${pn}` +
-    `!5e0!3m2!1sja!2sjp`
+    `!5e0!3m2!1s${lang}!2s${lang === "ja" ? "jp" : "us"}`
   );
 }
 
 /** Determine the best embed URL based on available restaurant data. */
-function getMapEmbedUrl(r: Restaurant): string | null {
+function getMapEmbedUrl(r: Restaurant, locale: string): string | null {
+  const lang = locale === "ja" ? "ja" : "en";
   // Priority 1: Place ID (guaranteed full Place Card)
   if (r.googlePlaceId && r.googleMapQuery && r.latitude && r.longitude) {
-    return buildPbEmbedUrl(r.googlePlaceId, r.googleMapQuery, r.latitude, r.longitude);
+    return buildPbEmbedUrl(r.googlePlaceId, r.googleMapQuery, r.latitude, r.longitude, locale);
   }
 
   // Priority 2: Google Map query (place name search)
   if (r.googleMapQuery) {
     return `https://maps.google.com/maps?q=${encodeURIComponent(
       r.googleMapQuery
-    )}&hl=ja&z=16&output=embed`;
+    )}&hl=${lang}&z=16&output=embed`;
   }
 
   // Priority 3: Address search
   if (r.address) {
     return `https://maps.google.com/maps?q=${encodeURIComponent(
       r.address
-    )}&hl=ja&z=16&output=embed`;
+    )}&hl=${lang}&z=16&output=embed`;
   }
 
   return null;
@@ -47,7 +55,8 @@ function getMapEmbedUrl(r: Restaurant): string | null {
 
 export function MapLocationSection({ restaurant }: MapLocationSectionProps) {
   const t = useTranslations("info");
-  const mapUrl = restaurant ? getMapEmbedUrl(restaurant) : null;
+  const locale = useLocale();
+  const mapUrl = restaurant ? getMapEmbedUrl(restaurant, locale) : null;
 
   return (
     <section className="bg-background-secondary border border-border rounded-lg p-6">
@@ -67,7 +76,7 @@ export function MapLocationSection({ restaurant }: MapLocationSectionProps) {
         </div>
       ) : (
         <div className="h-64 bg-background-tertiary rounded-lg flex items-center justify-center text-foreground-tertiary">
-          Map not available
+          {t("mapNotAvailable")}
         </div>
       )}
     </section>

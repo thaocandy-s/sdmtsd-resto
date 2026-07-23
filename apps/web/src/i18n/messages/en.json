@@ -132,7 +132,17 @@
     "email": "Email",
     "hours": "Opening Hours",
     "holidays": "Holidays",
-    "map": "Location Map"
+    "map": "Location Map",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "noHours": "Please contact us for opening hours",
+    "mapNotAvailable": "Map not available",
+    "followUs": "Follow Us"
   },
   "reservation": {
     "title": "Make a Reservation",
