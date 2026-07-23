@@ -632,6 +632,38 @@ async function main() {
     },
   });
 
+  // Create Hero Banners
+  await prisma.heroBanner.createMany({
+    data: [
+      {
+        title: "鉄板・もんじゃ・居酒屋 三代目土信田商店",
+        subtitle:
+          "飯田橋もんじゃ！一度食べたらやみつきに！月島へ行かなくても昔ながらの本格派もんじゃを味わえます。",
+        imageUrl:
+          "https://images.unsplash.com/photo-1543007630-9710e4a00a20?w=1600&auto=format&fit=crop",
+        sortOrder: 1,
+        isActive: true,
+      },
+      {
+        title: "昔ながらの本格派もんじゃ",
+        subtitle:
+          "居酒屋メニューや飲み物も品数多く揃えております。飯田橋駅、水道橋駅、九段下駅から好アクセス！",
+        imageUrl:
+          "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&auto=format&fit=crop",
+        sortOrder: 2,
+        isActive: true,
+      },
+      {
+        title: "名物 泡アート超達人ビール",
+        subtitle: "美味しいもんじゃ焼きと、こだわりのサワー・超達人ビールで至福のひとときを。",
+        imageUrl:
+          "https://images.unsplash.com/photo-1571613316887-6f8d5cbf7ef7?w=1600&auto=format&fit=crop",
+        sortOrder: 3,
+        isActive: true,
+      },
+    ],
+  });
+
   console.log("Japanese Seed completed successfully!");
 }
 

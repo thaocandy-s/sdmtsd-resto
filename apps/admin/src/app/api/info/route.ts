@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
 
-export const GET = withAuth(async () => {
+export async function GET() {
   try {
     const restaurant = await prisma.restaurant.findFirst();
     return NextResponse.json({ data: restaurant });
@@ -10,7 +10,7 @@ export const GET = withAuth(async () => {
     console.error("Get restaurant info error:", error);
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
-});
+}
 
 export const PUT = withAuth(
   async (request: NextRequest) => {
@@ -30,6 +30,8 @@ export const PUT = withAuth(
         openingHours,
         holidays,
         socialLinks,
+        logoUrl,
+        faviconUrl,
         isActive,
       } = body;
 
@@ -52,6 +54,8 @@ export const PUT = withAuth(
             openingHours,
             holidays,
             socialLinks,
+            logoUrl,
+            faviconUrl,
             isActive,
           },
         });
@@ -71,6 +75,8 @@ export const PUT = withAuth(
             openingHours,
             holidays,
             socialLinks,
+            logoUrl,
+            faviconUrl,
             isActive: isActive !== false,
           },
         });

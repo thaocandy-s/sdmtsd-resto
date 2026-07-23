@@ -13,6 +13,7 @@ export function Header() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [phone, setPhone] = useState<string>("+81-3-1234-5678");
+  const [logoUrl, setLogoUrl] = useState<string>("/images/logo.png");
   const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -21,6 +22,9 @@ export function Header() {
       .then((data) => {
         if (data?.data?.phone) {
           setPhone(data.data.phone);
+        }
+        if (data?.data?.logoUrl) {
+          setLogoUrl(data.data.logoUrl);
         }
       })
       .catch(console.error);
@@ -74,7 +78,7 @@ export function Header() {
           className="flex items-center gap-2"
           onClick={() => setIsOpen(false)}
         >
-          <span className="text-xl font-jp font-bold text-gold-400">{t("siteName")}</span>
+          <img src={logoUrl} alt={t("siteName")} className="h-10 w-auto object-contain" />
         </Link>
 
         {/* Desktop Navigation */}

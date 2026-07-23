@@ -22,6 +22,11 @@ export default function ChallengePage() {
   const [isSavingImage, setIsSavingImage] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Pagination states for winners
+  const [winnersPage, setWinnersPage] = useState(1);
+  const [totalWinnersPages, setTotalWinnersPages] = useState(1);
+  const [totalWinners, setTotalWinners] = useState(0);
+
   // Modal State
   const [showRuleModal, setShowRuleModal] = useState(false);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
@@ -39,18 +44,31 @@ export default function ChallengePage() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [winnersPage]);
 
   const loadData = async () => {
     setLoading(true);
     try {
       const res = await api.get<{
-        data: { rules: Rule[]; winners: Winner[]; challengeImage?: string };
-      }>("/api/challenge");
+        data: {
+          rules: Rule[];
+          winners: Winner[];
+          challengeImage?: string;
+          meta?: {
+            winnersPage: number;
+            totalWinners: number;
+            totalWinnersPages: number;
+          };
+        };
+      }>(`/api/challenge?winnersPage=${winnersPage}&winnersLimit=10`);
       setRules(res.data.rules || []);
       setWinners(res.data.winners || []);
       if (res.data.challengeImage) {
         setChallengeImage(res.data.challengeImage);
+      }
+      if (res.data.meta) {
+        setTotalWinnersPages(res.data.meta.totalWinnersPages || 1);
+        setTotalWinners(res.data.meta.totalWinners || 0);
       }
     } catch (error) {
       console.error("Load error:", error);
@@ -220,11 +238,37 @@ export default function ChallengePage() {
           onDelete={(id) => handleDeleteTrigger("rules", id)}
         />
       ) : (
-        <WinnerList
-          winners={winners}
-          onEdit={handleEditWinner}
-          onDelete={(id) => handleDeleteTrigger("winners", id)}
-        />
+        <>
+          <WinnerList
+            winners={winners}
+            onEdit={handleEditWinner}
+            onDelete={(id) => handleDeleteTrigger("winners", id)}
+          />
+
+          {!loading && totalWinnersPages > 1 && (
+            <div className="mt-8 bg-background-secondary border border-border rounded-xl px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-sm text-foreground-secondary">
+                Showing page {winnersPage} / {totalWinnersPages} ({totalWinners} total)
+              </div>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => setWinnersPage(Math.max(winnersPage - 1, 1))}
+                  disabled={winnersPage === 1}
+                  className="flex-1 sm:flex-none px-3 py-1.5 min-h-[44px] sm:min-h-0 border border-border rounded-lg text-sm text-foreground-secondary hover:text-foreground hover:bg-background-tertiary disabled:opacity-50 disabled:pointer-events-none transition-colors flex items-center justify-center"
+                >
+                  {tc("previous")}
+                </button>
+                <button
+                  onClick={() => setWinnersPage(Math.min(winnersPage + 1, totalWinnersPages))}
+                  disabled={winnersPage === totalWinnersPages}
+                  className="flex-1 sm:flex-none px-3 py-1.5 min-h-[44px] sm:min-h-0 border border-border rounded-lg text-sm text-foreground-secondary hover:text-foreground hover:bg-background-tertiary disabled:opacity-50 disabled:pointer-events-none transition-colors flex items-center justify-center"
+                >
+                  {tc("next")}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <RuleFormModal

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
+import { deleteMediaByUrl } from "@/lib/supabase";
 
 export const PUT = withAuthParams(
   async (request, { params }) => {
@@ -31,6 +32,11 @@ export const DELETE = withAuthParams(
     try {
       const existing = await prisma.event.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Event not found" }, { status: 404 });
+
+      if (existing.imageUrl) {
+        await deleteMediaByUrl(existing.imageUrl);
+      }
+
       await prisma.event.delete({ where: { id: params.id } });
       return NextResponse.json({ message: "Event deleted successfully" });
     } catch (error) {

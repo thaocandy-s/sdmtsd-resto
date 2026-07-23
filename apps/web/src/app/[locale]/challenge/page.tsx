@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { ChallengeSkeleton } from "./components/challenge-skeleton";
 import { ChallengeRules, Rule } from "./components/challenge-rules";
-import { WinnerCard, Winner } from "./components/winner-card";
+import { WinnerSlider } from "./components/winner-slider";
+import { Winner } from "./components/winner-card";
 
 export default function ChallengePage() {
   const t = useTranslations("challenge");
@@ -47,9 +48,9 @@ export default function ChallengePage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent flex items-end p-6">
             <div>
               <span className="text-gold-400 text-xs font-semibold tracking-wider uppercase block mb-1">
-                Katanuki Challenge
+                {t("title")}
               </span>
-              <span className="text-white text-lg font-bold font-jp">型抜きチャレンジ</span>
+              <span className="text-white text-lg font-bold font-jp">{t("title")}</span>
             </div>
           </div>
         </div>
@@ -62,11 +63,7 @@ export default function ChallengePage() {
         {winners.length === 0 ? (
           <p className="text-center text-foreground-secondary py-8">{t("noWinners")}</p>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {winners.map((winner) => (
-              <WinnerCard key={winner.id} winner={winner} />
-            ))}
-          </div>
+          <WinnerSlider winners={winners} />
         )}
       </section>
     </main>

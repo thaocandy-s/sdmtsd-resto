@@ -41,7 +41,13 @@
     "touristPreview": "観光ガイド",
     "faqPreview": "よくある質問",
     "reservationCta": "ご予約はこちら",
-    "reserveNow": "今すぐ予約"
+    "reserveNow": "今すぐ予約",
+    "challengeSubtitle": "スキルを試して素晴らしい割引を獲得しましょう！",
+    "noPopularFoods": "人気メニューはまだ登録されていません",
+    "noBeerArts": "ビアアートはまだ登録されていません",
+    "noTourPlaces": "観光スポットはまだ登録されていません",
+    "noFaqs": "よくある質問はまだありません",
+    "noImage": "画像なし"
   },
   "menu": {
     "title": "フードメニュー",
@@ -191,10 +197,18 @@
     "subject": "件名",
     "message": "メッセージ",
     "submitSuccess": "メッセージが送信されました！",
-    "submitError": "メッセージの送信に失敗しました"
+    "submitError": "メッセージの送信に失敗しました",
+    "successTitle": "送信完了！",
+    "successDesc": "お問い合わせいただきありがとうございます。追ってご連絡いたします。",
+    "sendAnother": "別のメッセージを送信する",
+    "sending": "送信中...",
+    "sendMessage": "メッセージを送信"
   },
   "footer": {
     "copyright": "All rights reserved.",
-    "description": "本格的な日本料理を優雅で伝統的な雰囲気でお楽しみください。"
+    "description": "本格的な日本料理を優雅で伝統的な雰囲気でお楽しみください。",
+    "quickLinks": "クイックリンク",
+    "information": "インフォメーション",
+    "followUs": "公式SNS"
   }
 }

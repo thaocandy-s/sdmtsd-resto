@@ -2,6 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api-client";
+import { uploadImage } from "@/shared/components/image-upload";
+import { useTranslations } from "next-intl";
+import { BannerTab } from "./_components/BannerTab";
+import { EventTab } from "./_components/EventTab";
+import { BrandAssetsTab } from "./_components/BrandAssetsTab";
 
 interface Banner {
   id: string;
@@ -22,10 +27,18 @@ interface Event {
 }
 
 export default function HomeManagementPage() {
+  const t = useTranslations("homeManagement");
   const [banners, setBanners] = useState<Banner[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"banners" | "events">("banners");
+  const [activeTab, setActiveTab] = useState<"banners" | "events" | "assets">("banners");
+
+  const [restaurantInfo, setRestaurantInfo] = useState<any>(null);
+  const [logoUrl, setLogoUrl] = useState("");
+  const [faviconUrl, setFaviconUrl] = useState("");
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [faviconFile, setFaviconFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -34,12 +47,16 @@ export default function HomeManagementPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [bannersRes, eventsRes] = await Promise.all([
+      const [bannersRes, eventsRes, infoRes] = await Promise.all([
         api.get<{ data: Banner[] }>("/api/banners"),
         api.get<{ data: Event[] }>("/api/events"),
+        api.get<{ data: any }>("/api/info"),
       ]);
       setBanners(bannersRes.data || []);
       setEvents(eventsRes.data || []);
+      setRestaurantInfo(infoRes.data || null);
+      setLogoUrl(infoRes.data?.logoUrl || "");
+      setFaviconUrl(infoRes.data?.faviconUrl || "");
     } catch (error) {
       console.error("Load data error:", error);
     } finally {
@@ -47,8 +64,43 @@ export default function HomeManagementPage() {
     }
   };
 
+  const handleSaveAssets = async () => {
+    setSaving(true);
+    try {
+      let finalLogoUrl = logoUrl;
+      let finalFaviconUrl = faviconUrl;
+
+      if (logoFile) {
+        finalLogoUrl = await uploadImage(logoFile, "brand");
+      }
+      if (faviconFile) {
+        finalFaviconUrl = await uploadImage(faviconFile, "brand");
+      }
+
+      await api.put("/api/info", {
+        ...restaurantInfo,
+        logoUrl: finalLogoUrl,
+        faviconUrl: finalFaviconUrl,
+      });
+
+      alert(t("saveSuccess"));
+
+      const infoRes = await api.get<{ data: any }>("/api/info");
+      setRestaurantInfo(infoRes.data);
+      setLogoUrl(infoRes.data?.logoUrl || "");
+      setFaviconUrl(infoRes.data?.faviconUrl || "");
+      setLogoFile(null);
+      setFaviconFile(null);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || t("saveFailed"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const deleteBanner = async (id: string) => {
-    if (!confirm("Delete this banner?")) return;
+    if (!confirm(t("deleteBannerConfirm"))) return;
     try {
       await api.delete(`/api/banners/${id}`);
       loadData();
@@ -58,7 +110,7 @@ export default function HomeManagementPage() {
   };
 
   const deleteEvent = async (id: string) => {
-    if (!confirm("Delete this event?")) return;
+    if (!confirm(t("deleteEventConfirm"))) return;
     try {
       await api.delete(`/api/events/${id}`);
       loadData();
@@ -70,22 +122,40 @@ export default function HomeManagementPage() {
   return (
     <>
       <header className="mb-8">
-        <h2 className="text-2xl font-bold text-foreground">Home Management</h2>
-        <p className="text-foreground-secondary mt-1">Manage hero banners and events</p>
+        <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
+        <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
       </header>
 
       <div className="flex gap-4 mb-6">
         <button
           onClick={() => setActiveTab("banners")}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === "banners" ? "bg-gold-500 text-background" : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"}`}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            activeTab === "banners"
+              ? "bg-gold-500 text-background"
+              : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
+          }`}
         >
-          Banners ({banners.length})
+          {t("bannersTab", { count: banners.length })}
         </button>
         <button
           onClick={() => setActiveTab("events")}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === "events" ? "bg-gold-500 text-background" : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"}`}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            activeTab === "events"
+              ? "bg-gold-500 text-background"
+              : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
+          }`}
         >
-          Events ({events.length})
+          {t("eventsTab", { count: events.length })}
+        </button>
+        <button
+          onClick={() => setActiveTab("assets")}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            activeTab === "assets"
+              ? "bg-gold-500 text-background"
+              : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
+          }`}
+        >
+          {t("brandAssetsTab")}
         </button>
       </div>
 
@@ -101,79 +171,20 @@ export default function HomeManagementPage() {
           ))}
         </div>
       ) : activeTab === "banners" ? (
-        banners.length === 0 ? (
-          <div className="bg-background-secondary border border-border rounded-lg p-12 text-center">
-            <p className="text-foreground-secondary">No banners configured. Using default hero.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {banners.map((b) => (
-              <div
-                key={b.id}
-                className="bg-background-secondary border border-border rounded-lg p-4 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-24 h-16 rounded bg-background-tertiary overflow-hidden">
-                    {b.imageUrl && (
-                      <img src={b.imageUrl} alt={b.title} className="w-full h-full object-cover" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">{b.title}</p>
-                    <p className="text-sm text-foreground-secondary">{b.subtitle}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`text-xs px-2 py-1 rounded ${b.isActive ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"}`}
-                  >
-                    {b.isActive ? "Active" : "Inactive"}
-                  </span>
-                  <button
-                    onClick={() => deleteBanner(b.id)}
-                    className="text-red-400 hover:text-red-300 text-sm"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )
-      ) : events.length === 0 ? (
-        <div className="bg-background-secondary border border-border rounded-lg p-12 text-center">
-          <p className="text-foreground-secondary">No events found</p>
-        </div>
+        <BannerTab banners={banners} onDelete={deleteBanner} onRefresh={loadData} />
+      ) : activeTab === "assets" ? (
+        <BrandAssetsTab
+          logoUrl={logoUrl}
+          setLogoUrl={setLogoUrl}
+          setLogoFile={setLogoFile}
+          faviconUrl={faviconUrl}
+          setFaviconUrl={setFaviconUrl}
+          setFaviconFile={setFaviconFile}
+          handleSaveAssets={handleSaveAssets}
+          saving={saving}
+        />
       ) : (
-        <div className="space-y-4">
-          {events.map((e) => (
-            <div
-              key={e.id}
-              className="bg-background-secondary border border-border rounded-lg p-4 flex items-center justify-between"
-            >
-              <div>
-                <p className="font-medium text-foreground">{e.title}</p>
-                <p className="text-sm text-foreground-secondary">
-                  {new Date(e.startDate).toLocaleDateString()} -{" "}
-                  {new Date(e.endDate).toLocaleDateString()}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <span
-                  className={`text-xs px-2 py-1 rounded ${e.isActive ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"}`}
-                >
-                  {e.isActive ? "Active" : "Inactive"}
-                </span>
-                <button
-                  onClick={() => deleteEvent(e.id)}
-                  className="text-red-400 hover:text-red-300 text-sm"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <EventTab events={events} onDelete={deleteEvent} />
       )}
     </>
   );
