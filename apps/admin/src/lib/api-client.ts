@@ -1,5 +1,16 @@
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 
+export function getApiUrl(endpoint: string): string {
+  if (!endpoint.startsWith("/")) {
+    return endpoint;
+  }
+  const isProd = process.env.NODE_ENV === "production";
+  if (isProd && !endpoint.startsWith("/admin")) {
+    return `/admin${endpoint}`;
+  }
+  return endpoint;
+}
+
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
 
@@ -11,7 +22,7 @@ async function refreshAccessToken(): Promise<string | null> {
   isRefreshing = true;
   refreshPromise = (async () => {
     try {
-      const response = await fetch("/api/auth/refresh", {
+      const response = await fetch(getApiUrl("/api/auth/refresh"), {
         method: "POST",
         credentials: "include",
       });
@@ -82,7 +93,7 @@ export async function apiClient<T = unknown>(
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(endpoint, {
+  const response = await fetch(getApiUrl(endpoint), {
     ...fetchOptions,
     headers,
     credentials: "include",
@@ -92,7 +103,7 @@ export async function apiClient<T = unknown>(
     const newToken = await refreshAccessToken();
     if (newToken) {
       headers.set("Authorization", `Bearer ${newToken}`);
-      const retryResponse = await fetch(endpoint, {
+      const retryResponse = await fetch(getApiUrl(endpoint), {
         ...fetchOptions,
         headers,
         credentials: "include",
