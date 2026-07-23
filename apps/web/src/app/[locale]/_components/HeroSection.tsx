@@ -145,10 +145,46 @@ export function HeroSection({ initialBanners }: HeroSectionProps) {
     }
   };
 
+  // Mouse drag swiping handlers for desktop
+  const [mouseDownStart, setMouseDownStart] = useState<number | null>(null);
+  const [mouseDragEnd, setMouseDragEnd] = useState<number | null>(null);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    setMouseDragEnd(null);
+    setMouseDownStart(e.clientX);
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (mouseDownStart === null) return;
+    setMouseDragEnd(e.clientX);
+  };
+
+  const onMouseUp = () => {
+    if (mouseDownStart === null || mouseDragEnd === null) {
+      setMouseDownStart(null);
+      return;
+    }
+    const distance = mouseDownStart - mouseDragEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrev();
+    }
+    setMouseDownStart(null);
+  };
+
+  const onMouseLeave = () => {
+    setIsHovered(false);
+    setMouseDownStart(null);
+  };
+
   if (banners.length === 0) {
     // Basic fallback header if database banners are empty or deleted
     return (
-      <section className="relative min-h-[80vh] flex items-center justify-center bg-wood-pattern">
+      <section className="relative min-h-[80vh] flex items-center justify-center bg-wood-pattern select-none">
         <div className="text-center px-4 z-20">
           <div className="mb-6 flex justify-center">
             <div className="bg-background-secondary/80 backdrop-blur-md p-3 rounded-full border border-border/40 shadow-xl max-w-[100px]">
@@ -158,6 +194,7 @@ export function HeroSection({ initialBanners }: HeroSectionProps) {
                 width={100}
                 height={100}
                 className="w-full h-auto"
+                draggable={false}
               />
             </div>
           </div>
@@ -175,12 +212,15 @@ export function HeroSection({ initialBanners }: HeroSectionProps) {
 
   return (
     <section
-      className="relative min-h-[85vh] w-full overflow-hidden bg-black flex items-center touch-pan-y"
+      className="relative min-h-[85vh] w-full overflow-hidden bg-black flex items-center touch-pan-y select-none cursor-grab active:cursor-grabbing"
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={onMouseLeave}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
     >
       {/* Slides Container */}
       <div className="absolute inset-0 w-full h-full">
@@ -202,7 +242,8 @@ export function HeroSection({ initialBanners }: HeroSectionProps) {
                 priority={index === 0}
                 loading={index === 0 ? "eager" : "lazy"}
                 sizes="100vw"
-                className="w-full h-full object-cover object-center transform scale-105 transition-transform duration-[6000ms] ease-out"
+                draggable={false}
+                className="w-full h-full object-cover object-center transform scale-105 transition-transform duration-[6000ms] ease-out pointer-events-none"
                 style={{
                   transform: isActive ? "scale(1)" : "scale(1.05)",
                 }}
@@ -219,6 +260,7 @@ export function HeroSection({ initialBanners }: HeroSectionProps) {
                         width={120}
                         height={120}
                         className="w-full h-auto"
+                        draggable={false}
                       />
                     </div>
                   </div>
