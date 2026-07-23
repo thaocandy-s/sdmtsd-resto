@@ -9,6 +9,9 @@ interface BeerArtFormModalProps {
   setForm: React.Dispatch<React.SetStateAction<FormData>>;
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
+  imageFile: File | null;
+  setImageFile: (file: File | null) => void;
+  isSaving: boolean;
 }
 
 export function BeerArtFormModal({
@@ -18,6 +21,9 @@ export function BeerArtFormModal({
   setForm,
   onClose,
   onSubmit,
+  imageFile,
+  setImageFile,
+  isSaving,
 }: BeerArtFormModalProps) {
   const t = useTranslations("beerArt");
   const tc = useTranslations("common");
@@ -53,7 +59,10 @@ export function BeerArtFormModal({
           </div>
           <ImageUpload
             value={form.imageUrl}
-            onChange={(url) => setForm({ ...form, imageUrl: url })}
+            onChange={(url, file) => {
+              setForm({ ...form, imageUrl: url });
+              setImageFile(file || null);
+            }}
             label={t("imageLabel")}
             required
             folder="beer-art"
@@ -105,9 +114,16 @@ export function BeerArtFormModal({
           <div className="flex gap-3 pt-4">
             <button
               type="submit"
-              className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors"
+              disabled={isSaving}
+              className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {editingId ? tc("save") : tc("add")}
+              {isSaving
+                ? editingId
+                  ? tc("save") + "..."
+                  : tc("add") + "..."
+                : editingId
+                  ? tc("save")
+                  : tc("add")}
             </button>
             <button
               type="button"

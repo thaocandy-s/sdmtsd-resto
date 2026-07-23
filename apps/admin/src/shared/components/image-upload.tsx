@@ -9,10 +9,10 @@ import { useTranslations } from "next-intl";
 /* ------------------------------------------------------------------ */
 
 /** Upload a single image file to /api/media/upload and return its public URL. */
-function uploadImage(
+export function uploadImage(
   file: File,
   folder: string | undefined,
-  onProgress: (percent: number) => void
+  onProgress?: (percent: number) => void
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const formData = new FormData();
@@ -26,7 +26,7 @@ function uploadImage(
     xhr.withCredentials = true;
 
     xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+      if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));
     };
 
     xhr.onload = () => {
@@ -54,7 +54,7 @@ function uploadImage(
 
 interface ImageUploadProps {
   value: string;
-  onChange: (url: string) => void;
+  onChange: (url: string, file?: File | null) => void;
   label?: string;
   required?: boolean;
   folder?: string;
@@ -81,17 +81,9 @@ export function ImageUpload({
       setError(t("pleaseSelectImage"));
       return;
     }
-    setUploading(true);
-    setProgress(0);
     setError("");
-    try {
-      const url = await uploadImage(file, folder, setProgress);
-      onChange(url);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("uploadFailed"));
-    } finally {
-      setUploading(false);
-    }
+    const localUrl = URL.createObjectURL(file);
+    onChange(localUrl, file);
   };
 
   return (
@@ -104,7 +96,7 @@ export function ImageUpload({
         {value && !uploading && (
           <button
             type="button"
-            onClick={() => onChange("")}
+            onClick={() => onChange("", null)}
             className="text-xs text-red-400 hover:text-red-300"
           >
             {t("remove")}
@@ -189,12 +181,19 @@ export function ImageUpload({
 
 interface MultiImageUploadProps {
   value: string[];
-  onChange: (urls: string[]) => void;
+  onChange: (urls: string[], files: File[]) => void;
+  files?: File[];
   label?: string;
   folder?: string;
 }
 
-export function MultiImageUpload({ value, onChange, label, folder }: MultiImageUploadProps) {
+export function MultiImageUpload({
+  value,
+  onChange,
+  files = [],
+  label,
+  folder,
+}: MultiImageUploadProps) {
   const t = useTranslations("imageUpload");
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -210,29 +209,32 @@ export function MultiImageUpload({ value, onChange, label, folder }: MultiImageU
       setError(t("pleaseSelectImage"));
       return;
     }
-    setUploading(true);
-    setProgress(0);
     setError("");
-    try {
-      const url = await uploadImage(file, folder, setProgress);
-      onChange([...value, url]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("uploadFailed"));
-    } finally {
-      setUploading(false);
-    }
+    const localUrl = URL.createObjectURL(file);
+    onChange([...value, localUrl], [...files, file]);
   };
 
   const addUrl = () => {
     const trimmed = urlInput.trim();
     if (trimmed) {
-      onChange([...value, trimmed]);
+      onChange([...value, trimmed], files);
       setUrlInput("");
     }
   };
 
   const removeAt = (index: number) => {
-    onChange(value.filter((_, i) => i !== index));
+    const urlToRemove = value[index];
+    const newUrls = value.filter((_, i) => i !== index);
+
+    let newFiles = [...files];
+    if (urlToRemove.startsWith("blob:")) {
+      const blobUrls = value.filter((url) => url.startsWith("blob:"));
+      const blobIndex = blobUrls.indexOf(urlToRemove);
+      if (blobIndex !== -1) {
+        newFiles = files.filter((_, i) => i !== blobIndex);
+      }
+    }
+    onChange(newUrls, newFiles);
   };
 
   return (

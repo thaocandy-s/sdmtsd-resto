@@ -14,6 +14,9 @@ interface BuffetFormModalProps {
   setForm: React.Dispatch<React.SetStateAction<BuffetFormData>>;
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
+  imageFile: File | null;
+  setImageFile: (file: File | null) => void;
+  isSaving: boolean;
 }
 
 export function BuffetFormModal({
@@ -24,6 +27,9 @@ export function BuffetFormModal({
   setForm,
   onClose,
   onSubmit,
+  imageFile,
+  setImageFile,
+  isSaving,
 }: BuffetFormModalProps) {
   const t = useTranslations("buffetMenu");
   const tc = useTranslations("common");
@@ -261,7 +267,10 @@ export function BuffetFormModal({
 
           <ImageUpload
             value={form.imageUrl}
-            onChange={(url) => setForm({ ...form, imageUrl: url })}
+            onChange={(url, file) => {
+              setForm({ ...form, imageUrl: url });
+              setImageFile(file || null);
+            }}
             folder="buffet-menu"
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -302,9 +311,16 @@ export function BuffetFormModal({
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2.5 rounded-lg font-medium transition-colors min-h-[44px]"
+              disabled={isSaving}
+              className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2.5 rounded-lg font-medium transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {editingId ? tc("save") : tc("add")}
+              {isSaving
+                ? editingId
+                  ? tc("save") + "..."
+                  : tc("add") + "..."
+                : editingId
+                  ? tc("save")
+                  : tc("add")}
             </button>
             <button
               type="button"

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
-import { ImageUpload } from "@/shared/components/image-upload";
+import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
 import { Category, FormData, emptyForm, toSlug } from "./types";
 
 interface FoodFormModalProps {
@@ -24,24 +24,42 @@ export function FoodFormModal({
   const t = useTranslations("foodMenu");
   const tc = useTranslations("common");
   const [form, setForm] = useState<FormData>(initialForm);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setForm(initialForm);
-  }, [initialForm]);
+    if (isOpen) {
+      setForm(initialForm);
+      setImageFile(null);
+    }
+  }, [initialForm, isOpen]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
+      let finalImageUrl = form.imageUrl;
+      if (imageFile) {
+        finalImageUrl = await uploadImage(imageFile, "food-menu");
+      }
+
+      const payload = {
+        ...form,
+        imageUrl: finalImageUrl,
+      };
+
       if (editingId) {
-        await api.put(`/api/menu/${editingId}`, form);
+        await api.put(`/api/menu/${editingId}`, payload);
       } else {
-        await api.post("/api/menu", form);
+        await api.post("/api/menu", payload);
       }
       onSubmitSuccess();
     } catch (error) {
       console.error("Save food error:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -135,7 +153,10 @@ export function FoodFormModal({
           </div>
           <ImageUpload
             value={form.imageUrl}
-            onChange={(url) => setForm({ ...form, imageUrl: url })}
+            onChange={(url, file) => {
+              setForm({ ...form, imageUrl: url });
+              setImageFile(file || null);
+            }}
             folder="food-menu"
           />
           <div className="grid grid-cols-2 gap-4">
@@ -188,9 +209,16 @@ export function FoodFormModal({
           <div className="flex gap-3 pt-4">
             <button
               type="submit"
-              className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors"
+              disabled={isSaving}
+              className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {editingId ? tc("save") : tc("add")}
+              {isSaving
+                ? editingId
+                  ? tc("save") + "..."
+                  : tc("add") + "..."
+                : editingId
+                  ? tc("save")
+                  : tc("add")}
             </button>
             <button
               type="button"

@@ -7,6 +7,7 @@ import { BeerArt, FormData, emptyForm } from "./_components/types";
 import { BeerArtList } from "./_components/BeerArtList";
 import { BeerArtFormModal } from "./_components/BeerArtFormModal";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { uploadImage } from "@/shared/components/image-upload";
 
 export default function BeerArtPage() {
   const t = useTranslations("beerArt");
@@ -16,6 +17,8 @@ export default function BeerArtPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>(emptyForm);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,15 +51,29 @@ export default function BeerArtPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
-      if (editingId) await api.put(`/api/beer-art/${editingId}`, form);
-      else await api.post("/api/beer-art", form);
+      let finalImageUrl = form.imageUrl;
+      if (imageFile) {
+        finalImageUrl = await uploadImage(imageFile, "beer-art");
+      }
+
+      const payload = {
+        ...form,
+        imageUrl: finalImageUrl,
+      };
+
+      if (editingId) await api.put(`/api/beer-art/${editingId}`, payload);
+      else await api.post("/api/beer-art", payload);
       setShowModal(false);
       setEditingId(null);
       setForm(emptyForm);
+      setImageFile(null);
       loadData();
     } catch (error) {
       console.error("Save error:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -70,6 +87,7 @@ export default function BeerArtPage() {
       artistName: item.artistName || "",
       isPublished: item.isPublished,
     });
+    setImageFile(null);
     setShowModal(true);
   };
 
@@ -95,6 +113,7 @@ export default function BeerArtPage() {
           onClick={() => {
             setEditingId(null);
             setForm(emptyForm);
+            setImageFile(null);
             setShowModal(true);
           }}
           className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
@@ -143,8 +162,12 @@ export default function BeerArtPage() {
         onClose={() => {
           setShowModal(false);
           setEditingId(null);
+          setImageFile(null);
         }}
         onSubmit={handleSubmit}
+        imageFile={imageFile}
+        setImageFile={setImageFile}
+        isSaving={isSaving}
       />
 
       <ConfirmModal

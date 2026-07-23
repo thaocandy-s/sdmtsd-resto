@@ -88,6 +88,7 @@
     "nameLabel": "Name",
     "descriptionLabel": "Description",
     "priceLabel": "Price",
+    "pricePreview": "Preview",
     "categoryLabel": "Category",
     "selectCategory": "Select category",
     "statusLabel": "Status",

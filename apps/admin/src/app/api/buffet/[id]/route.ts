@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
+import { deleteMediaByUrl } from "@/lib/supabase";
 
 export const PUT = withAuthParams(
   async (request, { params }) => {
@@ -8,6 +9,10 @@ export const PUT = withAuthParams(
       const body = await request.json();
       const existing = await prisma.buffetCourse.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Buffet not found" }, { status: 404 });
+
+      if (body.imageUrl !== undefined && body.imageUrl !== existing.imageUrl) {
+        await deleteMediaByUrl(existing.imageUrl);
+      }
 
       if (body.slug && body.slug !== existing.slug) {
         const slugExists = await prisma.buffetCourse.findUnique({ where: { slug: body.slug } });
@@ -56,6 +61,9 @@ export const DELETE = withAuthParams(
     try {
       const existing = await prisma.buffetCourse.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Buffet not found" }, { status: 404 });
+      if (existing.imageUrl) {
+        await deleteMediaByUrl(existing.imageUrl);
+      }
       await prisma.buffetCourse.update({
         where: { id: params.id },
         data: { deletedAt: new Date() },

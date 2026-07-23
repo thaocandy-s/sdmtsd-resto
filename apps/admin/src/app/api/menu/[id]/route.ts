@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
+import { deleteMediaByUrl } from "@/lib/supabase";
 
 // GET /api/menu/[id] - Get food by id
 export const GET = withAuthParams(async (_request, { params }) => {
@@ -49,6 +50,10 @@ export const PUT = withAuthParams(
       });
       if (!existing) {
         return NextResponse.json({ message: "Food not found" }, { status: 404 });
+      }
+
+      if (imageUrl !== undefined && imageUrl !== existing.imageUrl) {
+        await deleteMediaByUrl(existing.imageUrl);
       }
 
       // Check slug uniqueness if changed
@@ -105,6 +110,10 @@ export const DELETE = withAuthParams(
       });
       if (!existing) {
         return NextResponse.json({ message: "Food not found" }, { status: 404 });
+      }
+
+      if (existing.imageUrl) {
+        await deleteMediaByUrl(existing.imageUrl);
       }
 
       await prisma.food.update({
