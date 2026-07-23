@@ -23,12 +23,23 @@ import { prisma } from "@/lib/prisma";
 
 export async function generateMetadata(): Promise<Metadata> {
   const restaurant = await prisma.restaurant.findFirst();
+  const getAssetUrl = (url: string) => {
+    if (!url) return "";
+    if (url.startsWith("/") && !url.startsWith("/admin")) {
+      const isProd = process.env.NODE_ENV === "production";
+      return isProd ? `/admin${url}` : url;
+    }
+    return url;
+  };
+
+  const favicon = getAssetUrl(restaurant?.faviconUrl || "/favicon.ico");
+
   return {
     title: "Admin | " + (restaurant?.name || "Resto Hub"),
     description: "Restaurant Management System - Admin Dashboard",
     icons: {
-      icon: restaurant?.faviconUrl || "/favicon.ico",
-      shortcut: restaurant?.faviconUrl || "/favicon.ico",
+      icon: favicon,
+      shortcut: favicon,
     },
   };
 }

@@ -51,14 +51,14 @@ export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
   const locale = useLocale();
   const tSidebar = useTranslations("sidebar");
   const tCommon = useTranslations("common");
-  const [logoUrl, setLogoUrl] = useState<string>("/images/logo.png");
+  const [logoUrl, setLogoUrl] = useState<string>(getApiUrl("/images/logo.png"));
 
   useEffect(() => {
     fetch(getApiUrl("/api/info"))
       .then((res) => res.json())
       .then((data) => {
         if (data?.data?.logoUrl) {
-          setLogoUrl(data.data.logoUrl);
+          setLogoUrl(getApiUrl(data.data.logoUrl));
         }
       })
       .catch(console.error);
