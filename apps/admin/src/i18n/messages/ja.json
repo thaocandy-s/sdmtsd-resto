@@ -330,7 +330,8 @@
     "bannerSortOrder": "表示順",
     "bannerStatus": "有効状態",
     "bannerCtaLabel": "CTAラベル (任意)",
-    "bannerCtaUrl": "CTAリンク (任意)"
+    "bannerCtaUrl": "CTAリンク (任意)",
+    "delete": "削除"
   },
   "contact": {
     "title": "メッセージ一覧",

@@ -330,7 +330,8 @@
     "bannerSortOrder": "Sort Order",
     "bannerStatus": "Active Status",
     "bannerCtaLabel": "CTA Label (optional)",
-    "bannerCtaUrl": "CTA URL (optional)"
+    "bannerCtaUrl": "CTA URL (optional)",
+    "delete": "Delete"
   },
   "contact": {
     "title": "Messages",
