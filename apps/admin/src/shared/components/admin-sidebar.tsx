@@ -20,6 +20,7 @@ import {
   Mail,
   X,
   Settings,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@resto-hub/ui";
 import { getApiUrl } from "@/lib/api-client";
@@ -36,6 +37,7 @@ const navItems = [
   { href: "/restaurant-info", key: "restaurantInfo", icon: Info },
   // { href: "/reservations", key: "reservations", icon: CalendarCheck },
   { href: "/contact", key: "contactMessages", icon: Mail },
+  { href: "/analytics", key: "analytics", icon: BarChart3 },
   // { href: "/media-library", key: "mediaLibrary", icon: FolderOpen },
   { href: "/settings", key: "settings", icon: Settings },
 ];
