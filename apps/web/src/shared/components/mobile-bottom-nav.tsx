@@ -40,7 +40,7 @@ export function MobileBottomNav() {
                 }`}
               >
                 <Icon className="w-5 h-5" />
-                <span className="text-[9px] font-bold mt-0.5">{item.label}</span>
+                <span className="text-[9px] font-bold mt-0.5 whitespace-nowrap">{item.label}</span>
               </Link>
             );
           }
@@ -49,7 +49,7 @@ export function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center py-1.5 px-3.5 rounded-full text-xs font-medium transition-all duration-300 ${
+              className={`flex flex-col items-center justify-center py-1.5 px-2 sm:px-3.5 rounded-full text-xs font-medium transition-all duration-300 ${
                 isActive
                   ? "text-gold-400 bg-gold-500/15 border border-gold-500/30 shadow-inner"
                   : "text-foreground-secondary hover:text-gold-400 hover:bg-background-tertiary/50"
@@ -58,7 +58,9 @@ export function MobileBottomNav() {
               <Icon
                 className={`w-4 h-4 mb-0.5 ${isActive ? "text-gold-400" : "text-foreground-tertiary"}`}
               />
-              <span className="text-[11px] leading-tight">{item.label}</span>
+              <span className="text-[10px] sm:text-[11px] leading-tight whitespace-nowrap">
+                {item.label}
+              </span>
             </Link>
           );
         })}
