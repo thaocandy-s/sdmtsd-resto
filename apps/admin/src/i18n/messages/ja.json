@@ -20,7 +20,9 @@
     "logoutMessage": "Adminパネルからログアウトしてもよろしいですか？保存されていない変更は失われる可能性があります。",
     "loggingOut": "ログアウト中...",
     "language": "言語",
-    "saving": "保存中..."
+    "saving": "保存中...",
+    "previous": "前へ",
+    "next": "次へ"
   },
   "sidebar": {
     "homeManagement": "ホーム管理",
