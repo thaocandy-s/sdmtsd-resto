@@ -271,6 +271,8 @@
   "challenge": {
     "title": "型抜きチャレンジ",
     "subtitle": "チャレンジのルールと当選者リストを管理します",
+    "illustrationTitle": "チャレンジのイラスト・画像",
+    "illustrationSubtitle": "この画像は公開用の型抜きチャレンジページに表示されます。推奨サイズ：800x600px。",
     "addRule": "ルールを追加",
     "addWinner": "当選者を追加",
     "editRule": "ルールを編集",

@@ -10,6 +10,7 @@ export default function ChallengePage() {
   const t = useTranslations("challenge");
   const [rules, setRules] = useState<Rule[]>([]);
   const [winners, setWinners] = useState<Winner[]>([]);
+  const [challengeImage, setChallengeImage] = useState<string>("/images/katanuki.png");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,6 +19,9 @@ export default function ChallengePage() {
       .then((data) => {
         setRules(data.data?.rules || []);
         setWinners(data.data?.winners || []);
+        if (data.data?.challengeImage) {
+          setChallengeImage(data.data.challengeImage);
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -32,8 +36,25 @@ export default function ChallengePage() {
       <h1 className="text-4xl font-jp font-bold text-gold-400 mb-4">{t("title")}</h1>
       <p className="text-foreground-secondary mb-8">{t("subtitle")}</p>
 
-      {/* Rules Section */}
-      <ChallengeRules rules={rules} />
+      {/* Main Challenge Info & Rules Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 items-stretch">
+        <div className="relative min-h-[250px] md:min-h-full rounded-2xl overflow-hidden border border-border bg-background-secondary shadow-lg group">
+          <img
+            src={challengeImage}
+            alt="Katanuki Challenge Illustration"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent flex items-end p-6">
+            <div>
+              <span className="text-gold-400 text-xs font-semibold tracking-wider uppercase block mb-1">
+                Katanuki Challenge
+              </span>
+              <span className="text-white text-lg font-bold font-jp">型抜きチャレンジ</span>
+            </div>
+          </div>
+        </div>
+        <ChallengeRules rules={rules} />
+      </div>
 
       {/* Winners Gallery */}
       <section>

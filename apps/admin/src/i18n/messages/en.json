@@ -271,6 +271,8 @@
   "challenge": {
     "title": "Katanuki Challenge",
     "subtitle": "Manage challenge rules and winners list",
+    "illustrationTitle": "Challenge Illustration Image",
+    "illustrationSubtitle": "This image is displayed on the public challenge page. Recommended size: 800x600px.",
     "addRule": "Add Rule",
     "addWinner": "Add Winner",
     "editRule": "Edit Rule",
