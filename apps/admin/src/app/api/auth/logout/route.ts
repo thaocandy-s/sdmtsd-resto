@@ -14,7 +14,10 @@ export async function POST(request: NextRequest) {
     }
 
     const response = NextResponse.json({ data: { message: "Logged out" } });
-    response.cookies.delete("refreshToken");
+    response.cookies.set("refreshToken", "", {
+      path: "/",
+      maxAge: 0,
+    });
     return response;
   } catch (error) {
     console.error("Logout error:", error);
