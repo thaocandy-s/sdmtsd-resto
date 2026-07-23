@@ -30,7 +30,10 @@
     "price": "価格",
     "popular": "人気",
     "recommended": "おすすめ",
-    "new": "新着"
+    "new": "新着",
+    "previous": "前へ",
+    "next": "次へ",
+    "showingPage": "ページを表示中: {page} / {totalPages} (合計: {total} 件)"
   },
   "home": {
     "heroTitle": "レストハブへようこそ",
