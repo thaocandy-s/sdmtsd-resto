@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { ImageUpload } from "@/shared/components/image-upload";
 import { WinnerForm } from "./types";
 
 interface WinnerFormModalProps {
@@ -8,6 +9,8 @@ interface WinnerFormModalProps {
   setForm: (form: WinnerForm) => void;
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
+  imageFile: File | null;
+  setImageFile: (file: File | null) => void;
 }
 
 export function WinnerFormModal({
@@ -17,6 +20,8 @@ export function WinnerFormModal({
   setForm,
   onClose,
   onSubmit,
+  imageFile,
+  setImageFile,
 }: WinnerFormModalProps) {
   const t = useTranslations("challenge");
   const tc = useTranslations("common");
@@ -25,7 +30,7 @@ export function WinnerFormModal({
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-      <div className="bg-background-secondary border border-border rounded-lg p-6 max-w-lg w-full">
+      <div className="bg-background-secondary border border-border rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-foreground">
             {editingId ? t("editWinner") : t("addWinner")}
@@ -50,17 +55,15 @@ export function WinnerFormModal({
               className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
             />
           </div>
-          <div>
-            <label className="block text-sm text-foreground-secondary mb-1">
-              {t("imageLabel")}
-            </label>
-            <input
-              type="text"
-              value={form.imageUrl}
-              onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-            />
-          </div>
+          <ImageUpload
+            value={form.imageUrl}
+            onChange={(url, file) => {
+              setForm({ ...form, imageUrl: url });
+              setImageFile(file || null);
+            }}
+            label={t("imageLabel")}
+            folder="challenge"
+          />
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-foreground-secondary mb-1">

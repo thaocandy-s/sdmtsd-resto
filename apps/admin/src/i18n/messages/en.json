@@ -292,7 +292,8 @@
     "activeLabel": "Active",
     "publishedLabel": "Published",
     "imageLabel": "Image URL",
-    "deleteConfirm": "Are you sure you want to delete this item?"
+    "deleteConfirm": "Are you sure you want to delete this item?",
+    "showingPage": "Showing page {page} / {totalPages} ({total} total)"
   },
   "settings": {
     "title": "Account Settings",
