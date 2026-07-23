@@ -122,7 +122,8 @@
     "title": "よくある質問",
     "subtitle": "よくある質問への回答",
     "searchPlaceholder": "質問を検索...",
-    "noResults": "一致する質問が見つかりませんでした"
+    "noResults": "一致する質問が見つかりませんでした",
+    "all": "すべて"
   },
   "info": {
     "title": "店舗情報",

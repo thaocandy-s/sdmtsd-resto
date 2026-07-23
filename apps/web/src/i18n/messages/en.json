@@ -122,7 +122,8 @@
     "title": "Frequently Asked Questions",
     "subtitle": "Find answers to common questions",
     "searchPlaceholder": "Search questions...",
-    "noResults": "No matching questions found"
+    "noResults": "No matching questions found",
+    "all": "All"
   },
   "info": {
     "title": "Restaurant Information",
