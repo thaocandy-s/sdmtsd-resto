@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api-client";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 interface User {
   id: string;
@@ -113,17 +114,22 @@ export default function UsersPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (user: User) => {
-    if (!confirm(`Are you sure you want to delete ${user.firstName} ${user.lastName}?`)) {
-      return;
-    }
+  const [deleteConfirmUser, setDeleteConfirmUser] = useState<User | null>(null);
 
+  const handleDelete = (user: User) => {
+    setDeleteConfirmUser(user);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmUser) return;
     try {
-      await api.delete(`/users/${user.id}`);
+      await api.delete(`/users/${deleteConfirmUser.id}`);
       fetchUsers();
     } catch (error) {
       console.error("Failed to delete user:", error);
       alert("Failed to delete user");
+    } finally {
+      setDeleteConfirmUser(null);
     }
   };
 
@@ -401,6 +407,13 @@ export default function UsersPage() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        isOpen={deleteConfirmUser !== null}
+        title="Delete User"
+        message={`Are you sure you want to delete ${deleteConfirmUser?.firstName} ${deleteConfirmUser?.lastName}?`}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmUser(null)}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api-client";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 interface SeoMeta {
   id: string;
@@ -100,13 +101,21 @@ export default function SeoPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this SEO meta?")) return;
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  const handleDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await api.delete(`/api/seo/${id}`);
+      await api.delete(`/api/seo/${deleteConfirmId}`);
       loadData();
     } catch (error) {
       console.error("Delete error:", error);
+    } finally {
+      setDeleteConfirmId(null);
     }
   };
 
@@ -335,6 +344,13 @@ export default function SeoPage() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        isOpen={deleteConfirmId !== null}
+        title="Delete SEO Meta"
+        message="Are you sure you want to delete this SEO meta?"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
     </>
   );
 }

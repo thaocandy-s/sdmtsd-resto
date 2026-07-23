@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { api } from "@/lib/api-client";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 interface Media {
   id: string;
@@ -280,13 +281,21 @@ export default function MediaLibraryPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this media? The stored file will also be removed.")) return;
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  const handleDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await api.delete(`/api/media/${id}`);
+      await api.delete(`/api/media/${deleteConfirmId}`);
       loadData();
     } catch (err) {
       console.error("Delete error:", err);
+    } finally {
+      setDeleteConfirmId(null);
     }
   };
 
@@ -739,6 +748,13 @@ export default function MediaLibraryPage() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        isOpen={deleteConfirmId !== null}
+        title="Delete Media"
+        message="Delete this media? The stored file will also be removed."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
     </>
   );
 }

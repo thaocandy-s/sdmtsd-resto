@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { api } from "@/lib/api-client";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 const MODULES = [
   { value: "food", label: "Food Menu", actions: ["publish", "unpublish", "archive", "delete"] },
@@ -18,10 +19,12 @@ export default function BulkActionsPage() {
   const [ids, setIds] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingIdList, setPendingIdList] = useState<string[]>([]);
 
   const selectedModule = MODULES.find((m) => m.value === module);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const idList = ids
       .split(",")
@@ -31,17 +34,19 @@ export default function BulkActionsPage() {
       setResult("Please enter at least one ID");
       return;
     }
+    setPendingIdList(idList);
+    setShowConfirm(true);
+  };
 
-    if (!confirm(`Apply "${action}" to ${idList.length} item(s) in "${selectedModule?.label}"?`))
-      return;
-
+  const handleConfirmAction = async () => {
+    setShowConfirm(false);
     setLoading(true);
     setResult(null);
     try {
       const res = await api.post<{ data: { affected: number } }>("/api/bulk", {
         module,
         action,
-        ids: idList,
+        ids: pendingIdList,
       });
       setResult(`Successfully affected ${res.data.affected} item(s)`);
       setIds("");
@@ -50,6 +55,7 @@ export default function BulkActionsPage() {
       setResult("Error executing bulk action");
     } finally {
       setLoading(false);
+      setPendingIdList([]);
     }
   };
 
@@ -153,6 +159,16 @@ export default function BulkActionsPage() {
           </div>
         </div>
       </div>
+      <ConfirmModal
+        isOpen={showConfirm}
+        title="Confirm Bulk Action"
+        message={`Apply "${action}" to ${pendingIdList.length} item(s) in "${selectedModule?.label}"?`}
+        onConfirm={handleConfirmAction}
+        onCancel={() => {
+          setShowConfirm(false);
+          setPendingIdList([]);
+        }}
+      />
     </>
   );
 }

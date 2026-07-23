@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/api-client";
 import { uploadImage } from "@/shared/components/image-upload";
 import { useTranslations } from "next-intl";
+import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { BannerTab } from "./_components/BannerTab";
 import { EventTab } from "./_components/EventTab";
 import { BrandAssetsTab } from "./_components/BrandAssetsTab";
@@ -110,23 +111,33 @@ export default function HomeManagementPage() {
     }
   };
 
-  const deleteBanner = async (id: string) => {
-    if (!confirm(t("deleteBannerConfirm"))) return;
-    try {
-      await api.delete(`/api/banners/${id}`);
-      loadData();
-    } catch (error) {
-      console.error("Delete banner error:", error);
-    }
+  const [deleteConfirmType, setDeleteConfirmType] = useState<"banner" | "event" | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  const deleteBanner = (id: string) => {
+    setDeleteConfirmType("banner");
+    setDeleteConfirmId(id);
   };
 
-  const deleteEvent = async (id: string) => {
-    if (!confirm(t("deleteEventConfirm"))) return;
+  const deleteEvent = (id: string) => {
+    setDeleteConfirmType("event");
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmType || !deleteConfirmId) return;
     try {
-      await api.delete(`/api/events/${id}`);
+      if (deleteConfirmType === "banner") {
+        await api.delete(`/api/banners/${deleteConfirmId}`);
+      } else {
+        await api.delete(`/api/events/${deleteConfirmId}`);
+      }
       loadData();
     } catch (error) {
-      console.error("Delete event error:", error);
+      console.error(`Delete ${deleteConfirmType} error:`, error);
+    } finally {
+      setDeleteConfirmType(null);
+      setDeleteConfirmId(null);
     }
   };
 
@@ -213,6 +224,19 @@ export default function HomeManagementPage() {
           <span className="text-sm font-medium">{toast.message}</span>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={deleteConfirmId !== null}
+        title={t("delete")}
+        message={
+          deleteConfirmType === "banner" ? t("deleteBannerConfirm") : t("deleteEventConfirm")
+        }
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setDeleteConfirmType(null);
+          setDeleteConfirmId(null);
+        }}
+      />
     </>
   );
 }
