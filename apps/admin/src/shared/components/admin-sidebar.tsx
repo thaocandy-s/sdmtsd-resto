@@ -22,6 +22,7 @@ import {
   Settings,
 } from "lucide-react";
 import { cn } from "@resto-hub/ui";
+import { getApiUrl } from "@/lib/api-client";
 
 const navItems = [
   { href: "/home-management", key: "homeManagement", icon: Home },
@@ -53,7 +54,7 @@ export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
   const [logoUrl, setLogoUrl] = useState<string>("/images/logo.png");
 
   useEffect(() => {
-    fetch("/api/info")
+    fetch(getApiUrl("/api/info"))
       .then((res) => res.json())
       .then((data) => {
         if (data?.data?.logoUrl) {
