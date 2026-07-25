@@ -19,7 +19,7 @@ export const GET = withAuth(async (request: NextRequest) => {
         { description: { contains: search, mode: "insensitive" } },
       ];
     }
-    if (category) where.categoryId = category;
+    if (category) where.category = { slug: category };
     if (status) where.status = status;
 
     const [drinks, total, categories] = await Promise.all([
