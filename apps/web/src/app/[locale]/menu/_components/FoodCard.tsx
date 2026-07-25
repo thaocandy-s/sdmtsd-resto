@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Food } from "./types";
 
 interface FoodCardProps {
@@ -9,6 +10,7 @@ interface FoodCardProps {
 }
 
 export function FoodCard({ food, formatPrice }: FoodCardProps) {
+  const t = useTranslations("menu");
   return (
     <Link
       href={`/menu/${food.slug}`}
@@ -24,18 +26,18 @@ export function FoodCard({ food, formatPrice }: FoodCardProps) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-foreground-tertiary">
-              No image
+              {t("noImage")}
             </div>
           )}
           <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
             {food.isPopular && (
               <span className="px-2 py-1 bg-gold-500 text-background text-xs rounded font-medium">
-                Popular
+                {t("popular")}
               </span>
             )}
             {food.isRecommended && (
               <span className="px-2 py-1 bg-amber-600 text-white text-xs rounded font-medium">
-                Recommended
+                {t("recommended")}
               </span>
             )}
           </div>
