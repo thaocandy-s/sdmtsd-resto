@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { Food, Category, FormData, emptyForm } from "./_components/types";
+import { FoodMenuHeader } from "./_components/FoodMenuHeader";
+import { FoodFilters } from "./_components/FoodFilters";
 import { FoodFormModal } from "./_components/FoodFormModal";
 import { CategoryManagerModal } from "./_components/CategoryManagerModal";
 import { FoodTable } from "./_components/FoodTable";
@@ -126,63 +128,24 @@ export default function FoodMenuPage() {
 
   return (
     <>
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">{tFood("title")}</h2>
-          <p className="text-foreground-secondary mt-1">{tFood("subtitle")}</p>
-        </div>
-        <div className="flex flex-wrap items-stretch gap-3">
-          <button
-            onClick={() => setShowCategoryModal(true)}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
-          >
-            {tFood("manageCategories")}
-          </button>
-          <button
-            onClick={() => {
-              setEditingId(null);
-              setForm(emptyForm);
-              setShowModal(true);
-            }}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center bg-gold-500 hover:bg-gold-600 text-background px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
-          >
-            + {tFood("addFood")}
-          </button>
-        </div>
-      </header>
+      <FoodMenuHeader
+        onManageCategories={() => setShowCategoryModal(true)}
+        onAddFood={() => {
+          setEditingId(null);
+          setForm(emptyForm);
+          setShowModal(true);
+        }}
+      />
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-6">
-        <input
-          type="text"
-          placeholder={tFood("searchPlaceholder")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground placeholder-foreground-tertiary focus:outline-none focus:border-gold-500"
-        />
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className="bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-        >
-          <option value="">{tFood("categoryFilter")}</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.slug}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-        >
-          <option value="">{tFood("statusFilter")}</option>
-          <option value="DRAFT">{tCommon("draft")}</option>
-          <option value="PUBLISHED">{tCommon("published")}</option>
-          <option value="ARCHIVED">{tCommon("archived")}</option>
-        </select>
-      </div>
+      <FoodFilters
+        search={search}
+        onSearchChange={setSearch}
+        filterCategory={filterCategory}
+        onCategoryChange={setFilterCategory}
+        filterStatus={filterStatus}
+        onStatusChange={setFilterStatus}
+        categories={categories}
+      />
 
       <FoodTable
         foods={foods}
