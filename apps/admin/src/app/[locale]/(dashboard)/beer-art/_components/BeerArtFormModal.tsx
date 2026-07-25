@@ -105,6 +105,15 @@ export function BeerArtFormModal({
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
+              checked={form.isPopular}
+              onChange={(e) => setForm({ ...form, isPopular: e.target.checked })}
+              className="rounded border-border"
+            />
+            <span className="text-sm text-foreground">{t("popularLabel")}</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
               checked={form.isPublished}
               onChange={(e) => setForm({ ...form, isPublished: e.target.checked })}
               className="rounded border-border"

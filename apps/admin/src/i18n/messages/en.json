@@ -241,6 +241,7 @@
     "descriptionLabel": "Description",
     "customerNameLabel": "Customer Name",
     "artistNameLabel": "Artist Name",
+    "popularLabel": "Popular",
     "publishedLabel": "Published",
     "imageLabel": "Image",
     "deleteConfirm": "Are you sure you want to delete this item?",

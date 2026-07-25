@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 export interface BeerArt {
   id: string;
   title: string;
@@ -7,6 +9,7 @@ export interface BeerArt {
   imageUrl: string;
   customerName: string | null;
   artistName: string | null;
+  isPopular: boolean;
 }
 
 interface BeerArtCardProps {
@@ -15,6 +18,8 @@ interface BeerArtCardProps {
 }
 
 export function BeerArtCard({ item, onClick }: BeerArtCardProps) {
+  const tc = useTranslations("common");
+
   return (
     <button
       onClick={onClick}
@@ -26,6 +31,11 @@ export function BeerArtCard({ item, onClick }: BeerArtCardProps) {
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         loading="lazy"
       />
+      {item.isPopular && (
+        <span className="absolute top-2 right-2 px-2 py-1 bg-gold-500 text-background text-xs rounded font-medium">
+          {tc("popular")}
+        </span>
+      )}
     </button>
   );
 }

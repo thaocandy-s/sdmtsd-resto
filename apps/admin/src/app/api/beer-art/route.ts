@@ -40,8 +40,16 @@ export const POST = withAuth(
   async (request: NextRequest) => {
     try {
       const body = await request.json();
-      const { title, description, imageUrl, customerName, artistName, isPublished, sortOrder } =
-        body;
+      const {
+        title,
+        description,
+        imageUrl,
+        customerName,
+        artistName,
+        isPopular,
+        isPublished,
+        sortOrder,
+      } = body;
       if (!title || !imageUrl)
         return NextResponse.json({ message: "Title and image URL are required" }, { status: 400 });
 
@@ -52,6 +60,7 @@ export const POST = withAuth(
           imageUrl,
           customerName,
           artistName,
+          isPopular: isPopular || false,
           isPublished: isPublished || false,
           sortOrder: sortOrder ? parseInt(sortOrder) : 0,
         },

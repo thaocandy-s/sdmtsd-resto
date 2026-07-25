@@ -13,13 +13,18 @@ export function BeerArtCard({ item, onEdit, onDelete }: BeerArtCardProps) {
 
   return (
     <div className="bg-background-secondary border border-border rounded-lg overflow-hidden group">
-      <div className="aspect-square bg-background-tertiary">
+      <div className="aspect-square bg-background-tertiary relative">
         {item.imageUrl ? (
           <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-foreground-tertiary text-xs">
             {t("noImage")}
           </div>
+        )}
+        {item.isPopular && (
+          <span className="absolute top-2 right-2 px-2 py-1 bg-gold-500 text-background text-xs rounded font-medium">
+            {t("popularLabel")}
+          </span>
         )}
       </div>
       <div className="p-3">
