@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Phone } from "lucide-react";
 import { formatPriceWithTax } from "@resto-hub/utils";
 import { BuffetCourse } from "./buffet-course-card";
 
@@ -12,6 +14,16 @@ interface BuffetDetailContentProps {
 export function BuffetDetailContent({ course }: BuffetDetailContentProps) {
   const t = useTranslations("buffet");
   const tCommon = useTranslations("common");
+  const [phone, setPhone] = useState<string>("+81-3-1234-5678");
+
+  useEffect(() => {
+    fetch("/api/info")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.data?.phone) setPhone(data.data.phone);
+      })
+      .catch(console.error);
+  }, []);
 
   const formatPrice = (price: number) => formatPriceWithTax(price);
 
@@ -90,12 +102,13 @@ export function BuffetDetailContent({ course }: BuffetDetailContentProps) {
             </div>
           )}
 
-          <Link
-            href="/reservation"
-            className="inline-block mt-8 bg-gold-500 hover:bg-gold-600 text-background font-semibold px-6 py-3 rounded-md transition-colors"
+          <a
+            href={`tel:${phone}`}
+            className="inline-flex items-center gap-2 mt-8 bg-gold-500 hover:bg-gold-600 text-background font-semibold px-6 py-3 rounded-md transition-colors"
           >
-            {t("reserveNow")}
-          </Link>
+            <Phone className="h-4 w-4" />
+            {tCommon("phoneCall")}
+          </a>
         </div>
       </div>
     </main>
