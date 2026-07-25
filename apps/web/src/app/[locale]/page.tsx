@@ -22,7 +22,7 @@ export default async function HomePage() {
     prisma.beerArt.findMany({
       where: { isPublished: true },
       take: 4,
-      orderBy: { sortOrder: "asc" },
+      orderBy: [{ isPopular: "desc" }, { sortOrder: "asc" }],
     }),
     prisma.tourPlace.findMany({
       where: { isPublished: true },

@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
         where,
         skip,
         take: limit,
-        orderBy: { sortOrder: "asc" },
+        orderBy: [{ isPopular: "desc" }, { sortOrder: "asc" }],
       }),
       prisma.beerArt.count({ where }),
     ]);
