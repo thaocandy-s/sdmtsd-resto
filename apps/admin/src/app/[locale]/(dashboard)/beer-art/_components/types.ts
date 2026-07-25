@@ -5,6 +5,7 @@ export interface BeerArt {
   imageUrl: string;
   customerName: string | null;
   artistName: string | null;
+  isPopular: boolean;
   isPublished: boolean;
 }
 
@@ -14,6 +15,7 @@ export type FormData = {
   imageUrl: string;
   customerName: string;
   artistName: string;
+  isPopular: boolean;
   isPublished: boolean;
 };
 
@@ -23,5 +25,6 @@ export const emptyForm: FormData = {
   imageUrl: "",
   customerName: "",
   artistName: "",
+  isPopular: false,
   isPublished: false,
 };

@@ -241,6 +241,7 @@
     "descriptionLabel": "説明",
     "customerNameLabel": "お客様名",
     "artistNameLabel": "アーティスト名",
+    "popularLabel": "人気",
     "publishedLabel": "公開済み",
     "imageLabel": "画像",
     "deleteConfirm": "このアイテムを削除してもよろしいですか？",

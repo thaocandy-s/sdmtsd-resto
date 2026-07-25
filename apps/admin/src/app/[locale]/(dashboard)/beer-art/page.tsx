@@ -85,6 +85,7 @@ export default function BeerArtPage() {
       imageUrl: item.imageUrl,
       customerName: item.customerName || "",
       artistName: item.artistName || "",
+      isPopular: item.isPopular,
       isPublished: item.isPublished,
     });
     setImageFile(null);

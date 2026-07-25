@@ -214,6 +214,7 @@ model BeerArt {
   imageUrl     String
   customerName String?
   artistName   String?
+  isPopular    Boolean  @default(false)
   isPublished  Boolean  @default(false)
   sortOrder    Int      @default(0)
   createdAt    DateTime @default(now())
