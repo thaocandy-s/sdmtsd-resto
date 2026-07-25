@@ -27,6 +27,7 @@ interface Drink {
 
 export default function DrinkDetailPage() {
   const t = useTranslations("drink");
+  const tCommon = useTranslations("common");
   const params = useParams();
   const slug = params.slug as string;
   const [drink, setDrink] = useState<Drink | null>(null);
@@ -66,8 +67,6 @@ export default function DrinkDetailPage() {
       </main>
     );
   }
-
-  const tCommon = useTranslations("common");
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">
