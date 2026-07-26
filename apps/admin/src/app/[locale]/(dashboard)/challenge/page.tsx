@@ -183,21 +183,6 @@ export default function ChallengePage() {
           <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
           <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
         </div>
-        <button
-          onClick={() => {
-            setEditingId(null);
-            if (tab === "rules") {
-              setRuleForm(emptyRule);
-              setShowRuleModal(true);
-            } else {
-              setWinnerForm(emptyWinner);
-              setShowWinnerModal(true);
-            }
-          }}
-          className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          + {tab === "rules" ? t("addRule") : t("addWinner")}
-        </button>
       </header>
 
       {/* Illustration Upload Section */}
@@ -214,26 +199,43 @@ export default function ChallengePage() {
         </div>
       </div>
 
-      <div className="flex gap-4 mb-6 border-b border-border">
+      <div className="flex items-center justify-between gap-4 mb-6 border-b border-border">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setTab("rules")}
+            className={`pb-3 px-1 font-medium transition-colors ${
+              tab === "rules"
+                ? "text-gold-500 border-b-2 border-gold-500"
+                : "text-foreground-secondary hover:text-foreground"
+            }`}
+          >
+            {t("rulesTab")} ({rules.length})
+          </button>
+          <button
+            onClick={() => setTab("winners")}
+            className={`pb-3 px-1 font-medium transition-colors ${
+              tab === "winners"
+                ? "text-gold-500 border-b-2 border-gold-500"
+                : "text-foreground-secondary hover:text-foreground"
+            }`}
+          >
+            {t("winnersTab")} ({winners.length})
+          </button>
+        </div>
         <button
-          onClick={() => setTab("rules")}
-          className={`pb-3 px-1 font-medium transition-colors ${
-            tab === "rules"
-              ? "text-gold-500 border-b-2 border-gold-500"
-              : "text-foreground-secondary hover:text-foreground"
-          }`}
+          onClick={() => {
+            setEditingId(null);
+            if (tab === "rules") {
+              setRuleForm(emptyRule);
+              setShowRuleModal(true);
+            } else {
+              setWinnerForm(emptyWinner);
+              setShowWinnerModal(true);
+            }
+          }}
+          className="mb-3 bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
         >
-          {t("rulesTab")} ({rules.length})
-        </button>
-        <button
-          onClick={() => setTab("winners")}
-          className={`pb-3 px-1 font-medium transition-colors ${
-            tab === "winners"
-              ? "text-gold-500 border-b-2 border-gold-500"
-              : "text-foreground-secondary hover:text-foreground"
-          }`}
-        >
-          {t("winnersTab")} ({winners.length})
+          + {tab === "rules" ? t("addRule") : t("addWinner")}
         </button>
       </div>
 
