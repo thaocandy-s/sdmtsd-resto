@@ -4,13 +4,14 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { toSlug } from "@resto-hub/utils";
 import { ImageUpload } from "@/shared/components/image-upload";
-import { BuffetFormData, MenuItemOption } from "./types";
+import { BuffetFormData, MenuItemOption, CategoryOption } from "./types";
 
 interface BuffetFormModalProps {
   isOpen: boolean;
   editingId: string | null;
   form: BuffetFormData;
   menuItems: MenuItemOption[];
+  categories: CategoryOption[];
   setForm: React.Dispatch<React.SetStateAction<BuffetFormData>>;
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -24,6 +25,7 @@ export function BuffetFormModal({
   editingId,
   form,
   menuItems,
+  categories,
   setForm,
   onClose,
   onSubmit,
@@ -33,7 +35,9 @@ export function BuffetFormModal({
 }: BuffetFormModalProps) {
   const t = useTranslations("buffetMenu");
   const tc = useTranslations("common");
-  const [selectedCategoryTab, setSelectedCategoryTab] = useState<"food" | "drink">("food");
+  const [selectedCategoryTab, setSelectedCategoryTab] = useState<"food" | "drink" | "category">(
+    "food"
+  );
   const [itemSearch, setItemSearch] = useState("");
 
   if (!isOpen) return null;
@@ -67,6 +71,12 @@ export function BuffetFormModal({
       item.type === selectedCategoryTab &&
       item.name.toLowerCase().includes(itemSearch.toLowerCase())
   );
+
+  const filteredCategories = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(itemSearch.toLowerCase())
+  );
+
+  const displayItems = selectedCategoryTab === "category" ? filteredCategories : filteredMenuItems;
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-3 sm:p-4">
@@ -175,94 +185,137 @@ export function BuffetFormModal({
               <span className="text-xs text-foreground-tertiary">{t("includesSelectorDesc")}</span>
             </div>
 
-            {/* Selected Items Display Box */}
-            <div className="min-h-[48px] p-2.5 border border-border rounded-lg bg-background flex flex-wrap gap-2 items-center">
-              {currentIncludesArray.length === 0 ? (
-                <span className="text-sm text-foreground-tertiary italic">
-                  {t("noIncludesSelected")}
-                </span>
-              ) : (
-                currentIncludesArray.map((item) => (
-                  <span
-                    key={item}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-gold-500/20 border border-gold-500/50 text-gold-400 font-medium"
-                  >
-                    <span>{item}</span>
-                    <button
-                      type="button"
-                      onClick={() => toggleIncludeItem(item)}
-                      className="hover:text-red-400 transition-colors text-xs font-bold leading-none p-0.5"
-                      title="Remove item"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                ))
-              )}
-            </div>
-
-            {/* Tab Switcher & Search */}
-            <div className="flex flex-col sm:flex-row gap-2 pt-1">
-              <div className="flex bg-background-tertiary p-1 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => setSelectedCategoryTab("food")}
-                  className={`flex-1 sm:flex-none px-3.5 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors min-h-[36px] ${
-                    selectedCategoryTab === "food"
-                      ? "bg-gold-500 text-background"
-                      : "text-foreground-secondary hover:text-foreground"
-                  }`}
-                >
-                  {t("foodTab", { count: menuItems.filter((i) => i.type === "food").length })}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedCategoryTab("drink")}
-                  className={`flex-1 sm:flex-none px-3.5 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors min-h-[36px] ${
-                    selectedCategoryTab === "drink"
-                      ? "bg-gold-500 text-background"
-                      : "text-foreground-secondary hover:text-foreground"
-                  }`}
-                >
-                  {t("drinkTab", { count: menuItems.filter((i) => i.type === "drink").length })}
-                </button>
-              </div>
+            {/* All Menu Toggle */}
+            <label className="flex items-center gap-2 cursor-pointer py-1">
               <input
-                type="text"
-                placeholder={t("searchMenuPlaceholder")}
-                value={itemSearch}
-                onChange={(e) => setItemSearch(e.target.value)}
-                className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                type="checkbox"
+                checked={form.isAllMenu}
+                onChange={(e) => setForm({ ...form, isAllMenu: e.target.checked })}
+                className="rounded border-border w-4 h-4 accent-gold-500"
               />
-            </div>
+              <span className="text-sm text-foreground font-medium">{t("allMenuLabel")}</span>
+            </label>
 
-            {/* Quick Pick Pills */}
-            <div className="max-h-48 overflow-y-auto border border-border/50 rounded-lg p-2.5 flex flex-wrap gap-2 bg-background">
-              {filteredMenuItems.length === 0 ? (
-                <span className="text-sm text-foreground-tertiary p-2">
-                  {t("noMenuItemsFound", { type: selectedCategoryTab })}
-                </span>
-              ) : (
-                filteredMenuItems.map((item) => {
-                  const isSelected = currentIncludesArray.includes(item.name);
-                  return (
+            {form.isAllMenu ? (
+              <p className="text-sm text-foreground-tertiary italic">{t("allMenuDesc")}</p>
+            ) : (
+              <>
+                {/* Selected Items Display Box */}
+                <div className="min-h-[48px] p-2.5 border border-border rounded-lg bg-background flex flex-wrap gap-2 items-center">
+                  {currentIncludesArray.length === 0 ? (
+                    <span className="text-sm text-foreground-tertiary italic">
+                      {t("noIncludesSelected")}
+                    </span>
+                  ) : (
+                    currentIncludesArray.map((item) => (
+                      <span
+                        key={item}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-gold-500/20 border border-gold-500/50 text-gold-400 font-medium"
+                      >
+                        <span>{item}</span>
+                        <button
+                          type="button"
+                          onClick={() => toggleIncludeItem(item)}
+                          className="hover:text-red-400 transition-colors text-xs font-bold leading-none p-0.5"
+                          title="Remove item"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))
+                  )}
+                </div>
+
+                {/* Tab Switcher & Search */}
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  <div className="flex bg-background-tertiary p-1 rounded-lg">
                     <button
                       type="button"
-                      key={item.id}
-                      onClick={() => toggleIncludeItem(item.name)}
-                      className={`px-3 py-1.5 text-sm rounded-lg border transition-all min-h-[36px] flex items-center gap-1.5 ${
-                        isSelected
-                          ? "bg-gold-500/20 border-gold-500 text-gold-400 font-medium"
-                          : "bg-background-tertiary/50 border-border text-foreground-secondary hover:border-gold-500/50 hover:text-foreground"
+                      onClick={() => setSelectedCategoryTab("food")}
+                      className={`flex-1 sm:flex-none px-3.5 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors min-h-[36px] ${
+                        selectedCategoryTab === "food"
+                          ? "bg-gold-500 text-background"
+                          : "text-foreground-secondary hover:text-foreground"
                       }`}
                     >
-                      <span className="text-xs">{isSelected ? "✓" : "+"}</span>
-                      <span>{item.name}</span>
+                      {t("foodTab", { count: menuItems.filter((i) => i.type === "food").length })}
                     </button>
-                  );
-                })
-              )}
-            </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCategoryTab("drink")}
+                      className={`flex-1 sm:flex-none px-3.5 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors min-h-[36px] ${
+                        selectedCategoryTab === "drink"
+                          ? "bg-gold-500 text-background"
+                          : "text-foreground-secondary hover:text-foreground"
+                      }`}
+                    >
+                      {t("drinkTab", { count: menuItems.filter((i) => i.type === "drink").length })}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCategoryTab("category")}
+                      className={`flex-1 sm:flex-none px-3.5 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors min-h-[36px] ${
+                        selectedCategoryTab === "category"
+                          ? "bg-gold-500 text-background"
+                          : "text-foreground-secondary hover:text-foreground"
+                      }`}
+                    >
+                      {t("categoryTab", { count: categories.length })}
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder={t("searchMenuPlaceholder")}
+                    value={itemSearch}
+                    onChange={(e) => setItemSearch(e.target.value)}
+                    className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                  />
+                </div>
+
+                {/* Quick Pick Pills */}
+                <div className="max-h-48 overflow-y-auto border border-border/50 rounded-lg p-2.5 flex flex-wrap gap-2 bg-background">
+                  {displayItems.length === 0 ? (
+                    <span className="text-sm text-foreground-tertiary p-2">
+                      {t("noMenuItemsFound", { type: selectedCategoryTab })}
+                    </span>
+                  ) : (
+                    displayItems.map((item) => {
+                      const isSelected = currentIncludesArray.includes(item.name);
+                      return (
+                        <button
+                          type="button"
+                          key={item.id}
+                          onClick={() => toggleIncludeItem(item.name)}
+                          className={`px-3 py-1.5 text-sm rounded-lg border transition-all min-h-[36px] flex items-center gap-1.5 ${
+                            isSelected
+                              ? "bg-gold-500/20 border-gold-500 text-gold-400 font-medium"
+                              : "bg-background-tertiary/50 border-border text-foreground-secondary hover:border-gold-500/50 hover:text-foreground"
+                          }`}
+                        >
+                          <span className="text-xs">{isSelected ? "✓" : "+"}</span>
+                          <span>{item.name}</span>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="block text-sm text-foreground-secondary mb-1">
+              {t("notesLabel")}
+            </label>
+            <textarea
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              rows={3}
+              placeholder={t("notesPlaceholder")}
+              className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:border-gold-500"
+            />
+            <p className="text-xs text-foreground-tertiary mt-1">{t("notesHint")}</p>
           </div>
 
           <ImageUpload

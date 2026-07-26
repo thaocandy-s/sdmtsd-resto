@@ -8,6 +8,8 @@ export interface Buffet {
   minPeople: number | null;
   maxPeople: number | null;
   includes: string[];
+  isAllMenu: boolean;
+  notes: string | null;
   imageUrl: string | null;
   isPopular: boolean;
   sortOrder: number;
@@ -15,6 +17,12 @@ export interface Buffet {
 }
 
 export interface MenuItemOption {
+  id: string;
+  name: string;
+  type: "food" | "drink";
+}
+
+export interface CategoryOption {
   id: string;
   name: string;
   type: "food" | "drink";
@@ -29,6 +37,8 @@ export type BuffetFormData = {
   minPeople: string;
   maxPeople: string;
   includes: string;
+  isAllMenu: boolean;
+  notes: string;
   imageUrl: string;
   isPopular: boolean;
   sortOrder: string;
@@ -44,6 +54,8 @@ export const emptyBuffetForm: BuffetFormData = {
   minPeople: "",
   maxPeople: "",
   includes: "",
+  isAllMenu: false,
+  notes: "",
   imageUrl: "",
   isPopular: false,
   sortOrder: "0",
