@@ -87,6 +87,8 @@ export default function FoodMenuPage() {
       imageUrl: food.imageUrl || "",
       isPopular: food.isPopular,
       isRecommended: food.isRecommended,
+      ingredients: food.ingredients || "",
+      calories: food.calories?.toString() || "",
       status: food.status,
       sortOrder: food.sortOrder.toString(),
     });
@@ -105,6 +107,8 @@ export default function FoodMenuPage() {
       imageUrl: food.imageUrl || "",
       isPopular: food.isPopular,
       isRecommended: food.isRecommended,
+      ingredients: food.ingredients || "",
+      calories: food.calories?.toString() || "",
       status: "DRAFT",
       sortOrder: food.sortOrder.toString(),
     });

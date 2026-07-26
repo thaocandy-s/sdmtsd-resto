@@ -159,6 +159,29 @@ export function FoodFormModal({
             }}
             folder="food-menu"
           />
+          <div>
+            <label className="block text-sm text-foreground-secondary mb-1">
+              {t("caloriesLabel")}
+            </label>
+            <input
+              type="number"
+              value={form.calories}
+              onChange={(e) => setForm({ ...form, calories: e.target.value })}
+              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-foreground-secondary mb-1">
+              {t("ingredientsLabel")}
+            </label>
+            <textarea
+              value={form.ingredients}
+              onChange={(e) => setForm({ ...form, ingredients: e.target.value })}
+              rows={2}
+              placeholder={t("ingredientsPlaceholder")}
+              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+            />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-foreground-secondary mb-1">

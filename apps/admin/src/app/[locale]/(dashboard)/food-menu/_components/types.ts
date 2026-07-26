@@ -8,6 +8,8 @@ export interface Food {
   imageUrl: string | null;
   isPopular: boolean;
   isRecommended: boolean;
+  ingredients: string | null;
+  calories: number | null;
   status: string;
   sortOrder: number;
   category: { id: string; name: string };
@@ -33,6 +35,8 @@ export type FormData = {
   imageUrl: string;
   isPopular: boolean;
   isRecommended: boolean;
+  ingredients: string;
+  calories: string;
   status: string;
   sortOrder: string;
 };
@@ -54,6 +58,8 @@ export const emptyForm: FormData = {
   imageUrl: "",
   isPopular: false,
   isRecommended: false,
+  ingredients: "",
+  calories: "",
   status: "DRAFT",
   sortOrder: "0",
 };
