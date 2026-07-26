@@ -88,17 +88,41 @@ export function BuffetDetailContent({ course }: BuffetDetailContentProps) {
             )}
           </div>
 
-          {course.includes.length > 0 && (
+          {course.isAllMenu ? (
             <div>
               <h3 className="text-lg font-semibold text-foreground mb-3">{t("includes")}</h3>
-              <ul className="space-y-2">
-                {course.includes.map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-foreground-secondary">
-                    <span className="w-1.5 h-1.5 bg-gold-400 rounded-full" />
-                    {item}
-                  </li>
+              <p className="flex items-center gap-2 text-foreground-secondary">
+                <span className="w-1.5 h-1.5 bg-gold-400 rounded-full" />
+                {t("allMenu")}
+              </p>
+            </div>
+          ) : (
+            course.includes.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-3">{t("includes")}</h3>
+                <ul className="space-y-2">
+                  {course.includes.map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-foreground-secondary">
+                      <span className="w-1.5 h-1.5 bg-gold-400 rounded-full" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          )}
+
+          {course.notes && (
+            <div className="mt-6 space-y-1.5">
+              {course.notes
+                .split("\n")
+                .map((line) => line.trim())
+                .filter(Boolean)
+                .map((line, index) => (
+                  <p key={index} className="text-sm text-foreground-secondary">
+                    ※ {line}
+                  </p>
                 ))}
-              </ul>
             </div>
           )}
 

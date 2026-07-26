@@ -195,6 +195,8 @@ model BuffetCourse {
   minPeople   Int?
   maxPeople   Int?
   includes    String[]
+  isAllMenu   Boolean       @default(false)
+  notes       String?
   imageUrl    String?
   images      String[]
   isPopular   Boolean       @default(false)

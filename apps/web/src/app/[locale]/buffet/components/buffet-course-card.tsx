@@ -14,6 +14,8 @@ export interface BuffetCourse {
   minPeople: number | null;
   maxPeople: number | null;
   includes: string[];
+  isAllMenu: boolean;
+  notes: string | null;
   imageUrl: string | null;
   isPopular: boolean;
 }
@@ -77,19 +79,30 @@ export function BuffetCourseCard({ course }: BuffetCourseCardProps) {
                   : null}
           </p>
         )}
-        {course.includes.length > 0 && (
+        {course.isAllMenu ? (
           <div className="flex flex-wrap gap-1">
-            {course.includes.slice(0, 3).map((item) => (
-              <span key={item} className="px-2 py-0.5 bg-gold-500/10 text-gold-400 text-xs rounded">
-                {item}
-              </span>
-            ))}
-            {course.includes.length > 3 && (
-              <span className="px-2 py-0.5 text-foreground-tertiary text-xs">
-                {t("moreItems", { count: course.includes.length - 3 })}
-              </span>
-            )}
+            <span className="px-2 py-0.5 bg-gold-500/10 text-gold-400 text-xs rounded">
+              {t("allMenu")}
+            </span>
           </div>
+        ) : (
+          course.includes.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {course.includes.slice(0, 3).map((item) => (
+                <span
+                  key={item}
+                  className="px-2 py-0.5 bg-gold-500/10 text-gold-400 text-xs rounded"
+                >
+                  {item}
+                </span>
+              ))}
+              {course.includes.length > 3 && (
+                <span className="px-2 py-0.5 text-foreground-tertiary text-xs">
+                  {t("moreItems", { count: course.includes.length - 3 })}
+                </span>
+              )}
+            </div>
+          )
         )}
       </div>
     </Link>

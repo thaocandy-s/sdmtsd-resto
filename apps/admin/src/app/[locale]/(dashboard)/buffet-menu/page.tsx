@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
-import { Buffet, MenuItemOption, BuffetFormData, emptyBuffetForm } from "./_components/types";
+import {
+  Buffet,
+  MenuItemOption,
+  CategoryOption,
+  BuffetFormData,
+  emptyBuffetForm,
+} from "./_components/types";
 import { BuffetTable } from "./_components/BuffetTable";
 import { BuffetFormModal } from "./_components/BuffetFormModal";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
@@ -31,6 +37,7 @@ export default function BuffetMenuPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<BuffetFormData>(emptyBuffetForm);
   const [menuItems, setMenuItems] = useState<MenuItemOption[]>([]);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -48,9 +55,11 @@ export default function BuffetMenuPage() {
 
   const loadMenuItems = async () => {
     try {
-      const [foodRes, drinkRes] = await Promise.all([
+      const [foodRes, drinkRes, foodCatRes, drinkCatRes] = await Promise.all([
         api.get<{ data: { id: string; name: string }[] }>("/api/menu?limit=500"),
         api.get<{ data: { id: string; name: string }[] }>("/api/drink?limit=500"),
+        api.get<{ data: { id: string; name: string }[] }>("/api/menu/categories"),
+        api.get<{ data: { id: string; name: string }[] }>("/api/drink/categories"),
       ]);
       const foods: MenuItemOption[] = (foodRes.data || []).map((item) => ({
         id: item.id,
@@ -63,6 +72,17 @@ export default function BuffetMenuPage() {
         type: "drink",
       }));
       setMenuItems([...foods, ...drinks]);
+      const foodCats: CategoryOption[] = (foodCatRes.data || []).map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        type: "food",
+      }));
+      const drinkCats: CategoryOption[] = (drinkCatRes.data || []).map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        type: "drink",
+      }));
+      setCategories([...foodCats, ...drinkCats]);
     } catch (error) {
       console.error("Load menu items error:", error);
     }
@@ -102,12 +122,15 @@ export default function BuffetMenuPage() {
       const payload = {
         ...form,
         imageUrl: finalImageUrl,
-        includes: form.includes
-          ? form.includes
-              .split("\n")
-              .map((item) => item.trim())
-              .filter(Boolean)
-          : [],
+        includes: form.isAllMenu
+          ? []
+          : form.includes
+            ? form.includes
+                .split("\n")
+                .map((item) => item.trim())
+                .filter(Boolean)
+            : [],
+        notes: form.notes.trim() || null,
       };
       if (editingId) await api.put(`/api/buffet/${editingId}`, payload);
       else await api.post("/api/buffet", payload);
@@ -140,6 +163,8 @@ export default function BuffetMenuPage() {
           ? buffet.maxPeople.toString()
           : "",
       includes: Array.isArray(buffet.includes) ? buffet.includes.join("\n") : "",
+      isAllMenu: buffet.isAllMenu,
+      notes: buffet.notes || "",
       imageUrl: buffet.imageUrl || "",
       isPopular: buffet.isPopular,
       sortOrder: buffet.sortOrder?.toString() || "0",
@@ -220,6 +245,7 @@ export default function BuffetMenuPage() {
         editingId={editingId}
         form={form}
         menuItems={menuItems}
+        categories={categories}
         setForm={setForm}
         onClose={() => {
           setShowModal(false);
