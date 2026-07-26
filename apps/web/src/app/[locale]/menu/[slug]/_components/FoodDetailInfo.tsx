@@ -40,22 +40,6 @@ export function FoodDetailInfo({ food, formatPrice }: FoodDetailInfoProps) {
         <p className="text-sm text-foreground-secondary mb-4">{food.calories} kcal</p>
       )}
 
-      {food.allergens.length > 0 && (
-        <div className="mb-4">
-          <h3 className="text-sm font-medium text-foreground-secondary mb-2">{t("allergens")}</h3>
-          <div className="flex flex-wrap gap-2">
-            {food.allergens.map((allergen) => (
-              <span
-                key={allergen}
-                className="px-2 py-1 bg-orange-500/10 text-orange-400 text-xs rounded"
-              >
-                {allergen}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
       {food.ingredients && (
         <div className="mb-4">
           <h3 className="text-sm font-medium text-foreground-secondary mb-2">{t("ingredients")}</h3>

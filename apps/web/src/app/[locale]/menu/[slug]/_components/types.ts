@@ -9,7 +9,6 @@ export interface Food {
   images: string[];
   isPopular: boolean;
   isRecommended: boolean;
-  allergens: string[];
   ingredients: string | null;
   calories: number | null;
   category: {
