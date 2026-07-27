@@ -10,3 +10,4 @@ dist/
 .prisma/
 .env*
 docs/
+backups/
