@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { getRestaurant } from "@/lib/restaurant";
 import { BuffetDetailContent } from "../components/buffet-detail-content";
@@ -16,16 +17,35 @@ export async function generateStaticParams() {
   return courses.map(({ slug }) => ({ slug }));
 }
 
+// Deduplicated between generateMetadata and the page — one query per render
+const getCourse = cache((slug: string) =>
+  prisma.buffetCourse.findFirst({
+    where: { slug, deletedAt: null, status: "PUBLISHED" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      price: true,
+      duration: true,
+      minPeople: true,
+      maxPeople: true,
+      includes: true,
+      isAllMenu: true,
+      notes: true,
+      imageUrl: true,
+      isPopular: true,
+    },
+  })
+);
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const course = await prisma.buffetCourse.findFirst({
-    where: { slug, deletedAt: null, status: "PUBLISHED" },
-    select: { name: true, description: true, imageUrl: true },
-  });
+  const course = await getCourse(slug);
   if (!course) return {};
   return {
     title: course.name,
@@ -51,27 +71,7 @@ export default async function BuffetDetailPage({
   setRequestLocale(locale);
   const t = await getTranslations("buffet");
 
-  const [course, restaurant] = await Promise.all([
-    prisma.buffetCourse.findFirst({
-      where: { slug, deletedAt: null, status: "PUBLISHED" },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        description: true,
-        price: true,
-        duration: true,
-        minPeople: true,
-        maxPeople: true,
-        includes: true,
-        isAllMenu: true,
-        notes: true,
-        imageUrl: true,
-        isPopular: true,
-      },
-    }),
-    getRestaurant(),
-  ]);
+  const [course, restaurant] = await Promise.all([getCourse(slug), getRestaurant()]);
 
   if (!course) {
     return (

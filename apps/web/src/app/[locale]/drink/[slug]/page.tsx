@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { DrinkDetail } from "./_components/DrinkDetail";
 
@@ -15,16 +16,34 @@ export async function generateStaticParams() {
   return drinks.map(({ slug }) => ({ slug }));
 }
 
+// Deduplicated between generateMetadata and the page — one query per render
+const getDrink = cache((slug: string) =>
+  prisma.drink.findFirst({
+    where: { slug, deletedAt: null, status: "PUBLISHED" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      price: true,
+      originalPrice: true,
+      imageUrl: true,
+      images: true,
+      isPopular: true,
+      alcoholPercent: true,
+      volume: true,
+      category: { select: { id: true, name: true, slug: true } },
+    },
+  })
+);
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const drink = await prisma.drink.findFirst({
-    where: { slug, deletedAt: null, status: "PUBLISHED" },
-    select: { name: true, description: true, imageUrl: true },
-  });
+  const drink = await getDrink(slug);
   if (!drink) return {};
   return {
     title: drink.name,
@@ -50,23 +69,7 @@ export default async function DrinkDetailPage({
   setRequestLocale(locale);
   const t = await getTranslations("drink");
 
-  const drink = await prisma.drink.findFirst({
-    where: { slug, deletedAt: null, status: "PUBLISHED" },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
-      price: true,
-      originalPrice: true,
-      imageUrl: true,
-      images: true,
-      isPopular: true,
-      alcoholPercent: true,
-      volume: true,
-      category: { select: { id: true, name: true, slug: true } },
-    },
-  });
+  const drink = await getDrink(slug);
 
   if (!drink) {
     return (
