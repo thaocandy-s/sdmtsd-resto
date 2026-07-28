@@ -44,7 +44,7 @@ export const animations = {
   slideInRight,
 };
 
-interface AnimatedSectionProps extends HTMLMotionProps<"section"> {
+export interface AnimatedSectionProps extends HTMLMotionProps<"section"> {
   children: React.ReactNode;
 }
 

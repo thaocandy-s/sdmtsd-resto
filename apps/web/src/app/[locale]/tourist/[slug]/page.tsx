@@ -1,45 +1,73 @@
-"use client";
-
-import { useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { TourPlace } from "./_components/types";
-import { TourPlaceImages } from "./_components/TourPlaceImages";
-import { TourPlaceInfo } from "./_components/TourPlaceInfo";
-import { TourPlaceLightbox } from "./_components/TourPlaceLightbox";
+import { prisma } from "@/lib/prisma";
+import { TourPlaceDetail } from "./_components/TourPlaceDetail";
 
-export default function TouristDetailPage() {
-  const t = useTranslations("tourist");
-  const params = useParams();
-  const slug = params.slug as string;
-  const [place, setPlace] = useState<TourPlace | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+// ISR: serve cached HTML, regenerate at most every 5 minutes
+export const revalidate = 300;
 
-  useEffect(() => {
-    if (slug) {
-      fetch(`/api/tourist/${slug}`)
-        .then((r) => r.json())
-        .then((data) => setPlace(data.data))
-        .catch(console.error)
-        .finally(() => setLoading(false));
-    }
-  }, [slug]);
+export async function generateStaticParams() {
+  const places = await prisma.tourPlace.findMany({
+    where: { deletedAt: null, isPublished: true },
+    select: { slug: true },
+  });
+  return places.map(({ slug }) => ({ slug }));
+}
 
-  if (loading) {
-    return (
-      <main className="max-w-4xl mx-auto px-4 py-12">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-background-secondary rounded w-1/3" />
-          <div className="h-64 bg-background-secondary rounded-lg" />
-          <div className="h-4 bg-background-secondary rounded w-2/3" />
-          <div className="h-4 bg-background-secondary rounded" />
-          <div className="h-4 bg-background-secondary rounded" />
-        </div>
-      </main>
-    );
-  }
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const place = await prisma.tourPlace.findFirst({
+    where: { slug, deletedAt: null, isPublished: true },
+    select: { name: true, description: true, imageUrl: true },
+  });
+  if (!place) return {};
+  return {
+    title: place.name,
+    description: place.description || undefined,
+    alternates: {
+      canonical: `/${locale}/tourist/${slug}`,
+      languages: { en: `/en/tourist/${slug}`, ja: `/ja/tourist/${slug}` },
+    },
+    openGraph: {
+      title: place.name,
+      description: place.description || undefined,
+      images: place.imageUrl ? [place.imageUrl] : undefined,
+    },
+  };
+}
+
+export default async function TouristDetailPage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("tourist");
+
+  const place = await prisma.tourPlace.findFirst({
+    where: { slug, deletedAt: null, isPublished: true },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      address: true,
+      latitude: true,
+      longitude: true,
+      websiteUrl: true,
+      phone: true,
+      imageUrl: true,
+      images: true,
+      openingHours: true,
+      category: { select: { id: true, name: true, slug: true } },
+    },
+  });
 
   if (!place) {
     return (
@@ -52,52 +80,5 @@ export default function TouristDetailPage() {
     );
   }
 
-  return (
-    <main className="max-w-4xl mx-auto px-4 py-12">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-foreground-secondary mb-6">
-        <Link href="/tourist" className="hover:text-gold-400 transition-colors">
-          {t("title")}
-        </Link>
-        <span>/</span>
-        <span className="text-foreground">{place.name}</span>
-      </nav>
-
-      {/* Header */}
-      <div className="mb-6">
-        <span className="inline-block px-3 py-1 bg-gold-500/10 text-gold-400 rounded-full text-sm mb-3">
-          {place.category.name}
-        </span>
-        <h1 className="text-4xl font-jp font-bold text-gold-400 mb-2">{place.name}</h1>
-      </div>
-
-      {/* Images section */}
-      <TourPlaceImages
-        name={place.name}
-        imageUrl={place.imageUrl}
-        images={place.images}
-        onSelectImage={setSelectedImage}
-      />
-
-      {/* Description & Info section */}
-      <TourPlaceInfo place={place} />
-
-      {/* Back Link */}
-      <div className="text-center">
-        <Link
-          href="/tourist"
-          className="inline-block text-gold-400 hover:text-gold-300 font-medium"
-        >
-          &larr; {t("backToList")}
-        </Link>
-      </div>
-
-      {/* Lightbox Modal */}
-      <TourPlaceLightbox
-        selectedImage={selectedImage}
-        name={place.name}
-        onClose={() => setSelectedImage(null)}
-      />
-    </main>
-  );
+  return <TourPlaceDetail place={place} />;
 }

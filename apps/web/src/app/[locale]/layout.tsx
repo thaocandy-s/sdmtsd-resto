@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans, Noto_Sans_JP } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Header } from "@/shared/components/header";
@@ -21,13 +21,23 @@ const notoSansJP = Noto_Sans_JP({
   preload: false,
 });
 
-import { prisma } from "@/lib/prisma";
+import { getRestaurant } from "@/lib/restaurant";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const restaurant = await prisma.restaurant.findFirst({
-    where: { isActive: true },
-  });
+const baseUrl = process.env.NEXT_PUBLIC_WEB_URL || "https://restohub.com";
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const restaurant = await getRestaurant();
   return {
+    metadataBase: new URL(baseUrl),
     title: {
       default: restaurant?.name || "Resto Hub - Japanese Restaurant",
       template: `%s | ${restaurant?.name || "Resto Hub"}`,
@@ -35,6 +45,20 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       restaurant?.description ||
       "Experience authentic Japanese cuisine in an elegant, traditional atmosphere.",
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        en: "/en",
+        ja: "/ja",
+        "x-default": "/en",
+      },
+    },
+    openGraph: {
+      type: "website",
+      siteName: restaurant?.name || "Resto Hub",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
+      images: restaurant?.logoUrl ? [restaurant.logoUrl] : undefined,
+    },
     icons: {
       icon: restaurant?.faviconUrl || "/favicon.ico",
       shortcut: restaurant?.faviconUrl || "/favicon.ico",
@@ -57,10 +81,9 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const [messages, restaurant] = await Promise.all([
-    getMessages(),
-    prisma.restaurant.findFirst({ where: { isActive: true } }),
-  ]);
+  setRequestLocale(locale);
+
+  const [messages, restaurant] = await Promise.all([getMessages(), getRestaurant()]);
 
   const headerInfo = restaurant
     ? {
@@ -78,9 +101,39 @@ export default async function LocaleLayout({
       }
     : undefined;
 
+  // Restaurant structured data for search engines
+  const restaurantJsonLd = restaurant
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Restaurant",
+        name: restaurant.name,
+        description: restaurant.description || undefined,
+        url: baseUrl,
+        telephone: restaurant.phone || undefined,
+        email: restaurant.email || undefined,
+        address: restaurant.address || undefined,
+        image: restaurant.logoUrl || undefined,
+        servesCuisine: "Japanese",
+        geo:
+          restaurant.latitude != null && restaurant.longitude != null
+            ? {
+                "@type": "GeoCoordinates",
+                latitude: restaurant.latitude,
+                longitude: restaurant.longitude,
+              }
+            : undefined,
+      }
+    : null;
+
   return (
     <html lang={locale} className="dark" suppressHydrationWarning>
       <body className={`${notoSans.variable} ${notoSansJP.variable} font-sans`}>
+        {restaurantJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantJsonLd) }}
+          />
+        )}
         <NextIntlClientProvider locale={locale} messages={messages}>
           <div className="min-h-screen bg-background text-foreground pb-16 lg:pb-0">
             <Header initialInfo={headerInfo} />

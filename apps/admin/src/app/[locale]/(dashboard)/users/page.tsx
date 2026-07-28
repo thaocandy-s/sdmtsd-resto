@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
+import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 interface User {
@@ -35,12 +37,10 @@ interface PaginationMeta {
 
 export default function UsersPage() {
   const { hasPermission } = useAuthStore();
-  const [users, setUsers] = useState<User[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [meta, setMeta] = useState<PaginationMeta | null>(null);
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const debouncedSearch = useDebouncedValue(search);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
@@ -52,41 +52,33 @@ export default function UsersPage() {
     isActive: true,
   });
 
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    try {
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  const usersQuery = useQuery({
+    queryKey: ["users", { page, search: debouncedSearch }],
+    queryFn: () => {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: "20",
       });
-      if (search) params.set("search", search);
+      if (debouncedSearch) params.set("search", debouncedSearch);
+      return api.get<{ data: User[]; meta: PaginationMeta }>(`/api/users?${params}`);
+    },
+    placeholderData: keepPreviousData,
+  });
 
-      const response = await api.get<{ data: User[]; meta: PaginationMeta }>(`/users?${params}`);
-      setUsers(response.data);
-      setMeta(response.meta);
-    } catch (error) {
-      console.error("Failed to fetch users:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, search]);
+  const rolesQuery = useQuery({
+    queryKey: ["roles"],
+    queryFn: () => api.get<{ data: Role[] }>("/api/roles"),
+    staleTime: 30 * 60 * 1000,
+  });
 
-  const fetchRoles = useCallback(async () => {
-    try {
-      const response = await api.get<{ data: Role[] }>("/roles");
-      setRoles(response.data);
-    } catch (error) {
-      console.error("Failed to fetch roles:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
-  useEffect(() => {
-    fetchRoles();
-  }, [fetchRoles]);
+  const users = usersQuery.data?.data ?? [];
+  const meta = usersQuery.data?.meta ?? null;
+  const roles = rolesQuery.data?.data ?? [];
+  const loading = usersQuery.isPending;
 
   const handleCreate = () => {
     setEditingUser(null);
@@ -123,8 +115,8 @@ export default function UsersPage() {
   const handleConfirmDelete = async () => {
     if (!deleteConfirmUser) return;
     try {
-      await api.delete(`/users/${deleteConfirmUser.id}`);
-      fetchUsers();
+      await api.delete(`/api/users/${deleteConfirmUser.id}`);
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     } catch (error) {
       console.error("Failed to delete user:", error);
       alert("Failed to delete user");
@@ -148,12 +140,12 @@ export default function UsersPage() {
         if (formData.password) {
           updateData.password = formData.password;
         }
-        await api.put(`/users/${editingUser.id}`, updateData);
+        await api.put(`/api/users/${editingUser.id}`, updateData);
       } else {
-        await api.post("/users", formData);
+        await api.post("/api/users", formData);
       }
       setShowModal(false);
-      fetchUsers();
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     } catch (error) {
       console.error("Failed to save user:", error);
       alert("Failed to save user");
@@ -189,7 +181,6 @@ export default function UsersPage() {
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
-            setPage(1);
           }}
           className="flex-1 h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground-tertiary focus:outline-none focus:ring-2 focus:ring-gold-500"
         />

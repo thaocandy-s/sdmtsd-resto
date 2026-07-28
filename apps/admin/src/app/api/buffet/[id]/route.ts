@@ -2,50 +2,41 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
 import { deleteMediaByUrl } from "@/lib/supabase";
+import { buffetUpdateSchema } from "@/lib/validation";
 
 export const PUT = withAuthParams(
   async (request, { params }) => {
     try {
       const body = await request.json();
+      const parsed = buffetUpdateSchema.safeParse(body);
+
+      if (!parsed.success) {
+        return NextResponse.json(
+          { message: "Invalid input", errors: parsed.error.flatten().fieldErrors },
+          { status: 400 }
+        );
+      }
+
+      const data = parsed.data;
       const existing = await prisma.buffetCourse.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Buffet not found" }, { status: 404 });
 
-      if (body.imageUrl !== undefined && body.imageUrl !== existing.imageUrl) {
-        await deleteMediaByUrl(existing.imageUrl);
-      }
-
-      if (body.slug && body.slug !== existing.slug) {
-        const slugExists = await prisma.buffetCourse.findUnique({ where: { slug: body.slug } });
+      if (data.slug && data.slug !== existing.slug) {
+        const slugExists = await prisma.buffetCourse.findUnique({ where: { slug: data.slug } });
         if (slugExists)
           return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
       }
 
       const buffet = await prisma.buffetCourse.update({
         where: { id: params.id },
-        data: {
-          ...body,
-          price: body.price !== undefined ? parseInt(body.price) : undefined,
-          duration: body.duration !== undefined ? parseInt(body.duration) : undefined,
-          minPeople:
-            body.minPeople !== undefined
-              ? body.minPeople
-                ? parseInt(body.minPeople)
-                : null
-              : undefined,
-          maxPeople:
-            body.maxPeople !== undefined
-              ? body.maxPeople
-                ? parseInt(body.maxPeople)
-                : null
-              : undefined,
-          sortOrder:
-            body.sortOrder !== undefined
-              ? body.sortOrder
-                ? parseInt(body.sortOrder)
-                : 0
-              : undefined,
-        },
+        data,
       });
+
+      // DB updated successfully — now it is safe to remove the replaced image
+      if (data.imageUrl !== undefined && data.imageUrl !== existing.imageUrl) {
+        await deleteMediaByUrl(existing.imageUrl);
+      }
+
       return NextResponse.json({ data: buffet });
     } catch (error) {
       console.error("Update buffet error:", error);
@@ -61,13 +52,14 @@ export const DELETE = withAuthParams(
     try {
       const existing = await prisma.buffetCourse.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Buffet not found" }, { status: 404 });
-      if (existing.imageUrl) {
-        await deleteMediaByUrl(existing.imageUrl);
-      }
+      // Soft delete first, then clean up storage
       await prisma.buffetCourse.update({
         where: { id: params.id },
         data: { deletedAt: new Date() },
       });
+      if (existing.imageUrl) {
+        await deleteMediaByUrl(existing.imageUrl);
+      }
       return NextResponse.json({ message: "Buffet deleted successfully" });
     } catch (error) {
       console.error("Delete buffet error:", error);

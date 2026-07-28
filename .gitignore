@@ -9,3 +9,5 @@ dist/
 .vercel
 .prisma/
 .env*
+docs/
+backups/

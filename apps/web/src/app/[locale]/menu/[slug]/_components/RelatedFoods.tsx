@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import Link from "next/link";
 import { RelatedFood } from "./types";
 
@@ -26,12 +27,14 @@ export function RelatedFoods({ related, formatPrice }: RelatedFoodsProps) {
             href={`/menu/${item.slug}`}
             className="group bg-background-secondary border border-border rounded-lg overflow-hidden hover:border-gold-500/50 transition-all"
           >
-            <div className="aspect-square bg-background-tertiary">
+            <div className="relative aspect-square bg-background-tertiary">
               {item.imageUrl ? (
-                <img
+                <Image
                   src={item.imageUrl}
                   alt={item.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  fill
+                  sizes="(min-width: 768px) 25vw, 50vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-foreground-tertiary text-sm">

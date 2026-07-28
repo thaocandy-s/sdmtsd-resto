@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { DashboardStatsGrid } from "./_components/DashboardStatsGrid";
@@ -53,22 +54,16 @@ interface DashboardData {
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const tContact = useTranslations("contact");
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
-  const loadData = async () => {
-    try {
-      const res = await api.get<{ data: DashboardData }>("/api/dashboard/stats");
-      setData(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const dashboardQuery = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: () => api.get<{ data: DashboardData }>("/api/dashboard/stats"),
+  });
 
-  useEffect(() => {
-    loadData().finally(() => setLoading(false));
-  }, []);
+  const data = dashboardQuery.data?.data ?? null;
+  const loading = dashboardQuery.isPending;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -88,7 +83,8 @@ export default function DashboardPage() {
     if (!contact.isRead) {
       try {
         await api.put(`/api/contact/${contact.id}`, { status: contact.status, isRead: true });
-        loadData();
+        queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+        queryClient.invalidateQueries({ queryKey: ["contacts"] });
       } catch (error) {
         console.error("Mark read error:", error);
       }
@@ -98,7 +94,8 @@ export default function DashboardPage() {
   const updateStatus = async (id: string, status: string) => {
     try {
       await api.put(`/api/contact/${id}`, { status });
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
       setSelectedContact(null);
     } catch (error) {
       console.error("Update status error:", error);
@@ -115,7 +112,8 @@ export default function DashboardPage() {
     if (!deleteConfirmId) return;
     try {
       await api.delete(`/api/contact/${deleteConfirmId}`);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
       setSelectedContact(null);
     } catch (error) {
       console.error("Delete error:", error);

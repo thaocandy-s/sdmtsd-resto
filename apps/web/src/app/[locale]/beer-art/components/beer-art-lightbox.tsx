@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { BeerArt } from "./beer-art-card";
 
 interface BeerArtLightboxProps {
@@ -34,6 +35,9 @@ export function BeerArtLightbox({ item, onClose }: BeerArtLightboxProps) {
     <div
       className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={item.title}
     >
       <div className="max-w-4xl max-h-[90vh] relative" onClick={(e) => e.stopPropagation()}>
         <button
@@ -43,10 +47,13 @@ export function BeerArtLightbox({ item, onClose }: BeerArtLightboxProps) {
         >
           &times;
         </button>
-        <img
+        <Image
           src={item.imageUrl}
           alt={item.title}
-          className="max-w-full max-h-[80vh] object-contain rounded-lg"
+          width={1200}
+          height={1200}
+          sizes="90vw"
+          className="max-w-full max-h-[80vh] w-auto h-auto object-contain rounded-lg"
         />
         <div className="mt-4 text-center text-white">
           <h3 className="text-xl font-semibold flex items-center justify-center gap-2">

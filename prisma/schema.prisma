@@ -24,6 +24,8 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
+
+  @@index([roleId])
 }
 
 model Role {
@@ -44,6 +46,8 @@ model Permission {
   module    String
   action    String
   createdAt DateTime @default(now())
+
+  @@index([roleId])
 }
 
 model RefreshToken {
@@ -53,6 +57,8 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime  @default(now())
   revokedAt DateTime?
+
+  @@index([userId])
 }
 
 // ===== RESTAURANT =====
@@ -96,6 +102,8 @@ model HeroBanner {
   endDate        DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+
+  @@index([isActive, sortOrder])
 }
 
 model Event {
@@ -109,6 +117,8 @@ model Event {
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
 }
 
 // ===== FOOD MENU =====
@@ -122,6 +132,8 @@ model FoodCategory {
   foods     Food[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
 }
 
 model Food {
@@ -145,6 +157,9 @@ model Food {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   deletedAt     DateTime?
+
+  @@index([categoryId])
+  @@index([deletedAt, status, sortOrder])
 }
 
 // ===== DRINK MENU =====
@@ -159,6 +174,8 @@ model DrinkCategory {
   drinks      Drink[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
 }
 
 model Drink {
@@ -181,6 +198,9 @@ model Drink {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   deletedAt      DateTime?
+
+  @@index([categoryId])
+  @@index([deletedAt, status, sortOrder])
 }
 
 // ===== BUFFET =====
@@ -205,6 +225,8 @@ model BuffetCourse {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   deletedAt   DateTime?
+
+  @@index([deletedAt, status, sortOrder])
 }
 
 // ===== BEER ART =====
@@ -222,6 +244,8 @@ model BeerArt {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   deletedAt    DateTime?
+
+  @@index([isPublished, sortOrder])
 }
 
 // ===== KATANUKI CHALLENGE =====
@@ -237,6 +261,8 @@ model KatanukiWinner {
   isPublished     Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@index([isPublished, sortOrder])
 }
 
 model KatanukiRule {
@@ -247,6 +273,8 @@ model KatanukiRule {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
 }
 
 // ===== TOURIST GUIDE =====
@@ -260,6 +288,8 @@ model TourCategory {
   places    TourPlace[]
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+
+  @@index([isActive, sortOrder])
 }
 
 model TourPlace {
@@ -282,6 +312,9 @@ model TourPlace {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   deletedAt    DateTime?
+
+  @@index([categoryId])
+  @@index([isPublished, sortOrder])
 }
 
 // ===== FAQ =====
@@ -295,6 +328,8 @@ model FaqCategory {
   faqs      Faq[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
 }
 
 model Faq {
@@ -308,6 +343,9 @@ model Faq {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   deletedAt   DateTime?
+
+  @@index([categoryId])
+  @@index([isPublished, sortOrder])
 }
 
 // ===== RESERVATION =====
@@ -325,6 +363,8 @@ model Reservation {
   status    ReservationStatus @default(PENDING)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
+
+  @@index([status, date])
 }
 
 // ===== CONTACT =====
@@ -340,6 +380,8 @@ model Contact {
   status    ContactStatus @default(NEW)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+
+  @@index([isRead, status, createdAt])
 }
 
 // ===== MEDIA LIBRARY =====
@@ -402,6 +444,8 @@ model AuditLog {
   ipAddress String?
   userAgent String?
   createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 // ===== ANALYTICS =====
@@ -439,6 +483,8 @@ model PageView {
   referrer  String?
   country   String?
   createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 // ===== ENUMS =====

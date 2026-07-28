@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import {
   Buffet,
   MenuItemOption,
@@ -18,97 +20,100 @@ import { uploadImage } from "@/shared/components/image-upload";
 export default function BuffetMenuPage() {
   const t = useTranslations("buffetMenu");
   const tc = useTranslations("common");
-  const [buffets, setBuffets] = useState<Buffet[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   // Delete confirmation state
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
 
   // Filter states
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search);
   const [filterStatus, setFilterStatus] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<BuffetFormData>(emptyBuffetForm);
-  const [menuItems, setMenuItems] = useState<MenuItemOption[]>([]);
-  const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    loadMenuItems();
-  }, []);
-
-  useEffect(() => {
     setCurrentPage(1);
-  }, [search, filterStatus]);
+  }, [debouncedSearch, filterStatus]);
 
-  useEffect(() => {
-    loadData();
-  }, [currentPage, search, filterStatus]);
+  const buffetsQuery = useQuery({
+    queryKey: ["buffets", { page: currentPage, search: debouncedSearch, status: filterStatus }],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (debouncedSearch) params.set("search", debouncedSearch);
+      if (filterStatus) params.set("status", filterStatus);
+      params.set("page", currentPage.toString());
+      params.set("limit", "10");
+      return api.get<{ data: Buffet[]; meta?: { totalPages: number; total: number } }>(
+        `/api/buffet?${params.toString()}`
+      );
+    },
+    placeholderData: keepPreviousData,
+  });
 
-  const loadMenuItems = async () => {
-    try {
+  // Heavy food/drink picker options are only fetched once the form modal opens
+  const pickerOptionsQuery = useQuery({
+    queryKey: ["buffet-picker-options"],
+    enabled: showModal,
+    staleTime: 30 * 60 * 1000,
+    queryFn: async () => {
       const [foodRes, drinkRes, foodCatRes, drinkCatRes] = await Promise.all([
         api.get<{ data: { id: string; name: string }[] }>("/api/menu?limit=500"),
         api.get<{ data: { id: string; name: string }[] }>("/api/drink?limit=500"),
         api.get<{ data: { id: string; name: string }[] }>("/api/menu/categories"),
         api.get<{ data: { id: string; name: string }[] }>("/api/drink/categories"),
       ]);
-      const foods: MenuItemOption[] = (foodRes.data || []).map((item) => ({
-        id: item.id,
-        name: item.name,
-        type: "food",
-      }));
-      const drinks: MenuItemOption[] = (drinkRes.data || []).map((item) => ({
-        id: item.id,
-        name: item.name,
-        type: "drink",
-      }));
-      setMenuItems([...foods, ...drinks]);
-      const foodCats: CategoryOption[] = (foodCatRes.data || []).map((cat) => ({
-        id: cat.id,
-        name: cat.name,
-        type: "food",
-      }));
-      const drinkCats: CategoryOption[] = (drinkCatRes.data || []).map((cat) => ({
-        id: cat.id,
-        name: cat.name,
-        type: "drink",
-      }));
-      setCategories([...foodCats, ...drinkCats]);
-    } catch (error) {
-      console.error("Load menu items error:", error);
-    }
-  };
+      const menuItems: MenuItemOption[] = [
+        ...(foodRes.data || []).map((item) => ({
+          id: item.id,
+          name: item.name,
+          type: "food" as const,
+        })),
+        ...(drinkRes.data || []).map((item) => ({
+          id: item.id,
+          name: item.name,
+          type: "drink" as const,
+        })),
+      ];
+      const categories: CategoryOption[] = [
+        ...(foodCatRes.data || []).map((cat) => ({
+          id: cat.id,
+          name: cat.name,
+          type: "food" as const,
+        })),
+        ...(drinkCatRes.data || []).map((cat) => ({
+          id: cat.id,
+          name: cat.name,
+          type: "drink" as const,
+        })),
+      ];
+      return { menuItems, categories };
+    },
+  });
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (search) params.set("search", search);
-      if (filterStatus) params.set("status", filterStatus);
-      params.set("page", currentPage.toString());
-      params.set("limit", "10");
+  const buffets = buffetsQuery.data?.data ?? [];
+  const totalPages = buffetsQuery.data?.meta?.totalPages ?? 1;
+  const totalItems = buffetsQuery.data?.meta?.total ?? 0;
+  const loading = buffetsQuery.isPending;
+  const menuItems = pickerOptionsQuery.data?.menuItems ?? [];
+  const categories = pickerOptionsQuery.data?.categories ?? [];
 
-      const res = await api.get<{ data: Buffet[]; meta?: { totalPages: number; total: number } }>(
-        `/api/buffet?${params.toString()}`
-      );
-      setBuffets(res.data || []);
-      setTotalPages(res.meta?.totalPages || 1);
-      setTotalItems(res.meta?.total || 0);
-    } catch (error) {
-      console.error("Load buffets error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/api/buffet/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["buffets"] });
+    },
+    onError: (error) => {
+      console.error("Delete buffet error:", error);
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,7 +143,7 @@ export default function BuffetMenuPage() {
       setEditingId(null);
       setForm(emptyBuffetForm);
       setImageFile(null);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["buffets"] });
     } catch (error) {
       console.error("Save buffet error:", error);
     } finally {
@@ -178,15 +183,10 @@ export default function BuffetMenuPage() {
     setDeleteConfirmId(id);
   };
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = () => {
     if (!deleteConfirmId) return;
-    try {
-      await api.delete(`/api/buffet/${deleteConfirmId}`);
-      setDeleteConfirmId(null);
-      loadData();
-    } catch (error) {
-      console.error("Delete buffet error:", error);
-    }
+    deleteMutation.mutate(deleteConfirmId);
+    setDeleteConfirmId(null);
   };
 
   return (

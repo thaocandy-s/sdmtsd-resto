@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
+import { foodCreateSchema } from "@/lib/validation";
 
 // GET /api/menu - List all foods (admin)
 export const GET = withAuth(async (request: NextRequest) => {
@@ -57,6 +58,15 @@ export const POST = withAuth(
   async (request: NextRequest) => {
     try {
       const body = await request.json();
+      const parsed = foodCreateSchema.safeParse(body);
+
+      if (!parsed.success) {
+        return NextResponse.json(
+          { message: "Invalid input", errors: parsed.error.flatten().fieldErrors },
+          { status: 400 }
+        );
+      }
+
       const {
         name,
         slug,
@@ -72,14 +82,7 @@ export const POST = withAuth(
         calories,
         sortOrder,
         status,
-      } = body;
-
-      if (!name || !slug || !categoryId || price === undefined) {
-        return NextResponse.json(
-          { message: "Name, slug, category, and price are required" },
-          { status: 400 }
-        );
-      }
+      } = parsed.data;
 
       const existing = await prisma.food.findUnique({ where: { slug } });
       if (existing) {
@@ -91,16 +94,16 @@ export const POST = withAuth(
           name,
           slug,
           description,
-          price: parseInt(price),
-          originalPrice: originalPrice ? parseInt(originalPrice) : null,
+          price,
+          originalPrice,
           categoryId,
           imageUrl,
           images: images || [],
           isPopular: isPopular || false,
           isRecommended: isRecommended || false,
           ingredients,
-          calories: calories ? parseInt(calories) : null,
-          sortOrder: sortOrder ? parseInt(sortOrder) : 0,
+          calories,
+          sortOrder: sortOrder ?? 0,
           status: status || "DRAFT",
         },
         include: { category: true },

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { formatPriceWithTax } from "@resto-hub/utils";
@@ -37,10 +38,12 @@ export function BuffetCourseCard({ course }: BuffetCourseCardProps) {
     >
       <div className="relative h-48 bg-background-tertiary">
         {course.imageUrl ? (
-          <img
+          <Image
             src={course.imageUrl}
             alt={course.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-foreground-tertiary">

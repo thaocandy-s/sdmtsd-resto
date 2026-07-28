@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 export interface Winner {
   id: string;
@@ -20,13 +21,14 @@ export function WinnerCard({ winner }: WinnerCardProps) {
 
   return (
     <div className="bg-background-secondary border border-border rounded-lg overflow-hidden">
-      <div className="aspect-square bg-background-tertiary">
+      <div className="relative aspect-square bg-background-tertiary">
         {winner.imageUrl ? (
-          <img
+          <Image
             src={winner.imageUrl}
             alt={winner.participantName}
-            className="w-full h-full object-cover"
-            loading="lazy"
+            fill
+            sizes="(min-width: 768px) 25vw, 50vw"
+            className="object-cover"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-foreground-tertiary">

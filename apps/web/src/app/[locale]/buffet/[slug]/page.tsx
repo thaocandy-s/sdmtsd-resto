@@ -1,33 +1,77 @@
-"use client";
-
-import { useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { BuffetCourse } from "../components/buffet-course-card";
+import { prisma } from "@/lib/prisma";
+import { getRestaurant } from "@/lib/restaurant";
 import { BuffetDetailContent } from "../components/buffet-detail-content";
-import { BuffetDetailSkeleton } from "../components/buffet-skeleton";
 
-export default function BuffetDetailPage() {
-  const t = useTranslations("buffet");
-  const params = useParams();
-  const slug = params.slug as string;
-  const [course, setCourse] = useState<BuffetCourse | null>(null);
-  const [loading, setLoading] = useState(true);
+// ISR: serve cached HTML, regenerate at most every 5 minutes
+export const revalidate = 300;
 
-  useEffect(() => {
-    if (slug) {
-      fetch(`/api/buffet/${slug}`)
-        .then((r) => r.json())
-        .then((data) => setCourse(data.data))
-        .catch(console.error)
-        .finally(() => setLoading(false));
-    }
-  }, [slug]);
+export async function generateStaticParams() {
+  const courses = await prisma.buffetCourse.findMany({
+    where: { deletedAt: null, status: "PUBLISHED" },
+    select: { slug: true },
+  });
+  return courses.map(({ slug }) => ({ slug }));
+}
 
-  if (loading) {
-    return <BuffetDetailSkeleton />;
-  }
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const course = await prisma.buffetCourse.findFirst({
+    where: { slug, deletedAt: null, status: "PUBLISHED" },
+    select: { name: true, description: true, imageUrl: true },
+  });
+  if (!course) return {};
+  return {
+    title: course.name,
+    description: course.description || undefined,
+    alternates: {
+      canonical: `/${locale}/buffet/${slug}`,
+      languages: { en: `/en/buffet/${slug}`, ja: `/ja/buffet/${slug}` },
+    },
+    openGraph: {
+      title: course.name,
+      description: course.description || undefined,
+      images: course.imageUrl ? [course.imageUrl] : undefined,
+    },
+  };
+}
+
+export default async function BuffetDetailPage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("buffet");
+
+  const [course, restaurant] = await Promise.all([
+    prisma.buffetCourse.findFirst({
+      where: { slug, deletedAt: null, status: "PUBLISHED" },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        price: true,
+        duration: true,
+        minPeople: true,
+        maxPeople: true,
+        includes: true,
+        isAllMenu: true,
+        notes: true,
+        imageUrl: true,
+        isPopular: true,
+      },
+    }),
+    getRestaurant(),
+  ]);
 
   if (!course) {
     return (
@@ -40,5 +84,5 @@ export default function BuffetDetailPage() {
     );
   }
 
-  return <BuffetDetailContent course={course} />;
+  return <BuffetDetailContent course={course} phone={restaurant?.phone || "+81-3-1234-5678"} />;
 }

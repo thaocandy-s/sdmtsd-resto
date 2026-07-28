@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { AnalyticsData } from "./_components/types";
 import { AnalyticsSummaryCards } from "./_components/AnalyticsSummaryCards";
@@ -11,25 +12,16 @@ import { DailyVisitorsTable } from "./_components/DailyVisitorsTable";
 
 export default function AnalyticsPage() {
   const t = useTranslations("analytics");
-  const [data, setData] = useState<AnalyticsData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
 
-  useEffect(() => {
-    loadData();
-  }, [days]);
+  const analyticsQuery = useQuery({
+    queryKey: ["analytics", { days }],
+    queryFn: () => api.get<{ data: AnalyticsData }>(`/api/analytics?days=${days}`),
+    placeholderData: keepPreviousData,
+  });
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get<{ data: AnalyticsData }>(`/api/analytics?days=${days}`);
-      setData(res.data);
-    } catch (error) {
-      console.error("Load error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const data = analyticsQuery.data?.data ?? null;
+  const loading = analyticsQuery.isPending;
 
   if (loading) {
     return (

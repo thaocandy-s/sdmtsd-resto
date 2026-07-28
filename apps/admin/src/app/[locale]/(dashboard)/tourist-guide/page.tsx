@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { Place, Category } from "./_components/types";
 import { PlaceFormModal } from "./_components/PlaceFormModal";
@@ -14,21 +15,13 @@ import { ConfirmModal } from "@/shared/components/confirm-modal";
 export default function TouristGuidePage() {
   const t = useTranslations("touristGuide");
   const tc = useTranslations("common");
+  const queryClient = useQueryClient();
 
   const [tab, setTab] = useState<"places" | "categories">("places");
-  const [places, setPlaces] = useState<Place[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [allCategories, setAllCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Pagination states
   const [placesPage, setPlacesPage] = useState(1);
-  const [placesTotalPages, setPlacesTotalPages] = useState(1);
-  const [placesTotal, setPlacesTotal] = useState(0);
-
   const [categoriesPage, setCategoriesPage] = useState(1);
-  const [categoriesTotalPages, setCategoriesTotalPages] = useState(1);
-  const [categoriesTotal, setCategoriesTotal] = useState(0);
 
   // Delete confirmation state
   const [deleteConfirmType, setDeleteConfirmType] = useState<"places" | "categories" | null>(null);
@@ -38,65 +31,43 @@ export default function TouristGuidePage() {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadAllCategories();
-  }, []);
+  // Full category list for the place form select
+  const allCategoriesQuery = useQuery({
+    queryKey: ["tour-categories", "all"],
+    queryFn: () => api.get<{ data: Category[] }>("/api/tourist/categories?all=true"),
+    staleTime: 30 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    loadPlaces();
-  }, [placesPage]);
+  const placesQuery = useQuery({
+    queryKey: ["tour-places", { page: placesPage }],
+    queryFn: () =>
+      api.get<{ data: Place[]; meta: { totalPages: number; total: number } }>(
+        `/api/tourist?page=${placesPage}&limit=10`
+      ),
+    placeholderData: keepPreviousData,
+  });
 
-  useEffect(() => {
-    loadCategories();
-  }, [categoriesPage]);
+  const categoriesQuery = useQuery({
+    queryKey: ["tour-categories", { page: categoriesPage }],
+    queryFn: () =>
+      api.get<{ data: Category[]; meta: { totalPages: number; total: number } }>(
+        `/api/tourist/categories?page=${categoriesPage}&limit=10`
+      ),
+    placeholderData: keepPreviousData,
+  });
 
-  const loadAllCategories = async () => {
-    try {
-      const res = await api.get<{ data: Category[] }>("/api/tourist/categories?all=true");
-      setAllCategories(res.data || []);
-    } catch (error) {
-      console.error("Load all categories error:", error);
-    }
-  };
-
-  const loadPlaces = async () => {
-    setLoading(true);
-    try {
-      const pRes = await api.get<{
-        data: Place[];
-        meta: { totalPages: number; total: number };
-      }>(`/api/tourist?page=${placesPage}&limit=10`);
-      setPlaces(pRes.data || []);
-      setPlacesTotalPages(pRes.meta?.totalPages || 1);
-      setPlacesTotal(pRes.meta?.total || 0);
-    } catch (error) {
-      console.error("Load places error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadCategories = async () => {
-    setLoading(true);
-    try {
-      const cRes = await api.get<{
-        data: Category[];
-        meta: { totalPages: number; total: number };
-      }>(`/api/tourist/categories?page=${categoriesPage}&limit=10`);
-      setCategories(cRes.data || []);
-      setCategoriesTotalPages(cRes.meta?.totalPages || 1);
-      setCategoriesTotal(cRes.meta?.total || 0);
-    } catch (error) {
-      console.error("Load categories error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const places = placesQuery.data?.data ?? [];
+  const placesTotalPages = placesQuery.data?.meta?.totalPages ?? 1;
+  const placesTotal = placesQuery.data?.meta?.total ?? 0;
+  const categories = categoriesQuery.data?.data ?? [];
+  const categoriesTotalPages = categoriesQuery.data?.meta?.totalPages ?? 1;
+  const categoriesTotal = categoriesQuery.data?.meta?.total ?? 0;
+  const allCategories = allCategoriesQuery.data?.data ?? [];
+  const loading = tab === "places" ? placesQuery.isPending : categoriesQuery.isPending;
 
   const handleDataChange = () => {
-    loadPlaces();
-    loadCategories();
-    loadAllCategories();
+    queryClient.invalidateQueries({ queryKey: ["tour-places"] });
+    queryClient.invalidateQueries({ queryKey: ["tour-categories"] });
   };
 
   const handleConfirmDelete = async () => {

@@ -1,9 +1,3 @@
-import { PrismaClient } from "@prisma/client";
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Re-export the shared Prisma singleton (@resto-hub/db) so existing
+// "@/lib/prisma" imports keep working without touching every call site.
+export { prisma } from "@resto-hub/db";

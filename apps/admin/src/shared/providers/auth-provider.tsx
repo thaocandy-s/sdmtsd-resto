@@ -17,18 +17,19 @@ interface AuthUser {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { setAuth, clearAuth, setLoading, isAuthenticated } = useAuthStore();
+  const { setUser, clearAuth, setLoading, isAuthenticated } = useAuthStore();
 
   const initAuth = useCallback(async () => {
     try {
       const response = await apiClient<{ data: AuthUser }>("/api/auth/me");
-      setAuth(response.data, "");
+      // setUser keeps the access token acquired during the refresh flow intact
+      setUser(response.data);
     } catch {
       clearAuth();
     } finally {
       setLoading(false);
     }
-  }, [setAuth, clearAuth, setLoading]);
+  }, [setUser, clearAuth, setLoading]);
 
   useEffect(() => {
     // Skip auth bootstrap on the login page to avoid refresh -> redirect loop

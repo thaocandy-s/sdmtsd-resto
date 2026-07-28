@@ -1,36 +1,44 @@
-"use client";
-
-import { useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
-import { ChallengeSkeleton } from "./components/challenge-skeleton";
-import { ChallengeRules, Rule } from "./components/challenge-rules";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import Image from "next/image";
+import { prisma } from "@/lib/prisma";
+import { ChallengeRules } from "./components/challenge-rules";
 import { WinnerSlider } from "./components/winner-slider";
-import { Winner } from "./components/winner-card";
 
-export default function ChallengePage() {
-  const t = useTranslations("challenge");
-  const [rules, setRules] = useState<Rule[]>([]);
-  const [winners, setWinners] = useState<Winner[]>([]);
-  const [challengeImage, setChallengeImage] = useState<string>("/images/katanuki.png");
-  const [loading, setLoading] = useState(true);
+// ISR: challenge content changes rarely, regenerate at most every hour
+export const revalidate = 3600;
 
-  useEffect(() => {
-    fetch("/api/challenge")
-      .then((r) => r.json())
-      .then((data) => {
-        setRules(data.data?.rules || []);
-        setWinners(data.data?.winners || []);
-        if (data.data?.challengeImage) {
-          setChallengeImage(data.data.challengeImage);
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+export default async function ChallengePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("challenge");
 
-  if (loading) {
-    return <ChallengeSkeleton />;
-  }
+  const [rules, winnerRows, imageSetting] = await Promise.all([
+    prisma.katanukiRule.findMany({
+      where: { isActive: true },
+      select: { id: true, title: true, description: true },
+      orderBy: { sortOrder: "asc" },
+    }),
+    prisma.katanukiWinner.findMany({
+      where: { isPublished: true },
+      select: {
+        id: true,
+        participantName: true,
+        imageUrl: true,
+        challengeName: true,
+        discountAwarded: true,
+        completedAt: true,
+      },
+      orderBy: { completedAt: "desc" },
+      take: 20,
+    }),
+    prisma.setting.findUnique({ where: { key: "katanuki_image" } }),
+  ]);
+
+  const winners = winnerRows.map((w) => ({
+    ...w,
+    completedAt: w.completedAt.toISOString(),
+  }));
+  const challengeImage = (imageSetting?.value as string) || "/images/katanuki.png";
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">
@@ -40,10 +48,13 @@ export default function ChallengePage() {
       {/* Main Challenge Info & Rules Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 items-stretch">
         <div className="relative min-h-[250px] md:min-h-full rounded-2xl overflow-hidden border border-border bg-background-secondary shadow-lg group">
-          <img
+          <Image
             src={challengeImage}
             alt="Katanuki Challenge Illustration"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            priority
+            sizes="(min-width: 768px) 50vw, 100vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent flex items-end p-6">
             <div>

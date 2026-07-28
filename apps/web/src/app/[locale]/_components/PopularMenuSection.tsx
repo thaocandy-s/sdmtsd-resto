@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
-import { AnimatedSection } from "@/shared/components/animated-section";
+import { AnimatedSection } from "@/shared/components/animated-section-lazy";
 import { formatPriceWithTax } from "@resto-hub/utils";
 
 interface Food {

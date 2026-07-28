@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
+import { buffetCreateSchema } from "@/lib/validation";
 
 export const GET = withAuth(async (request: NextRequest) => {
   try {
@@ -51,6 +52,15 @@ export const POST = withAuth(
   async (request: NextRequest) => {
     try {
       const body = await request.json();
+      const parsed = buffetCreateSchema.safeParse(body);
+
+      if (!parsed.success) {
+        return NextResponse.json(
+          { message: "Invalid input", errors: parsed.error.flatten().fieldErrors },
+          { status: 400 }
+        );
+      }
+
       const {
         name,
         slug,
@@ -67,14 +77,7 @@ export const POST = withAuth(
         isPopular,
         sortOrder,
         status,
-      } = body;
-
-      if (!name || !slug || price === undefined || !duration) {
-        return NextResponse.json(
-          { message: "Name, slug, price, and duration are required" },
-          { status: 400 }
-        );
-      }
+      } = parsed.data;
 
       const existing = await prisma.buffetCourse.findUnique({ where: { slug } });
       if (existing) return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
@@ -84,17 +87,17 @@ export const POST = withAuth(
           name,
           slug,
           description,
-          price: parseInt(price),
-          duration: parseInt(duration),
-          minPeople: minPeople ? parseInt(minPeople) : null,
-          maxPeople: maxPeople ? parseInt(maxPeople) : null,
+          price,
+          duration,
+          minPeople,
+          maxPeople,
           includes: includes || [],
           isAllMenu: isAllMenu || false,
           notes: notes || null,
           imageUrl,
           images: images || [],
           isPopular: isPopular || false,
-          sortOrder: sortOrder ? parseInt(sortOrder) : 0,
+          sortOrder: sortOrder ?? 0,
           status: status || "DRAFT",
         },
       });

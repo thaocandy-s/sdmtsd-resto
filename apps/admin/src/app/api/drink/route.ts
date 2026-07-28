@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
+import { drinkCreateSchema } from "@/lib/validation";
 
 export const GET = withAuth(async (request: NextRequest) => {
   try {
@@ -49,6 +50,15 @@ export const POST = withAuth(
   async (request: NextRequest) => {
     try {
       const body = await request.json();
+      const parsed = drinkCreateSchema.safeParse(body);
+
+      if (!parsed.success) {
+        return NextResponse.json(
+          { message: "Invalid input", errors: parsed.error.flatten().fieldErrors },
+          { status: 400 }
+        );
+      }
+
       const {
         name,
         slug,
@@ -64,14 +74,7 @@ export const POST = withAuth(
         volume,
         sortOrder,
         status,
-      } = body;
-
-      if (!name || !slug || !categoryId || price === undefined) {
-        return NextResponse.json(
-          { message: "Name, slug, category, and price are required" },
-          { status: 400 }
-        );
-      }
+      } = parsed.data;
 
       const existing = await prisma.drink.findUnique({ where: { slug } });
       if (existing) return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
@@ -81,16 +84,16 @@ export const POST = withAuth(
           name,
           slug,
           description,
-          price: parseInt(price),
-          originalPrice: originalPrice ? parseInt(originalPrice) : null,
+          price,
+          originalPrice,
           categoryId,
           imageUrl,
           images: images || [],
           isPopular: isPopular || false,
           isRecommended: isRecommended || false,
-          alcoholPercent: alcoholPercent ? parseFloat(alcoholPercent) : null,
+          alcoholPercent,
           volume,
-          sortOrder: sortOrder ? parseInt(sortOrder) : 0,
+          sortOrder: sortOrder ?? 0,
           status: status || "DRAFT",
         },
         include: { category: true },

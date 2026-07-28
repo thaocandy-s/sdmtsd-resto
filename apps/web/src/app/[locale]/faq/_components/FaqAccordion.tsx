@@ -52,6 +52,7 @@ export function FaqAccordion({ faqs, loading }: FaqAccordionProps) {
         >
           <button
             onClick={() => toggleExpand(faq.id)}
+            aria-expanded={expandedId === faq.id}
             className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-background-tertiary/50 transition-colors"
           >
             <span className="font-medium text-foreground pr-4">{faq.question}</span>

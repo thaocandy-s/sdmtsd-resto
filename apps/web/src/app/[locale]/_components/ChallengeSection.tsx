@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { AnimatedSection } from "@/shared/components/animated-section";
+import { AnimatedSection } from "@/shared/components/animated-section-lazy";
 
 export function ChallengeSection() {
   const t = useTranslations("home");

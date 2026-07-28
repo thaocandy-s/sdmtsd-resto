@@ -1,27 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { reservationSchema } from "@/lib/validation";
 
 // POST /api/reservation - Create reservation
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, date, time, guests, course, notes } = body;
+    const parsed = reservationSchema.safeParse(body);
 
-    if (!name || !email || !date || !time || !guests) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { message: "Name, email, date, time, and guests are required" },
+        { message: "Invalid input", errors: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+
+    const { name, email, phone, date, time, guests, course, notes } = parsed.data;
 
     const reservation = await prisma.reservation.create({
       data: {
         name,
         email,
         phone,
-        date: new Date(date),
+        date,
         time,
-        guests: parseInt(guests),
+        guests,
         course,
         notes,
       },
