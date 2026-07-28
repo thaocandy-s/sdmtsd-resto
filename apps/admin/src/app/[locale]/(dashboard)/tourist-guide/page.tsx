@@ -26,6 +26,7 @@ export default function TouristGuidePage() {
   // Delete confirmation state
   const [deleteConfirmType, setDeleteConfirmType] = useState<"places" | "categories" | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const [showPlaceModal, setShowPlaceModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -72,6 +73,7 @@ export default function TouristGuidePage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirmType || !deleteConfirmId) return;
+    setDeleteError("");
     try {
       if (deleteConfirmType === "places") await api.delete(`/api/tourist/${deleteConfirmId}`);
       else await api.delete(`/api/tourist/categories/${deleteConfirmId}`);
@@ -80,6 +82,7 @@ export default function TouristGuidePage() {
       handleDataChange();
     } catch (error) {
       console.error("Delete error:", error);
+      setDeleteError(error instanceof Error ? error.message : "Delete failed");
     }
   };
 
@@ -226,10 +229,12 @@ export default function TouristGuidePage() {
         isOpen={deleteConfirmId !== null}
         title={tc("delete")}
         message={t("deleteConfirm")}
+        error={deleteError}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setDeleteConfirmType(null);
           setDeleteConfirmId(null);
+          setDeleteError("");
         }}
       />
     </>

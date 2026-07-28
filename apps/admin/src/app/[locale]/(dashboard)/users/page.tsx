@@ -6,6 +6,7 @@ import { api } from "@/lib/api-client";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { FormError } from "@/shared/components/form-error";
 
 interface User {
   id: string;
@@ -42,6 +43,7 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search);
   const [showModal, setShowModal] = useState(false);
+  const [formError, setFormError] = useState("");
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
     email: "",
@@ -90,6 +92,7 @@ export default function UsersPage() {
       roleId: roles[0]?.id || "",
       isActive: true,
     });
+    setFormError("");
     setShowModal(true);
   };
 
@@ -103,10 +106,12 @@ export default function UsersPage() {
       roleId: user.role.id,
       isActive: user.isActive,
     });
+    setFormError("");
     setShowModal(true);
   };
 
   const [deleteConfirmUser, setDeleteConfirmUser] = useState<User | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const handleDelete = (user: User) => {
     setDeleteConfirmUser(user);
@@ -114,19 +119,20 @@ export default function UsersPage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirmUser) return;
+    setDeleteError("");
     try {
       await api.delete(`/api/users/${deleteConfirmUser.id}`);
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      setDeleteConfirmUser(null);
     } catch (error) {
       console.error("Failed to delete user:", error);
-      alert("Failed to delete user");
-    } finally {
-      setDeleteConfirmUser(null);
+      setDeleteError(error instanceof Error ? error.message : "Failed to delete user");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
 
     try {
       if (editingUser) {
@@ -148,7 +154,7 @@ export default function UsersPage() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     } catch (error) {
       console.error("Failed to save user:", error);
-      alert("Failed to save user");
+      setFormError(error instanceof Error ? error.message : "Failed to save user");
     }
   };
 
@@ -309,6 +315,7 @@ export default function UsersPage() {
           <div className="bg-background-secondary border border-border rounded-lg p-6 w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">{editingUser ? "Edit User" : "Add User"}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {formError && <FormError message={formError} />}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">First Name</label>
@@ -402,8 +409,12 @@ export default function UsersPage() {
         isOpen={deleteConfirmUser !== null}
         title="Delete User"
         message={`Are you sure you want to delete ${deleteConfirmUser?.firstName} ${deleteConfirmUser?.lastName}?`}
+        error={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirmUser(null)}
+        onCancel={() => {
+          setDeleteConfirmUser(null);
+          setDeleteError("");
+        }}
       />
     </div>
   );

@@ -99,6 +99,7 @@ export default function SeoPage() {
   };
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const handleDelete = (id: string) => {
     setDeleteConfirmId(id);
@@ -106,13 +107,14 @@ export default function SeoPage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirmId) return;
+    setDeleteError("");
     try {
       await api.delete(`/api/seo/${deleteConfirmId}`);
       queryClient.invalidateQueries({ queryKey: ["seo-metas"] });
+      setDeleteConfirmId(null);
     } catch (error) {
       console.error("Delete error:", error);
-    } finally {
-      setDeleteConfirmId(null);
+      setDeleteError(error instanceof Error ? error.message : "Delete failed");
     }
   };
 
@@ -349,8 +351,12 @@ export default function SeoPage() {
         isOpen={deleteConfirmId !== null}
         title="Delete SEO Meta"
         message="Are you sure you want to delete this SEO meta?"
+        error={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirmId(null)}
+        onCancel={() => {
+          setDeleteConfirmId(null);
+          setDeleteError("");
+        }}
       />
     </>
   );

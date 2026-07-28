@@ -19,6 +19,15 @@ export const PUT = withAuthParams(
 export const DELETE = withAuthParams(
   async (_request, { params }) => {
     try {
+      const placeCount = await prisma.tourPlace.count({ where: { categoryId: params.id } });
+      if (placeCount > 0) {
+        return NextResponse.json(
+          {
+            message: `Cannot delete: category still has ${placeCount} place(s). Move or delete them first.`,
+          },
+          { status: 400 }
+        );
+      }
       await prisma.tourCategory.delete({ where: { id: params.id } });
       return NextResponse.json({ message: "Category deleted" });
     } catch (error) {

@@ -20,6 +20,7 @@ export default function DrinkMenuPage() {
 
   // Delete confirmation state
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -82,9 +83,11 @@ export default function DrinkMenuPage() {
     mutationFn: (id: string) => api.delete(`/api/drink/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["drinks"] });
+      setDeleteConfirmId(null);
     },
     onError: (error) => {
       console.error("Delete drink error:", error);
+      setDeleteError(error instanceof Error ? error.message : "Delete failed");
     },
   });
 
@@ -136,8 +139,8 @@ export default function DrinkMenuPage() {
 
   const handleConfirmDelete = () => {
     if (!deleteConfirmId) return;
+    setDeleteError("");
     deleteMutation.mutate(deleteConfirmId);
-    setDeleteConfirmId(null);
   };
 
   return (
@@ -204,8 +207,12 @@ export default function DrinkMenuPage() {
         isOpen={deleteConfirmId !== null}
         title={tc("delete")}
         message={t("deleteConfirm")}
+        error={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirmId(null)}
+        onCancel={() => {
+          setDeleteConfirmId(null);
+          setDeleteError("");
+        }}
       />
     </>
   );

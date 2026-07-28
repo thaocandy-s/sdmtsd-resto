@@ -50,6 +50,16 @@ export const DELETE = withAuthParams(
         return NextResponse.json({ message: "Category not found" }, { status: 404 });
       }
 
+      const foodCount = await prisma.food.count({ where: { categoryId: params.id } });
+      if (foodCount > 0) {
+        return NextResponse.json(
+          {
+            message: `Cannot delete: category still has ${foodCount} food item(s). Move or delete them first.`,
+          },
+          { status: 400 }
+        );
+      }
+
       await prisma.foodCategory.delete({ where: { id: params.id } });
 
       return NextResponse.json({ message: "Category deleted successfully" });

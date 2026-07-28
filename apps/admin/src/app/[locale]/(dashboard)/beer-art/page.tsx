@@ -26,6 +26,7 @@ export default function BeerArtPage() {
 
   // Delete confirmation state
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const itemsQuery = useQuery({
     queryKey: ["beer-arts", { page: currentPage }],
@@ -93,12 +94,14 @@ export default function BeerArtPage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirmId) return;
+    setDeleteError("");
     try {
       await api.delete(`/api/beer-art/${deleteConfirmId}`);
       setDeleteConfirmId(null);
       queryClient.invalidateQueries({ queryKey: ["beer-arts"] });
     } catch (error) {
       console.error("Delete error:", error);
+      setDeleteError(error instanceof Error ? error.message : "Delete failed");
     }
   };
 
@@ -176,8 +179,12 @@ export default function BeerArtPage() {
         isOpen={deleteConfirmId !== null}
         title={tc("delete")}
         message={t("deleteConfirm")}
+        error={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirmId(null)}
+        onCancel={() => {
+          setDeleteConfirmId(null);
+          setDeleteError("");
+        }}
       />
     </>
   );

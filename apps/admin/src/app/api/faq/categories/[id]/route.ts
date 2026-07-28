@@ -19,6 +19,15 @@ export const PUT = withAuthParams(
 export const DELETE = withAuthParams(
   async (_request, { params }) => {
     try {
+      const faqCount = await prisma.faq.count({ where: { categoryId: params.id } });
+      if (faqCount > 0) {
+        return NextResponse.json(
+          {
+            message: `Cannot delete: category still has ${faqCount} FAQ(s). Move or delete them first.`,
+          },
+          { status: 400 }
+        );
+      }
       await prisma.faqCategory.delete({ where: { id: params.id } });
       return NextResponse.json({ message: "Category deleted" });
     } catch (error) {
