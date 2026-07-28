@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
+import { FormError } from "@/shared/components/form-error";
 import { Category, FormData, toSlug } from "./types";
 import { formatPriceWithTax } from "@resto-hub/utils";
 
@@ -27,11 +28,13 @@ export function DrinkFormModal({
   const [form, setForm] = useState<FormData>(initialForm);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (isOpen) {
       setForm(initialForm);
       setImageFile(null);
+      setError("");
     }
   }, [initialForm, isOpen]);
 
@@ -40,6 +43,7 @@ export function DrinkFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    setError("");
     try {
       let finalImageUrl = form.imageUrl;
       if (imageFile) {
@@ -59,6 +63,7 @@ export function DrinkFormModal({
       onSubmitSuccess();
     } catch (error) {
       console.error("Save drink error:", error);
+      setError(error instanceof Error ? error.message : "Save failed");
     } finally {
       setIsSaving(false);
     }
@@ -81,7 +86,7 @@ export function DrinkFormModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("nameLabel")} *
+              {t("nameLabel")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -108,7 +113,7 @@ export function DrinkFormModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-foreground-secondary mb-1">
-                {t("priceLabel")} *
+                {t("priceLabel")} <span className="text-red-400">*</span>
               </label>
               <input
                 type="number"
@@ -125,7 +130,7 @@ export function DrinkFormModal({
             </div>
             <div>
               <label className="block text-sm text-foreground-secondary mb-1">
-                {t("categoryLabel")} *
+                {t("categoryLabel")} <span className="text-red-400">*</span>
               </label>
               <select
                 value={form.categoryId}
@@ -202,6 +207,7 @@ export function DrinkFormModal({
             />
             <span className="text-sm text-foreground">{t("popularLabel")}</span>
           </label>
+          <FormError message={error} />
           <div className="flex gap-3 pt-4">
             <button
               type="submit"

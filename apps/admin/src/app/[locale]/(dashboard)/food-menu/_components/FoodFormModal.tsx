@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
+import { FormError } from "@/shared/components/form-error";
 import { Category, FormData, emptyForm, toSlug } from "./types";
 
 interface FoodFormModalProps {
@@ -26,11 +27,13 @@ export function FoodFormModal({
   const [form, setForm] = useState<FormData>(initialForm);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (isOpen) {
       setForm(initialForm);
       setImageFile(null);
+      setError("");
     }
   }, [initialForm, isOpen]);
 
@@ -39,6 +42,7 @@ export function FoodFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    setError("");
     try {
       let finalImageUrl = form.imageUrl;
       if (imageFile) {
@@ -58,6 +62,7 @@ export function FoodFormModal({
       onSubmitSuccess();
     } catch (error) {
       console.error("Save food error:", error);
+      setError(error instanceof Error ? error.message : "Save failed");
     } finally {
       setIsSaving(false);
     }
@@ -80,7 +85,7 @@ export function FoodFormModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("nameLabel")} *
+              {t("nameLabel")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -111,7 +116,7 @@ export function FoodFormModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-foreground-secondary mb-1">
-                {t("priceLabel")} *
+                {t("priceLabel")} <span className="text-red-400">*</span>
               </label>
               <input
                 type="number"
@@ -135,7 +140,7 @@ export function FoodFormModal({
           </div>
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("categoryLabel")} *
+              {t("categoryLabel")} <span className="text-red-400">*</span>
             </label>
             <select
               value={form.categoryId}
@@ -229,6 +234,7 @@ export function FoodFormModal({
               <span className="text-sm text-foreground">{t("recommendedLabel")}</span>
             </label>
           </div>
+          <FormError message={error} />
           <div className="flex gap-3 pt-4">
             <button
               type="submit"

@@ -619,7 +619,7 @@ export default function MediaLibraryPage() {
               <form onSubmit={handleUrlSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm text-foreground-secondary mb-1">
-                    File Name *
+                    File Name <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -630,7 +630,9 @@ export default function MediaLibraryPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-foreground-secondary mb-1">URL *</label>
+                  <label className="block text-sm text-foreground-secondary mb-1">
+                    URL <span className="text-red-400">*</span>
+                  </label>
                   <input
                     type="text"
                     value={urlForm.url}
@@ -642,7 +644,7 @@ export default function MediaLibraryPage() {
                 {!editingId && (
                   <div>
                     <label className="block text-sm text-foreground-secondary mb-1">
-                      Storage Path *
+                      Storage Path <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="text"
@@ -656,7 +658,7 @@ export default function MediaLibraryPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm text-foreground-secondary mb-1">
-                      MIME Type *
+                      MIME Type <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="text"

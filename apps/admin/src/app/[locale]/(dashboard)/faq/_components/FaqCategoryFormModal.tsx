@@ -1,10 +1,12 @@
 import { useTranslations } from "next-intl";
+import { FormError } from "@/shared/components/form-error";
 import { CatForm } from "./types";
 
 interface FaqCategoryFormModalProps {
   isOpen: boolean;
   editingId: string | null;
   form: CatForm;
+  error: string;
   setForm: (form: CatForm) => void;
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -14,6 +16,7 @@ export function FaqCategoryFormModal({
   isOpen,
   editingId,
   form,
+  error,
   setForm,
   onClose,
   onSubmit,
@@ -41,7 +44,7 @@ export function FaqCategoryFormModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-foreground-secondary mb-1">
-                {t("nameLabel")} *
+                {t("nameLabel")} <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
@@ -53,7 +56,7 @@ export function FaqCategoryFormModal({
             </div>
             <div>
               <label className="block text-sm text-foreground-secondary mb-1">
-                {t("slugLabel")} *
+                {t("slugLabel")} <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
@@ -86,6 +89,7 @@ export function FaqCategoryFormModal({
               className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
             />
           </div>
+          <FormError message={error} />
           <div className="flex gap-3 pt-4">
             <button
               type="submit"

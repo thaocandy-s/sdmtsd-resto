@@ -16,7 +16,9 @@ export function ProfileSection({ username, email, onChangeUsername }: ProfileSec
       </h3>
 
       <div>
-        <label className="block text-sm text-foreground-secondary mb-1">{t("username")} *</label>
+        <label className="block text-sm text-foreground-secondary mb-1">
+          {t("username")} <span className="text-red-400">*</span>
+        </label>
         <input
           type="text"
           value={username}

@@ -26,6 +26,7 @@ export default function FaqPage() {
   // Form states
   const [faqForm, setFaqForm] = useState<FaqForm>(emptyFaq);
   const [catForm, setCatForm] = useState<CatForm>(emptyCat);
+  const [formError, setFormError] = useState("");
 
   // Delete Confirm State
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -50,21 +51,23 @@ export default function FaqPage() {
 
   const handleFaqSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { ...faqForm, categoryId: faqForm.categoryId || null };
+    setFormError("");
     try {
-      if (editingId) await api.put(`/api/faq/${editingId}`, payload);
-      else await api.post("/api/faq", payload);
+      if (editingId) await api.put(`/api/faq/${editingId}`, faqForm);
+      else await api.post("/api/faq", faqForm);
       setShowFaqModal(false);
       setEditingId(null);
       setFaqForm(emptyFaq);
       queryClient.invalidateQueries({ queryKey: ["faqs"] });
     } catch (error) {
       console.error("Save error:", error);
+      setFormError(error instanceof Error ? error.message : "Save failed");
     }
   };
 
   const handleCatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
     try {
       if (editingId) await api.put(`/api/faq/categories/${editingId}`, catForm);
       else await api.post("/api/faq/categories", catForm);
@@ -75,11 +78,13 @@ export default function FaqPage() {
       queryClient.invalidateQueries({ queryKey: ["faqs"] });
     } catch (error) {
       console.error("Save error:", error);
+      setFormError(error instanceof Error ? error.message : "Save failed");
     }
   };
 
   const handleEditFaq = (item: FaqItem) => {
     setEditingId(item.id);
+    setFormError("");
     setFaqForm({
       question: item.question,
       answer: item.answer,
@@ -92,6 +97,7 @@ export default function FaqPage() {
 
   const handleEditCat = (item: FaqCategory) => {
     setEditingId(item.id);
+    setFormError("");
     setCatForm({
       name: item.name,
       slug: item.slug,
@@ -132,6 +138,7 @@ export default function FaqPage() {
         <button
           onClick={() => {
             setEditingId(null);
+            setFormError("");
             if (tab === "items") {
               setFaqForm(emptyFaq);
               setShowFaqModal(true);
@@ -194,10 +201,12 @@ export default function FaqPage() {
         editingId={editingId}
         form={faqForm}
         categories={categories}
+        error={formError}
         setForm={setFaqForm}
         onClose={() => {
           setShowFaqModal(false);
           setEditingId(null);
+          setFormError("");
         }}
         onSubmit={handleFaqSubmit}
       />
@@ -206,10 +215,12 @@ export default function FaqPage() {
         isOpen={showCatModal}
         editingId={editingId}
         form={catForm}
+        error={formError}
         setForm={setCatForm}
         onClose={() => {
           setShowCatModal(false);
           setEditingId(null);
+          setFormError("");
         }}
         onSubmit={handleCatSubmit}
       />
