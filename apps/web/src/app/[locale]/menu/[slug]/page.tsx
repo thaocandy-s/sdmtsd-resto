@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { FoodDetail } from "./_components/FoodDetail";
 
@@ -15,16 +16,36 @@ export async function generateStaticParams() {
   return foods.map(({ slug }) => ({ slug }));
 }
 
+// Deduplicated between generateMetadata and the page — one query per render
+const getFood = cache((slug: string) =>
+  prisma.food.findFirst({
+    where: { slug, deletedAt: null, status: "PUBLISHED" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      price: true,
+      originalPrice: true,
+      imageUrl: true,
+      images: true,
+      isPopular: true,
+      isRecommended: true,
+      ingredients: true,
+      calories: true,
+      categoryId: true,
+      category: { select: { id: true, name: true, slug: true } },
+    },
+  })
+);
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const food = await prisma.food.findFirst({
-    where: { slug, deletedAt: null, status: "PUBLISHED" },
-    select: { name: true, description: true, imageUrl: true },
-  });
+  const food = await getFood(slug);
   if (!food) return {};
   return {
     title: food.name,
@@ -50,25 +71,7 @@ export default async function FoodDetailPage({
   setRequestLocale(locale);
   const t = await getTranslations("menu");
 
-  const food = await prisma.food.findFirst({
-    where: { slug, deletedAt: null, status: "PUBLISHED" },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
-      price: true,
-      originalPrice: true,
-      imageUrl: true,
-      images: true,
-      isPopular: true,
-      isRecommended: true,
-      ingredients: true,
-      calories: true,
-      categoryId: true,
-      category: { select: { id: true, name: true, slug: true } },
-    },
-  });
+  const food = await getFood(slug);
 
   if (!food) {
     return (

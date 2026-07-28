@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { TourPlaceDetail } from "./_components/TourPlaceDetail";
 
@@ -15,16 +16,35 @@ export async function generateStaticParams() {
   return places.map(({ slug }) => ({ slug }));
 }
 
+// Deduplicated between generateMetadata and the page — one query per render
+const getPlace = cache((slug: string) =>
+  prisma.tourPlace.findFirst({
+    where: { slug, deletedAt: null, isPublished: true },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      address: true,
+      latitude: true,
+      longitude: true,
+      websiteUrl: true,
+      phone: true,
+      imageUrl: true,
+      images: true,
+      openingHours: true,
+      category: { select: { id: true, name: true, slug: true } },
+    },
+  })
+);
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const place = await prisma.tourPlace.findFirst({
-    where: { slug, deletedAt: null, isPublished: true },
-    select: { name: true, description: true, imageUrl: true },
-  });
+  const place = await getPlace(slug);
   if (!place) return {};
   return {
     title: place.name,
@@ -50,24 +70,7 @@ export default async function TouristDetailPage({
   setRequestLocale(locale);
   const t = await getTranslations("tourist");
 
-  const place = await prisma.tourPlace.findFirst({
-    where: { slug, deletedAt: null, isPublished: true },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
-      address: true,
-      latitude: true,
-      longitude: true,
-      websiteUrl: true,
-      phone: true,
-      imageUrl: true,
-      images: true,
-      openingHours: true,
-      category: { select: { id: true, name: true, slug: true } },
-    },
-  });
+  const place = await getPlace(slug);
 
   if (!place) {
     return (
