@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { FormError } from "@/shared/components/form-error";
+import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
 import { RuleForm } from "./types";
 
 interface RuleFormModalProps {
@@ -66,17 +67,6 @@ export function RuleFormModal({
               className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
             />
           </div>
-          <div>
-            <label className="block text-sm text-foreground-secondary mb-1">
-              {t("sortOrderLabel")}
-            </label>
-            <input
-              type="number"
-              value={form.sortOrder}
-              onChange={(e) => setForm({ ...form, sortOrder: parseInt(e.target.value) || 0 })}
-              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-            />
-          </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -86,6 +76,14 @@ export function RuleFormModal({
             />
             <span className="text-sm text-foreground">{t("activeLabel")}</span>
           </label>
+          <AdvancedSection title={tc("advancedOptions")}>
+            <PositionField
+              value={form.position}
+              onChange={(v) => setForm({ ...form, position: v })}
+              label={tc("positionLabel")}
+              hint={tc("positionHint")}
+            />
+          </AdvancedSection>
           <div className="flex gap-3 pt-4">
             <button
               type="submit"

@@ -17,6 +17,7 @@ export type FormData = {
   artistName: string;
   isPopular: boolean;
   isPublished: boolean;
+  position: string;
 };
 
 export const emptyForm: FormData = {
@@ -27,4 +28,5 @@ export const emptyForm: FormData = {
   artistName: "",
   isPopular: false,
   isPublished: false,
+  position: "",
 };

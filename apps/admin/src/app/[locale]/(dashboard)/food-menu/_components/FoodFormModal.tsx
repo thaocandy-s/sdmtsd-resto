@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
 import { FormError } from "@/shared/components/form-error";
+import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
 import { Category, FormData, emptyForm, toSlug } from "./types";
 
 interface FoodFormModalProps {
@@ -11,7 +12,7 @@ interface FoodFormModalProps {
   initialForm: FormData;
   categories: Category[];
   onClose: () => void;
-  onSubmitSuccess: () => void;
+  onSubmitSuccess: (createdId?: string) => void;
 }
 
 export function FoodFormModal({
@@ -56,10 +57,11 @@ export function FoodFormModal({
 
       if (editingId) {
         await api.put(`/api/menu/${editingId}`, payload);
+        onSubmitSuccess();
       } else {
-        await api.post("/api/menu", payload);
+        const created = await api.post<{ data: { id: string } }>("/api/menu", payload);
+        onSubmitSuccess(created.data.id);
       }
-      onSubmitSuccess();
     } catch (error) {
       console.error("Save food error:", error);
       setError(error instanceof Error ? error.message : "Save failed");
@@ -187,32 +189,19 @@ export function FoodFormModal({
               className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-foreground-secondary mb-1">
-                {t("statusLabel")}
-              </label>
-              <select
-                value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value })}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-              >
-                <option value="DRAFT">{tc("draft")}</option>
-                <option value="PUBLISHED">{tc("published")}</option>
-                <option value="ARCHIVED">{tc("archived")}</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm text-foreground-secondary mb-1">
-                {t("sortOrderLabel")}
-              </label>
-              <input
-                type="number"
-                value={form.sortOrder}
-                onChange={(e) => setForm({ ...form, sortOrder: e.target.value })}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-              />
-            </div>
+          <div>
+            <label className="block text-sm text-foreground-secondary mb-1">
+              {t("statusLabel")}
+            </label>
+            <select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+            >
+              <option value="DRAFT">{tc("draft")}</option>
+              <option value="PUBLISHED">{tc("published")}</option>
+              <option value="ARCHIVED">{tc("archived")}</option>
+            </select>
           </div>
           <div className="flex items-center gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -235,6 +224,14 @@ export function FoodFormModal({
             </label>
           </div>
           <FormError message={error} />
+          <AdvancedSection title={tc("advancedOptions")}>
+            <PositionField
+              value={form.position}
+              onChange={(v) => setForm({ ...form, position: v })}
+              label={tc("positionLabel")}
+              hint={tc("positionHint")}
+            />
+          </AdvancedSection>
           <div className="flex gap-3 pt-4">
             <button
               type="submit"

@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Buffet } from "./types";
 import { BuffetCard } from "./BuffetCard";
+import { SortableList, OrderBadge } from "@/shared/components/sortable-list";
 
 interface BuffetTableProps {
   buffets: Buffet[];
@@ -12,6 +13,9 @@ interface BuffetTableProps {
   totalPages?: number;
   totalItems?: number;
   onPageChange?: (page: number) => void;
+  reorderEnabled?: boolean;
+  onReorder?: (orderedIds: string[]) => void;
+  getHighlightProps?: (id: string) => { "data-highlight-id": string; className: string };
 }
 
 export function BuffetTable({
@@ -24,6 +28,9 @@ export function BuffetTable({
   totalPages = 1,
   totalItems = 0,
   onPageChange,
+  reorderEnabled,
+  onReorder,
+  getHighlightProps,
 }: BuffetTableProps) {
   const t = useTranslations("buffetMenu");
   const tc = useTranslations("common");
@@ -60,6 +67,76 @@ export function BuffetTable({
       <div className="bg-background-secondary border border-border rounded-xl p-12 text-center">
         <p className="text-foreground-secondary">{t("noBuffets")}</p>
       </div>
+    );
+  }
+
+  // Drag & drop mode: a single sortable list across breakpoints.
+  if (reorderEnabled && onReorder) {
+    return (
+      <SortableList
+        items={buffets}
+        onReorder={onReorder}
+        className="space-y-3"
+        renderItem={(b, index, handle) => {
+          const hp = getHighlightProps?.(b.id) ?? {
+            "data-highlight-id": b.id,
+            className: "",
+          };
+          return (
+            <div
+              {...hp}
+              className={`bg-background-secondary border border-border rounded-lg p-3 flex items-center gap-3 ${hp.className}`}
+            >
+              {handle}
+              <OrderBadge order={index + 1} />
+              <div className="w-10 h-10 rounded-lg overflow-hidden bg-background-tertiary shrink-0">
+                {b.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={b.imageUrl} alt={b.name} className="w-full h-full object-cover" />
+                ) : null}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-medium text-foreground truncate">{b.name}</span>
+                  {b.isPopular && (
+                    <span className="text-[10px] bg-gold-500/20 text-gold-400 px-1.5 py-0.5 rounded font-medium">
+                      {t("popularLabel")}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-xs text-foreground-secondary">
+                    ¥{b.price.toLocaleString()}
+                  </span>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded font-medium ${
+                      b.status === "PUBLISHED"
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-yellow-500/20 text-yellow-400"
+                    }`}
+                  >
+                    {b.status === "PUBLISHED" ? tc("published") : tc("draft")}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => onEdit(b)}
+                  className="text-gold-400 hover:text-gold-300 text-sm font-medium transition-colors"
+                >
+                  {tc("edit")}
+                </button>
+                <button
+                  onClick={() => onDelete(b.id)}
+                  className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
+                >
+                  {tc("delete")}
+                </button>
+              </div>
+            </div>
+          );
+        }}
+      />
     );
   }
 

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
+import { createOrdered } from "@/lib/ordering";
+import { positionValue } from "@/lib/validation";
 
 export const GET = withAuth(async () => {
   try {
@@ -23,23 +25,26 @@ export const POST = withAuth(
   async (request: NextRequest) => {
     try {
       const body = await request.json();
-      const { question, answer, categoryId, isPublished, sortOrder } = body;
+      const { question, answer, categoryId, isPublished } = body;
       if (!question || !answer || !categoryId)
         return NextResponse.json(
           { message: "Question, answer, and category are required" },
           { status: 400 }
         );
 
-      const faq = await prisma.faq.create({
-        data: {
-          question,
-          answer,
-          categoryId,
-          isPublished: isPublished || false,
-          sortOrder: sortOrder || 0,
-        },
-        include: { category: true },
-      });
+      const position = positionValue.parse(body.position);
+      const faq = await createOrdered("faq", categoryId, position, (tx, sortOrder) =>
+        tx.faq.create({
+          data: {
+            question,
+            answer,
+            categoryId,
+            isPublished: isPublished || false,
+            sortOrder,
+          },
+          include: { category: true },
+        })
+      );
       return NextResponse.json({ data: faq }, { status: 201 });
     } catch (error) {
       console.error("Create FAQ error:", error);

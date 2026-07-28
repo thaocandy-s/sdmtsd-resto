@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
+import { createOrdered } from "@/lib/ordering";
+import { positionValue } from "@/lib/validation";
 
 export const GET = withAuth(async () => {
   try {
@@ -23,7 +25,6 @@ export const POST = withAuth(
         mobileImageUrl,
         ctaLabel,
         ctaUrl,
-        sortOrder,
         isActive,
         startDate,
         endDate,
@@ -33,20 +34,23 @@ export const POST = withAuth(
         return NextResponse.json({ message: "Title and image URL are required" }, { status: 400 });
       }
 
-      const banner = await prisma.heroBanner.create({
-        data: {
-          title,
-          subtitle,
-          imageUrl,
-          mobileImageUrl,
-          ctaLabel,
-          ctaUrl,
-          sortOrder: sortOrder || 0,
-          isActive: isActive !== false,
-          startDate: startDate ? new Date(startDate) : null,
-          endDate: endDate ? new Date(endDate) : null,
-        },
-      });
+      const position = positionValue.parse(body.position);
+      const banner = await createOrdered("banner", undefined, position, (tx, sortOrder) =>
+        tx.heroBanner.create({
+          data: {
+            title,
+            subtitle,
+            imageUrl,
+            mobileImageUrl,
+            ctaLabel,
+            ctaUrl,
+            sortOrder,
+            isActive: isActive !== false,
+            startDate: startDate ? new Date(startDate) : null,
+            endDate: endDate ? new Date(endDate) : null,
+          },
+        })
+      );
       return NextResponse.json({ data: banner }, { status: 201 });
     } catch (error) {
       console.error("Create banner error:", error);

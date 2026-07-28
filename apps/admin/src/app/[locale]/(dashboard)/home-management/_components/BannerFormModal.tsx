@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
 import { FormError } from "@/shared/components/form-error";
+import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
 
 interface Banner {
   id: string;
@@ -18,7 +20,7 @@ interface BannerFormModalProps {
   editingId: string | null;
   initialData: Banner | null;
   onClose: () => void;
-  onDataChange: () => void;
+  onDataChange: (createdId?: string) => void;
 }
 
 export function BannerFormModal({
@@ -35,7 +37,7 @@ export function BannerFormModal({
   const [subtitle, setSubtitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [sortOrder, setSortOrder] = useState(0);
+  const [position, setPosition] = useState("");
   const [isActive, setIsActive] = useState(true);
 
   const [isSaving, setIsSaving] = useState(false);
@@ -49,13 +51,13 @@ export function BannerFormModal({
         setTitle(initialData.title);
         setSubtitle(initialData.subtitle || "");
         setImageUrl(initialData.imageUrl);
-        setSortOrder(initialData.sortOrder);
+        setPosition("");
         setIsActive(initialData.isActive);
       } else {
         setTitle("");
         setSubtitle("");
         setImageUrl("");
-        setSortOrder(0);
+        setPosition("");
         setIsActive(true);
       }
     }
@@ -81,7 +83,7 @@ export function BannerFormModal({
         title,
         subtitle: subtitle || null,
         imageUrl: finalImageUrl,
-        sortOrder,
+        position,
         isActive,
         ctaLabel: null,
         ctaUrl: null,
@@ -89,11 +91,13 @@ export function BannerFormModal({
 
       if (editingId) {
         await api.put(`/api/banners/${editingId}`, data);
+        onDataChange();
       } else {
-        await api.post("/api/banners", data);
+        const created = await api.post<{ data: { id: string } }>("/api/banners", data);
+        onDataChange(created.data.id);
       }
 
-      onDataChange();
+      toast.success(editingId ? tc("saved") : tc("created"));
       onClose();
     } catch (err: any) {
       console.error(err);
@@ -153,31 +157,26 @@ export function BannerFormModal({
             folder="banners"
           />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                {t("bannerSortOrder")}
-              </label>
+          <div className="flex items-center">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
-                type="number"
-                value={sortOrder}
-                onChange={(e) => setSortOrder(parseInt(e.target.value) || 0)}
-                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-gold-500"
+                type="checkbox"
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
+                className="rounded border-border text-gold-500 focus:ring-gold-500 bg-background"
               />
-            </div>
-
-            <div className="flex items-center pt-6">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isActive}
-                  onChange={(e) => setIsActive(e.target.checked)}
-                  className="rounded border-border text-gold-500 focus:ring-gold-500 bg-background"
-                />
-                <span className="text-sm font-medium text-foreground">{t("bannerStatus")}</span>
-              </label>
-            </div>
+              <span className="text-sm font-medium text-foreground">{t("bannerStatus")}</span>
+            </label>
           </div>
+
+          <AdvancedSection title={tc("advancedOptions")}>
+            <PositionField
+              value={position}
+              onChange={setPosition}
+              label={tc("positionLabel")}
+              hint={tc("positionHint")}
+            />
+          </AdvancedSection>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
             <button

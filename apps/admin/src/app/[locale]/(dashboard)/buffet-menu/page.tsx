@@ -3,8 +3,11 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
+import { useReorder } from "@/shared/hooks/use-reorder";
+import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 import {
   Buffet,
   MenuItemOption,
@@ -107,6 +110,24 @@ export default function BuffetMenuPage() {
   const menuItems = pickerOptionsQuery.data?.menuItems ?? [];
   const categories = pickerOptionsQuery.data?.categories ?? [];
 
+  // Buffet ordering is flat. Drag & drop is enabled only when the whole list
+  // fits on one page with no active filters, so the loaded list is the
+  // complete, ordered scope the reorder API expects.
+  const reorderEnabled = !debouncedSearch && !filterStatus && totalPages <= 1;
+  const buffetsQueryKey = [
+    "buffets",
+    { page: currentPage, search: debouncedSearch, status: filterStatus },
+  ];
+
+  const highlight = useHighlightNew();
+  const { reorder } = useReorder<Buffet>({
+    module: "buffet",
+    queryKey: buffetsQueryKey,
+    selectItems: (data) => (data as { data: Buffet[] }).data,
+    applyItems: (data, next) => ({ ...(data as object), data: next }),
+    getId: (item) => item.id,
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/api/buffet/${id}`),
     onSuccess: () => {
@@ -143,12 +164,16 @@ export default function BuffetMenuPage() {
         notes: form.notes.trim() || null,
       };
       if (editingId) await api.put(`/api/buffet/${editingId}`, payload);
-      else await api.post("/api/buffet", payload);
+      else {
+        const created = await api.post<{ data: { id: string } }>("/api/buffet", payload);
+        highlight.flash(created.data.id);
+      }
       setShowModal(false);
       setEditingId(null);
       setForm(emptyBuffetForm);
       setImageFile(null);
       queryClient.invalidateQueries({ queryKey: ["buffets"] });
+      toast.success(editingId ? tc("saved") : tc("created"));
     } catch (error) {
       console.error("Save buffet error:", error);
       setFormError(error instanceof Error ? error.message : "Save failed");
@@ -178,7 +203,7 @@ export default function BuffetMenuPage() {
       notes: buffet.notes || "",
       imageUrl: buffet.imageUrl || "",
       isPopular: buffet.isPopular,
-      sortOrder: buffet.sortOrder?.toString() || "0",
+      position: "",
       status: buffet.status,
     });
     setImageFile(null);
@@ -246,6 +271,9 @@ export default function BuffetMenuPage() {
         totalPages={totalPages}
         totalItems={totalItems}
         onPageChange={setCurrentPage}
+        reorderEnabled={reorderEnabled}
+        onReorder={reorder}
+        getHighlightProps={highlight.getHighlightProps}
       />
 
       <BuffetFormModal

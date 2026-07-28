@@ -3,8 +3,11 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
+import { useReorder } from "@/shared/hooks/use-reorder";
+import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 import { Drink, Category, FormData, emptyForm } from "./_components/types";
 import { DrinkMenuHeader } from "./_components/DrinkMenuHeader";
 import { DrinkFilters } from "./_components/DrinkFilters";
@@ -79,6 +82,39 @@ export default function DrinkMenuPage() {
   const categories = categoriesQuery.data?.data ?? [];
   const loading = drinksQuery.isPending;
 
+  // Drag & drop is category-scoped. It is enabled only when a single category
+  // is selected, there is no active search, and the whole category fits on one
+  // page — so the loaded list is the complete, ordered scope the API expects.
+  const reorderEnabled = !!filterCategory && !debouncedSearch && totalPages <= 1;
+  const scopeCategoryId = categories.find((c) => c.slug === filterCategory)?.id ?? null;
+  const drinksQueryKey = [
+    "drinks",
+    {
+      page: currentPage,
+      search: debouncedSearch,
+      category: filterCategory,
+      status: filterStatus,
+    },
+  ];
+
+  const highlight = useHighlightNew();
+  const { reorder } = useReorder<Drink>({
+    module: "drink",
+    queryKey: drinksQueryKey,
+    selectItems: (data) => (data as { data: Drink[] }).data,
+    applyItems: (data, next) => ({ ...(data as object), data: next }),
+    getId: (item) => item.id,
+    scopeValue: scopeCategoryId,
+  });
+
+  const { reorder: reorderCategories } = useReorder<Category>({
+    module: "drink-category",
+    queryKey: ["drink-categories"],
+    selectItems: (data) => (data as { data: Category[] }).data,
+    applyItems: (data, next) => ({ ...(data as object), data: next }),
+    getId: (item) => item.id,
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/api/drink/${id}`),
     onSuccess: () => {
@@ -102,7 +138,7 @@ export default function DrinkMenuPage() {
       imageUrl: drink.imageUrl || "",
       isPopular: drink.isPopular,
       status: drink.status,
-      sortOrder: "0",
+      position: "",
       alcoholPercent:
         drink.alcoholPercent !== null && drink.alcoholPercent !== undefined
           ? drink.alcoholPercent.toString()
@@ -123,7 +159,7 @@ export default function DrinkMenuPage() {
       imageUrl: drink.imageUrl || "",
       isPopular: drink.isPopular,
       status: "DRAFT",
-      sortOrder: "0",
+      position: "",
       alcoholPercent:
         drink.alcoholPercent !== null && drink.alcoholPercent !== undefined
           ? drink.alcoholPercent.toString()
@@ -174,6 +210,9 @@ export default function DrinkMenuPage() {
         totalPages={totalPages}
         totalItems={totalItems}
         onPageChange={setCurrentPage}
+        reorderEnabled={reorderEnabled}
+        onReorder={reorder}
+        getHighlightProps={highlight.getHighlightProps}
       />
 
       <DrinkFormModal
@@ -185,11 +224,13 @@ export default function DrinkMenuPage() {
           setShowModal(false);
           setEditingId(null);
         }}
-        onSubmitSuccess={() => {
+        onSubmitSuccess={(createdId) => {
           setShowModal(false);
           setEditingId(null);
           setForm(emptyForm);
           queryClient.invalidateQueries({ queryKey: ["drinks"] });
+          if (createdId) highlight.flash(createdId);
+          toast.success(editingId ? tc("saved") : tc("created"));
         }}
       />
 
@@ -197,6 +238,8 @@ export default function DrinkMenuPage() {
         isOpen={showCategoryModal}
         categories={categories}
         onClose={() => setShowCategoryModal(false)}
+        onReorder={reorderCategories}
+        getHighlightProps={highlight.getHighlightProps}
         onDataChange={() => {
           queryClient.invalidateQueries({ queryKey: ["drink-categories"] });
           queryClient.invalidateQueries({ queryKey: ["drinks"] });

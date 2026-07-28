@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { toSlug } from "@resto-hub/utils";
 import { ImageUpload } from "@/shared/components/image-upload";
 import { FormError } from "@/shared/components/form-error";
+import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
 import { BuffetFormData, MenuItemOption, CategoryOption } from "./types";
 
 interface BuffetFormModalProps {
@@ -330,31 +331,18 @@ export function BuffetFormModal({
             }}
             folder="buffet-menu"
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-foreground-secondary mb-1">
-                {t("sortOrderLabel")}
-              </label>
-              <input
-                type="number"
-                value={form.sortOrder}
-                onChange={(e) => setForm({ ...form, sortOrder: e.target.value })}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:border-gold-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-foreground-secondary mb-1">
-                {t("statusLabel")}
-              </label>
-              <select
-                value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value })}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:border-gold-500"
-              >
-                <option value="DRAFT">{tc("draft")}</option>
-                <option value="PUBLISHED">{tc("published")}</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-sm text-foreground-secondary mb-1">
+              {t("statusLabel")}
+            </label>
+            <select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+              className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:border-gold-500"
+            >
+              <option value="DRAFT">{tc("draft")}</option>
+              <option value="PUBLISHED">{tc("published")}</option>
+            </select>
           </div>
           <label className="flex items-center gap-2 cursor-pointer py-1">
             <input
@@ -365,6 +353,14 @@ export function BuffetFormModal({
             />
             <span className="text-sm text-foreground font-medium">{t("popularLabel")}</span>
           </label>
+          <AdvancedSection title={tc("advancedOptions")}>
+            <PositionField
+              value={form.position}
+              onChange={(v) => setForm({ ...form, position: v })}
+              label={tc("positionLabel")}
+              hint={tc("positionHint")}
+            />
+          </AdvancedSection>
           <div className="flex gap-3 pt-2">
             <button
               type="submit"

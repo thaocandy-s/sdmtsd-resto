@@ -16,10 +16,12 @@ const optionalFloat = z.preprocess(
   z.coerce.number().nullable()
 );
 
-// Empty string falls back to 0 (matches previous parseInt behavior).
-const sortOrderValue = z.preprocess(
-  (v) => (v === "" || v === null || v === undefined ? 0 : v),
-  z.coerce.number().int()
+// Optional explicit position for ordered content (Advanced form field).
+// sortOrder itself is system-managed; clients request a position instead and
+// the ordering service (lib/ordering.ts) computes/normalizes sortOrder.
+export const positionValue = z.preprocess(
+  (v) => (v === "" || v === null || v === undefined ? undefined : v),
+  z.coerce.number().int().optional()
 );
 
 export const foodCreateSchema = z.object({
@@ -35,7 +37,7 @@ export const foodCreateSchema = z.object({
   isRecommended: z.boolean().optional(),
   ingredients: z.string().max(2000).nullish(),
   calories: optionalInt,
-  sortOrder: sortOrderValue.optional(),
+  position: positionValue,
   status: contentStatus.optional(),
 });
 
@@ -54,7 +56,7 @@ export const drinkCreateSchema = z.object({
   isRecommended: z.boolean().optional(),
   alcoholPercent: optionalFloat,
   volume: z.string().max(50).nullish(),
-  sortOrder: sortOrderValue.optional(),
+  position: positionValue,
   status: contentStatus.optional(),
 });
 
@@ -74,7 +76,7 @@ export const buffetCreateSchema = z.object({
   imageUrl: z.string().max(1000).nullish(),
   images: z.array(z.string().max(1000)).max(20).optional(),
   isPopular: z.boolean().optional(),
-  sortOrder: sortOrderValue.optional(),
+  position: positionValue,
   status: contentStatus.optional(),
 });
 

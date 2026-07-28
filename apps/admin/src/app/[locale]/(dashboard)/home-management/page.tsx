@@ -9,6 +9,8 @@ import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { BannerTab } from "./_components/BannerTab";
 import { EventTab } from "./_components/EventTab";
 import { BrandAssetsTab } from "./_components/BrandAssetsTab";
+import { useReorder } from "@/shared/hooks/use-reorder";
+import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 
 interface Banner {
   id: string;
@@ -75,6 +77,15 @@ export default function HomeManagementPage() {
   const events = eventsQuery.data?.data ?? [];
   const restaurantInfo = infoQuery.data?.data ?? null;
   const loading = bannersQuery.isPending || eventsQuery.isPending || infoQuery.isPending;
+
+  const bannerHighlight = useHighlightNew();
+  const { reorder: reorderBanners } = useReorder<Banner>({
+    module: "banner",
+    queryKey: ["banners"],
+    selectItems: (data) => (data as { data: Banner[] }).data,
+    applyItems: (data, next) => ({ ...(data as object), data: next }),
+    getId: (item) => item.id,
+  });
 
   // Seed the brand asset form whenever fresh info arrives
   useEffect(() => {
@@ -210,7 +221,14 @@ export default function HomeManagementPage() {
           ))}
         </div>
       ) : activeTab === "banners" ? (
-        <BannerTab banners={banners} onDelete={deleteBanner} onRefresh={refreshData} />
+        <BannerTab
+          banners={banners}
+          onDelete={deleteBanner}
+          onRefresh={refreshData}
+          onReorder={reorderBanners}
+          onCreated={bannerHighlight.flash}
+          getHighlightProps={bannerHighlight.getHighlightProps}
+        />
       ) : activeTab === "assets" ? (
         <BrandAssetsTab
           logoUrl={logoUrl}

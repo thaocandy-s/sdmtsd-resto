@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
+import { useReorder } from "@/shared/hooks/use-reorder";
+import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 import { Rule, Winner, RuleForm, WinnerForm, emptyRule, emptyWinner } from "./_components/types";
 import { RuleList } from "./_components/RuleList";
 import { WinnerList } from "./_components/WinnerList";
@@ -68,6 +71,18 @@ export default function ChallengePage() {
     savedChallengeImage ?? challengeQuery.data?.data.challengeImage ?? "/images/katanuki.png";
   const loading = challengeQuery.isPending;
 
+  const ruleHighlight = useHighlightNew();
+  const { reorder: reorderRules } = useReorder<Rule>({
+    module: "katanuki-rule",
+    queryKey: ["challenge", { winnersPage }],
+    selectItems: (data) => (data as { data: { rules: Rule[] } }).data.rules,
+    applyItems: (data, next) => {
+      const d = data as { data: { rules: Rule[] } };
+      return { ...d, data: { ...d.data, rules: next } };
+    },
+    getId: (item) => item.id,
+  });
+
   const handleImageChange = async (url: string, file?: File | null) => {
     setIsSavingImage(true);
     try {
@@ -93,8 +108,13 @@ export default function ChallengePage() {
     e.preventDefault();
     setFormError("");
     try {
-      if (editingId) await api.put(`/api/challenge/rules/${editingId}`, ruleForm);
-      else await api.post("/api/challenge/rules", ruleForm);
+      if (editingId) {
+        await api.put(`/api/challenge/rules/${editingId}`, ruleForm);
+      } else {
+        const created = await api.post<{ data: { id: string } }>("/api/challenge/rules", ruleForm);
+        ruleHighlight.flash(created.data.id);
+      }
+      toast.success(editingId ? tc("saved") : tc("created"));
       setShowRuleModal(false);
       setEditingId(null);
       setRuleForm(emptyRule);
@@ -136,7 +156,7 @@ export default function ChallengePage() {
     setRuleForm({
       title: item.title,
       description: item.description,
-      sortOrder: item.sortOrder,
+      position: "",
       isActive: item.isActive,
     });
     setFormError("");
@@ -250,6 +270,8 @@ export default function ChallengePage() {
           rules={rules}
           onEdit={handleEditRule}
           onDelete={(id) => handleDeleteTrigger("rules", id)}
+          onReorder={reorderRules}
+          getHighlightProps={ruleHighlight.getHighlightProps}
         />
       ) : (
         <>

@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { useReorder } from "@/shared/hooks/use-reorder";
+import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 import { FaqItem, FaqCategory, FaqForm, CatForm, emptyFaq, emptyCat } from "./_components/types";
 import { FaqItemList } from "./_components/FaqItemList";
 import { FaqCategoryList } from "./_components/FaqCategoryList";
@@ -50,16 +53,39 @@ export default function FaqPage() {
   const categories = categoriesQuery.data?.data ?? [];
   const loading = itemsQuery.isPending || categoriesQuery.isPending;
 
+  const highlight = useHighlightNew();
+
+  const { reorder: reorderItems } = useReorder<FaqItem>({
+    module: "faq",
+    queryKey: ["faqs"],
+    selectItems: (data) => (data as { data: FaqItem[] }).data,
+    applyItems: (data, next) => ({ ...(data as object), data: next }),
+    getId: (item) => item.id,
+  });
+
+  const { reorder: reorderCategories } = useReorder<FaqCategory>({
+    module: "faq-category",
+    queryKey: ["faq-categories"],
+    selectItems: (data) => (data as { data: FaqCategory[] }).data,
+    applyItems: (data, next) => ({ ...(data as object), data: next }),
+    getId: (item) => item.id,
+  });
+
   const handleFaqSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
     try {
-      if (editingId) await api.put(`/api/faq/${editingId}`, faqForm);
-      else await api.post("/api/faq", faqForm);
+      if (editingId) {
+        await api.put(`/api/faq/${editingId}`, faqForm);
+      } else {
+        const created = await api.post<{ data: FaqItem }>("/api/faq", faqForm);
+        highlight.flash(created.data.id);
+      }
       setShowFaqModal(false);
       setEditingId(null);
       setFaqForm(emptyFaq);
       queryClient.invalidateQueries({ queryKey: ["faqs"] });
+      toast.success(editingId ? tc("saved") : tc("created"));
     } catch (error) {
       console.error("Save error:", error);
       setFormError(error instanceof Error ? error.message : "Save failed");
@@ -70,13 +96,18 @@ export default function FaqPage() {
     e.preventDefault();
     setFormError("");
     try {
-      if (editingId) await api.put(`/api/faq/categories/${editingId}`, catForm);
-      else await api.post("/api/faq/categories", catForm);
+      if (editingId) {
+        await api.put(`/api/faq/categories/${editingId}`, catForm);
+      } else {
+        const created = await api.post<{ data: FaqCategory }>("/api/faq/categories", catForm);
+        highlight.flash(created.data.id);
+      }
       setShowCatModal(false);
       setEditingId(null);
       setCatForm(emptyCat);
       queryClient.invalidateQueries({ queryKey: ["faq-categories"] });
       queryClient.invalidateQueries({ queryKey: ["faqs"] });
+      toast.success(editingId ? tc("saved") : tc("created"));
     } catch (error) {
       console.error("Save error:", error);
       setFormError(error instanceof Error ? error.message : "Save failed");
@@ -89,7 +120,7 @@ export default function FaqPage() {
     setFaqForm({
       question: item.question,
       answer: item.answer,
-      sortOrder: item.sortOrder,
+      position: "",
       isPublished: item.isPublished,
       categoryId: item.category?.id || "",
     });
@@ -103,7 +134,7 @@ export default function FaqPage() {
       name: item.name,
       slug: item.slug,
       description: item.description || "",
-      sortOrder: item.sortOrder,
+      position: "",
     });
     setShowCatModal(true);
   };
@@ -191,12 +222,16 @@ export default function FaqPage() {
           items={items}
           onEdit={handleEditFaq}
           onDelete={(id) => handleDeleteTrigger("items", id)}
+          onReorder={(categoryId, orderedIds) => reorderItems(orderedIds, categoryId)}
+          getHighlightProps={highlight.getHighlightProps}
         />
       ) : (
         <FaqCategoryList
           categories={categories}
           onEdit={handleEditCat}
           onDelete={(id) => handleDeleteTrigger("categories", id)}
+          onReorder={reorderCategories}
+          getHighlightProps={highlight.getHighlightProps}
         />
       )}
 

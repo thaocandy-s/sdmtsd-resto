@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
 import { deleteMediaByUrl } from "@/lib/supabase";
 import { buffetUpdateSchema } from "@/lib/validation";
+import { normalizeScope, updateOrdered } from "@/lib/ordering";
 
 export const PUT = withAuthParams(
   async (request, { params }) => {
@@ -17,7 +18,7 @@ export const PUT = withAuthParams(
         );
       }
 
-      const data = parsed.data;
+      const { position, ...data } = parsed.data;
       const existing = await prisma.buffetCourse.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Buffet not found" }, { status: 404 });
 
@@ -27,10 +28,12 @@ export const PUT = withAuthParams(
           return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
       }
 
-      const buffet = await prisma.buffetCourse.update({
-        where: { id: params.id },
-        data,
-      });
+      const buffet = await updateOrdered("buffet", params.id, { position }, (tx) =>
+        tx.buffetCourse.update({
+          where: { id: params.id },
+          data,
+        })
+      );
 
       // DB updated successfully — now it is safe to remove the replaced image
       if (data.imageUrl !== undefined && data.imageUrl !== existing.imageUrl) {
@@ -57,6 +60,7 @@ export const DELETE = withAuthParams(
         where: { id: params.id },
         data: { deletedAt: new Date() },
       });
+      await normalizeScope("buffet");
       if (existing.imageUrl) {
         await deleteMediaByUrl(existing.imageUrl);
       }

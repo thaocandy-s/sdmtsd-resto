@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { ImageUpload } from "@/shared/components/image-upload";
 import { FormError } from "@/shared/components/form-error";
+import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
 import { FormData } from "./types";
 
 interface BeerArtFormModalProps {
@@ -124,6 +125,14 @@ export function BeerArtFormModal({
             />
             <span className="text-sm text-foreground">{t("publishedLabel")}</span>
           </label>
+          <AdvancedSection title={tc("advancedOptions")}>
+            <PositionField
+              value={form.position}
+              onChange={(v) => setForm({ ...form, position: v })}
+              label={tc("positionLabel")}
+              hint={tc("positionHint")}
+            />
+          </AdvancedSection>
           <div className="flex gap-3 pt-4">
             <button
               type="submit"

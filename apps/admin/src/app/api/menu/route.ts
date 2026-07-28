@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
 import { foodCreateSchema } from "@/lib/validation";
+import { createOrdered } from "@/lib/ordering";
 
 // GET /api/menu - List all foods (admin)
 export const GET = withAuth(async (request: NextRequest) => {
@@ -80,7 +81,7 @@ export const POST = withAuth(
         isRecommended,
         ingredients,
         calories,
-        sortOrder,
+        position,
         status,
       } = parsed.data;
 
@@ -89,25 +90,27 @@ export const POST = withAuth(
         return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
       }
 
-      const food = await prisma.food.create({
-        data: {
-          name,
-          slug,
-          description,
-          price,
-          originalPrice,
-          categoryId,
-          imageUrl,
-          images: images || [],
-          isPopular: isPopular || false,
-          isRecommended: isRecommended || false,
-          ingredients,
-          calories,
-          sortOrder: sortOrder ?? 0,
-          status: status || "DRAFT",
-        },
-        include: { category: true },
-      });
+      const food = await createOrdered("food", categoryId, position, (tx, sortOrder) =>
+        tx.food.create({
+          data: {
+            name,
+            slug,
+            description,
+            price,
+            originalPrice,
+            categoryId,
+            imageUrl,
+            images: images || [],
+            isPopular: isPopular || false,
+            isRecommended: isRecommended || false,
+            ingredients,
+            calories,
+            sortOrder,
+            status: status || "DRAFT",
+          },
+          include: { category: true },
+        })
+      );
 
       return NextResponse.json({ data: food }, { status: 201 });
     } catch (error) {

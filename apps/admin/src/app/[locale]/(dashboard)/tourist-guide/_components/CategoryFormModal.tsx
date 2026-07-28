@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { toSlug } from "@resto-hub/utils";
 import { FormError } from "@/shared/components/form-error";
+import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
 import { Category, CatForm, emptyCat } from "./types";
 
 interface CategoryFormModalProps {
@@ -10,7 +12,7 @@ interface CategoryFormModalProps {
   editingId: string | null;
   initialData: Category | null;
   onClose: () => void;
-  onDataChange: () => void;
+  onDataChange: (createdId?: string) => void;
 }
 
 export function CategoryFormModal({
@@ -32,7 +34,7 @@ export function CategoryFormModal({
         name: initialData.name,
         slug: initialData.slug,
         description: initialData.description || "",
-        sortOrder: initialData.sortOrder,
+        position: "",
       });
     } else {
       setForm(emptyCat);
@@ -47,10 +49,12 @@ export function CategoryFormModal({
     try {
       if (editingId) {
         await api.put(`/api/tourist/categories/${editingId}`, form);
+        onDataChange();
       } else {
-        await api.post("/api/tourist/categories", form);
+        const created = await api.post<{ data: { id: string } }>("/api/tourist/categories", form);
+        onDataChange(created.data.id);
       }
-      onDataChange();
+      toast.success(editingId ? tc("saved") : tc("created"));
       onClose();
     } catch (error) {
       console.error("Save category error:", error);
@@ -104,17 +108,14 @@ export function CategoryFormModal({
               className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
             />
           </div>
-          <div>
-            <label className="block text-sm text-foreground-secondary mb-1">
-              {t("sortOrderLabel")}
-            </label>
-            <input
-              type="number"
-              value={form.sortOrder}
-              onChange={(e) => setForm({ ...form, sortOrder: parseInt(e.target.value) || 0 })}
-              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+          <AdvancedSection title={tc("advancedOptions")}>
+            <PositionField
+              value={form.position}
+              onChange={(v) => setForm({ ...form, position: v })}
+              label={tc("positionLabel")}
+              hint={tc("positionHint")}
             />
-          </div>
+          </AdvancedSection>
           <div className="flex gap-3 pt-4">
             <button
               type="submit"

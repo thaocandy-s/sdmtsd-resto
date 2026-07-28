@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
 import { drinkCreateSchema } from "@/lib/validation";
+import { createOrdered } from "@/lib/ordering";
 
 export const GET = withAuth(async (request: NextRequest) => {
   try {
@@ -72,32 +73,34 @@ export const POST = withAuth(
         isRecommended,
         alcoholPercent,
         volume,
-        sortOrder,
+        position,
         status,
       } = parsed.data;
 
       const existing = await prisma.drink.findUnique({ where: { slug } });
       if (existing) return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
 
-      const drink = await prisma.drink.create({
-        data: {
-          name,
-          slug,
-          description,
-          price,
-          originalPrice,
-          categoryId,
-          imageUrl,
-          images: images || [],
-          isPopular: isPopular || false,
-          isRecommended: isRecommended || false,
-          alcoholPercent,
-          volume,
-          sortOrder: sortOrder ?? 0,
-          status: status || "DRAFT",
-        },
-        include: { category: true },
-      });
+      const drink = await createOrdered("drink", categoryId, position, (tx, sortOrder) =>
+        tx.drink.create({
+          data: {
+            name,
+            slug,
+            description,
+            price,
+            originalPrice,
+            categoryId,
+            imageUrl,
+            images: images || [],
+            isPopular: isPopular || false,
+            isRecommended: isRecommended || false,
+            alcoholPercent,
+            volume,
+            sortOrder,
+            status: status || "DRAFT",
+          },
+          include: { category: true },
+        })
+      );
       return NextResponse.json({ data: drink }, { status: 201 });
     } catch (error) {
       console.error("Create drink error:", error);

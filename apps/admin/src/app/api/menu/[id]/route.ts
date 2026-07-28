@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
 import { deleteMediaByUrl } from "@/lib/supabase";
 import { foodUpdateSchema } from "@/lib/validation";
+import { normalizeScope, updateOrdered } from "@/lib/ordering";
 
 // GET /api/menu/[id] - Get food by id
 export const GET = withAuthParams(async (_request, { params }) => {
@@ -50,7 +51,7 @@ export const PUT = withAuthParams(
         isRecommended,
         ingredients,
         calories,
-        sortOrder,
+        position,
         status,
       } = parsed.data;
 
@@ -69,26 +70,36 @@ export const PUT = withAuthParams(
         }
       }
 
-      const food = await prisma.food.update({
-        where: { id: params.id },
-        data: {
-          name,
-          slug,
-          description,
-          price,
-          originalPrice,
-          categoryId,
-          imageUrl,
-          images,
-          isPopular,
-          isRecommended,
-          ingredients,
-          calories,
-          sortOrder,
-          status,
+      const food = await updateOrdered(
+        "food",
+        params.id,
+        {
+          previousScope: existing.categoryId,
+          nextScope: categoryId ?? existing.categoryId,
+          position,
         },
-        include: { category: true },
-      });
+        (tx, resolvedSortOrder) =>
+          tx.food.update({
+            where: { id: params.id },
+            data: {
+              name,
+              slug,
+              description,
+              price,
+              originalPrice,
+              categoryId,
+              imageUrl,
+              images,
+              isPopular,
+              isRecommended,
+              ingredients,
+              calories,
+              ...(resolvedSortOrder !== undefined ? { sortOrder: resolvedSortOrder } : {}),
+              status,
+            },
+            include: { category: true },
+          })
+      );
 
       // DB updated successfully — now it is safe to remove the replaced image
       if (imageUrl !== undefined && imageUrl !== existing.imageUrl) {
@@ -121,6 +132,7 @@ export const DELETE = withAuthParams(
         where: { id: params.id },
         data: { deletedAt: new Date() },
       });
+      await normalizeScope("food", existing.categoryId);
 
       if (existing.imageUrl) {
         await deleteMediaByUrl(existing.imageUrl);

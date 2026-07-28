@@ -3,6 +3,8 @@ import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { FormError } from "@/shared/components/form-error";
+import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
+import { SortableList, OrderBadge } from "@/shared/components/sortable-list";
 import { Category, CategoryFormData, emptyCategoryForm, toSlug } from "./types";
 
 interface CategoryManagerModalProps {
@@ -10,6 +12,8 @@ interface CategoryManagerModalProps {
   categories: Category[];
   onClose: () => void;
   onDataChange: () => void;
+  onReorder?: (orderedIds: string[]) => void;
+  getHighlightProps?: (id: string) => { "data-highlight-id": string; className: string };
 }
 
 export function CategoryManagerModal({
@@ -17,6 +21,8 @@ export function CategoryManagerModal({
   categories,
   onClose,
   onDataChange,
+  onReorder,
+  getHighlightProps,
 }: CategoryManagerModalProps) {
   const t = useTranslations("drinkMenu");
   const tc = useTranslations("common");
@@ -54,7 +60,7 @@ export function CategoryManagerModal({
       name: cat.name,
       slug: cat.slug,
       description: cat.description || "",
-      sortOrder: (cat.sortOrder || 0).toString(),
+      position: "",
     });
     setIsAddingCat(true);
   };
@@ -138,17 +144,14 @@ export function CategoryManagerModal({
                   className="w-full bg-background-secondary border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-gold-500"
                 />
               </div>
-              <div className="w-1/2">
-                <label className="block text-xs text-foreground-secondary mb-1">
-                  {t("sortOrderLabel")}
-                </label>
-                <input
-                  type="number"
-                  value={catForm.sortOrder}
-                  onChange={(e) => setCatForm({ ...catForm, sortOrder: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-gold-500"
+              <AdvancedSection title={tc("advancedOptions")}>
+                <PositionField
+                  value={catForm.position}
+                  onChange={(v) => setCatForm({ ...catForm, position: v })}
+                  label={tc("positionLabel")}
+                  hint={tc("positionHint")}
                 />
-              </div>
+              </AdvancedSection>
               <FormError message={error} />
               <div className="flex gap-2 pt-2">
                 <button
@@ -184,95 +187,52 @@ export function CategoryManagerModal({
             </button>
           )}
 
-          {/* Category Table */}
+          {/* Category List (drag & drop to reorder) */}
           {!isAddingCat && error && <FormError message={error} />}
-          <div className="hidden md:block border border-border rounded-lg overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-background-tertiary border-b border-border">
-                <tr className="text-left text-foreground-secondary">
-                  <th className="px-4 py-2.5">{t("nameLabel")} / Slug</th>
-                  <th className="px-4 py-2.5">{t("descriptionLabel")}</th>
-                  <th className="px-4 py-2.5">{t("categoryLabel")}</th>
-                  <th className="px-4 py-2.5">{tc("actions")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {categories.map((cat) => (
-                  <tr key={cat.id} className="hover:bg-background-tertiary/50">
-                    <td className="px-4 py-2.5">
-                      <div className="font-medium text-foreground">{cat.name}</div>
-                      <div className="text-xs text-foreground-tertiary">{cat.slug}</div>
-                    </td>
-                    <td className="px-4 py-2.5 text-foreground-secondary max-w-xs truncate">
-                      {cat.description || (
-                        <span className="text-foreground-tertiary italic">
-                          {t("noDescription")}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5 text-foreground-secondary">
-                      {cat._count?.drinks ?? 0} {t("itemsCount")}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => handleCatEdit(cat)}
-                          className="text-gold-400 hover:text-gold-300 text-xs font-medium"
-                        >
-                          {tc("edit")}
-                        </button>
-                        <button
-                          onClick={() => handleCatDelete(cat.id)}
-                          className="text-red-400 hover:text-red-300 text-xs font-medium"
-                        >
-                          {tc("delete")}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Category List */}
-          <div className="block md:hidden space-y-3">
-            {categories.map((cat) => (
-              <div
-                key={cat.id}
-                className="bg-background border border-border rounded-lg p-3 space-y-2"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="font-semibold text-foreground">{cat.name}</div>
-                    <div className="text-xs text-foreground-tertiary">{cat.slug}</div>
+          <SortableList
+            items={categories}
+            onReorder={onReorder ?? (() => {})}
+            className="space-y-2"
+            renderItem={(cat, index, handle) => {
+              const hp = getHighlightProps?.(cat.id) ?? {
+                "data-highlight-id": cat.id,
+                className: "",
+              };
+              return (
+                <div
+                  {...hp}
+                  className={`bg-background border border-border rounded-lg p-3 flex items-center gap-3 ${hp.className}`}
+                >
+                  {handle}
+                  <OrderBadge order={index + 1} />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-foreground truncate">{cat.name}</div>
+                    <div className="text-xs text-foreground-tertiary truncate">
+                      {cat.slug}
+                      {cat.description ? ` · ${cat.description}` : ""}
+                    </div>
                   </div>
-                  <div className="text-xs bg-background-tertiary px-2 py-0.5 rounded text-foreground-secondary whitespace-nowrap">
+                  <div className="text-xs bg-background-tertiary px-2 py-0.5 rounded text-foreground-secondary whitespace-nowrap shrink-0">
                     {cat._count?.drinks ?? 0} {t("itemsCount")}
                   </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <button
+                      onClick={() => handleCatEdit(cat)}
+                      className="text-gold-400 hover:text-gold-300 text-xs font-medium"
+                    >
+                      {tc("edit")}
+                    </button>
+                    <button
+                      onClick={() => handleCatDelete(cat.id)}
+                      className="text-red-400 hover:text-red-300 text-xs font-medium"
+                    >
+                      {tc("delete")}
+                    </button>
+                  </div>
                 </div>
-                {cat.description && (
-                  <p className="text-xs text-foreground-secondary line-clamp-2">
-                    {cat.description}
-                  </p>
-                )}
-                <div className="flex justify-end gap-3 pt-2 border-t border-border/40 text-xs">
-                  <button
-                    onClick={() => handleCatEdit(cat)}
-                    className="text-gold-400 hover:text-gold-300 font-medium"
-                  >
-                    {tc("edit")}
-                  </button>
-                  <button
-                    onClick={() => handleCatDelete(cat.id)}
-                    className="text-red-400 hover:text-red-300 font-medium"
-                  >
-                    {tc("delete")}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              );
+            }}
+          />
         </div>
       </div>
       <ConfirmModal

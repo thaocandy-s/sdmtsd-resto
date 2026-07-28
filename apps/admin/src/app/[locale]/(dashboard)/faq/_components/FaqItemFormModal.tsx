@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { FormError } from "@/shared/components/form-error";
+import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
 import { FaqCategory, FaqForm } from "./types";
 
 interface FaqItemFormModalProps {
@@ -67,36 +68,23 @@ export function FaqItemFormModal({
               className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-foreground-secondary mb-1">
-                {t("categoryLabel")} <span className="text-red-400">*</span>
-              </label>
-              <select
-                value={form.categoryId}
-                onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-                required
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-              >
-                <option value="">{t("selectCategory")}</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm text-foreground-secondary mb-1">
-                {t("sortOrderLabel")}
-              </label>
-              <input
-                type="number"
-                value={form.sortOrder}
-                onChange={(e) => setForm({ ...form, sortOrder: parseInt(e.target.value) || 0 })}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-              />
-            </div>
+          <div>
+            <label className="block text-sm text-foreground-secondary mb-1">
+              {t("categoryLabel")} <span className="text-red-400">*</span>
+            </label>
+            <select
+              value={form.categoryId}
+              onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+              required
+              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+            >
+              <option value="">{t("selectCategory")}</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -107,6 +95,14 @@ export function FaqItemFormModal({
             />
             <span className="text-sm text-foreground">{t("publishedLabel")}</span>
           </label>
+          <AdvancedSection title={tc("advancedOptions")}>
+            <PositionField
+              value={form.position}
+              onChange={(v) => setForm({ ...form, position: v })}
+              label={tc("positionLabel")}
+              hint={tc("positionHint")}
+            />
+          </AdvancedSection>
           <FormError message={error} />
           <div className="flex gap-3 pt-4">
             <button

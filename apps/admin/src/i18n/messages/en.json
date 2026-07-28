@@ -23,7 +23,15 @@
     "saving": "Saving...",
     "imageRequired": "Image is required",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "advancedOptions": "Advanced options",
+    "positionLabel": "Position (optional)",
+    "positionHint": "Leave empty to add to the end. Drag & drop is the recommended way to reorder.",
+    "saved": "Saved",
+    "created": "Created",
+    "orderUpdated": "Order updated",
+    "orderUpdateFailed": "Failed to update order",
+    "dragToReorder": "Drag to reorder"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -284,7 +292,8 @@
     "slugLabel": "Slug",
     "descriptionLabel": "Description",
     "deleteConfirm": "Are you sure you want to delete this item?",
-    "orderLabel": "Order"
+    "orderLabel": "Order",
+    "uncategorized": "Uncategorized"
   },
   "challenge": {
     "title": "Katanuki Challenge",

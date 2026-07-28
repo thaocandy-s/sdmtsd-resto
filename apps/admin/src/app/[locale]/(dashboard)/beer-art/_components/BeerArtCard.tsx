@@ -5,14 +5,21 @@ interface BeerArtCardProps {
   item: BeerArt;
   onEdit: (item: BeerArt) => void;
   onDelete: (id: string) => void;
+  getHighlightProps?: (id: string) => { "data-highlight-id": string; className: string };
 }
 
-export function BeerArtCard({ item, onEdit, onDelete }: BeerArtCardProps) {
+export function BeerArtCard({ item, onEdit, onDelete, getHighlightProps }: BeerArtCardProps) {
   const t = useTranslations("beerArt");
   const tc = useTranslations("common");
+  const hp = getHighlightProps?.(item.id);
 
   return (
-    <div className="bg-background-secondary border border-border rounded-lg overflow-hidden group">
+    <div
+      {...hp}
+      className={`bg-background-secondary border border-border rounded-lg overflow-hidden group ${
+        hp?.className ?? ""
+      }`}
+    >
       <div className="aspect-square bg-background-tertiary relative">
         {item.imageUrl ? (
           <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />

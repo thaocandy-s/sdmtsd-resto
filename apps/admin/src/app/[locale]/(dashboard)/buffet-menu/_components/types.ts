@@ -41,7 +41,7 @@ export type BuffetFormData = {
   notes: string;
   imageUrl: string;
   isPopular: boolean;
-  sortOrder: string;
+  position: string;
   status: string;
 };
 
@@ -58,6 +58,6 @@ export const emptyBuffetForm: BuffetFormData = {
   notes: "",
   imageUrl: "",
   isPopular: false,
-  sortOrder: "0",
+  position: "",
   status: "DRAFT",
 };

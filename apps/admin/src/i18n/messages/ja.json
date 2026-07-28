@@ -23,7 +23,15 @@
     "saving": "保存中...",
     "imageRequired": "画像は必須です",
     "previous": "前へ",
-    "next": "次へ"
+    "next": "次へ",
+    "advancedOptions": "詳細オプション",
+    "positionLabel": "表示位置（任意）",
+    "positionHint": "空欄の場合は末尾に追加されます。並び替えはドラッグ＆ドロップが推奨です。",
+    "saved": "保存しました",
+    "created": "作成しました",
+    "orderUpdated": "表示順を更新しました",
+    "orderUpdateFailed": "表示順の更新に失敗しました",
+    "dragToReorder": "ドラッグして並び替え"
   },
   "sidebar": {
     "dashboard": "ダッシュボード",
@@ -284,7 +292,8 @@
     "slugLabel": "スラグ",
     "descriptionLabel": "説明",
     "deleteConfirm": "このアイテムを削除してもよろしいですか？",
-    "orderLabel": "表示順"
+    "orderLabel": "表示順",
+    "uncategorized": "未分類"
   },
   "challenge": {
     "title": "型抜きチャレンジ",

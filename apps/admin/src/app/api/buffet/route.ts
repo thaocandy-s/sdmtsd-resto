@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
 import { buffetCreateSchema } from "@/lib/validation";
+import { createOrdered } from "@/lib/ordering";
 
 export const GET = withAuth(async (request: NextRequest) => {
   try {
@@ -75,32 +76,34 @@ export const POST = withAuth(
         imageUrl,
         images,
         isPopular,
-        sortOrder,
+        position,
         status,
       } = parsed.data;
 
       const existing = await prisma.buffetCourse.findUnique({ where: { slug } });
       if (existing) return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
 
-      const buffet = await prisma.buffetCourse.create({
-        data: {
-          name,
-          slug,
-          description,
-          price,
-          duration,
-          minPeople,
-          maxPeople,
-          includes: includes || [],
-          isAllMenu: isAllMenu || false,
-          notes: notes || null,
-          imageUrl,
-          images: images || [],
-          isPopular: isPopular || false,
-          sortOrder: sortOrder ?? 0,
-          status: status || "DRAFT",
-        },
-      });
+      const buffet = await createOrdered("buffet", undefined, position, (tx, sortOrder) =>
+        tx.buffetCourse.create({
+          data: {
+            name,
+            slug,
+            description,
+            price,
+            duration,
+            minPeople,
+            maxPeople,
+            includes: includes || [],
+            isAllMenu: isAllMenu || false,
+            notes: notes || null,
+            imageUrl,
+            images: images || [],
+            isPopular: isPopular || false,
+            sortOrder,
+            status: status || "DRAFT",
+          },
+        })
+      );
       return NextResponse.json({ data: buffet }, { status: 201 });
     } catch (error) {
       console.error("Create buffet error:", error);

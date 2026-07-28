@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
+import { createOrdered } from "@/lib/ordering";
+import { positionValue } from "@/lib/validation";
 
 export const GET = withAuth(async (request: NextRequest) => {
   try {
@@ -40,31 +42,26 @@ export const POST = withAuth(
   async (request: NextRequest) => {
     try {
       const body = await request.json();
-      const {
-        title,
-        description,
-        imageUrl,
-        customerName,
-        artistName,
-        isPopular,
-        isPublished,
-        sortOrder,
-      } = body;
+      const { title, description, imageUrl, customerName, artistName, isPopular, isPublished } =
+        body;
       if (!title || !imageUrl)
         return NextResponse.json({ message: "Title and image URL are required" }, { status: 400 });
 
-      const item = await prisma.beerArt.create({
-        data: {
-          title,
-          description,
-          imageUrl,
-          customerName,
-          artistName,
-          isPopular: isPopular || false,
-          isPublished: isPublished || false,
-          sortOrder: sortOrder ? parseInt(sortOrder) : 0,
-        },
-      });
+      const position = positionValue.parse(body.position ?? body.sortOrder);
+      const item = await createOrdered("beer-art", undefined, position, (tx, sortOrder) =>
+        tx.beerArt.create({
+          data: {
+            title,
+            description,
+            imageUrl,
+            customerName,
+            artistName,
+            isPopular: isPopular || false,
+            isPublished: isPublished || false,
+            sortOrder,
+          },
+        })
+      );
       return NextResponse.json({ data: item }, { status: 201 });
     } catch (error) {
       console.error("Create beer art error:", error);

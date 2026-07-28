@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
 import { FormError } from "@/shared/components/form-error";
+import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
 import { Category, FormData, toSlug } from "./types";
 import { formatPriceWithTax } from "@resto-hub/utils";
 
@@ -12,7 +13,7 @@ interface DrinkFormModalProps {
   initialForm: FormData;
   categories: Category[];
   onClose: () => void;
-  onSubmitSuccess: () => void;
+  onSubmitSuccess: (createdId?: string) => void;
 }
 
 export function DrinkFormModal({
@@ -57,10 +58,11 @@ export function DrinkFormModal({
 
       if (editingId) {
         await api.put(`/api/drink/${editingId}`, payload);
+        onSubmitSuccess();
       } else {
-        await api.post("/api/drink", payload);
+        const created = await api.post<{ data: { id: string } }>("/api/drink", payload);
+        onSubmitSuccess(created.data.id);
       }
-      onSubmitSuccess();
     } catch (error) {
       console.error("Save drink error:", error);
       setError(error instanceof Error ? error.message : "Save failed");
@@ -208,6 +210,14 @@ export function DrinkFormModal({
             <span className="text-sm text-foreground">{t("popularLabel")}</span>
           </label>
           <FormError message={error} />
+          <AdvancedSection title={tc("advancedOptions")}>
+            <PositionField
+              value={form.position}
+              onChange={(v) => setForm({ ...form, position: v })}
+              label={tc("positionLabel")}
+              hint={tc("positionHint")}
+            />
+          </AdvancedSection>
           <div className="flex gap-3 pt-4">
             <button
               type="submit"

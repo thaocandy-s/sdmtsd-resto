@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { BeerArt, FormData, emptyForm } from "./_components/types";
 import { BeerArtList } from "./_components/BeerArtList";
 import { BeerArtFormModal } from "./_components/BeerArtFormModal";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { uploadImage } from "@/shared/components/image-upload";
+import { useReorder } from "@/shared/hooks/use-reorder";
+import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 
 export default function BeerArtPage() {
   const t = useTranslations("beerArt");
@@ -42,6 +45,17 @@ export default function BeerArtPage() {
   const totalItems = itemsQuery.data?.meta?.total ?? 0;
   const loading = itemsQuery.isPending;
 
+  const beerArtsQueryKey = ["beer-arts", { page: currentPage }];
+  const reorderEnabled = totalPages <= 1;
+  const highlight = useHighlightNew();
+  const { reorder: reorderItems } = useReorder<BeerArt>({
+    module: "beer-art",
+    queryKey: beerArtsQueryKey,
+    selectItems: (data) => (data as { data: BeerArt[] }).data,
+    applyItems: (data, next) => ({ ...(data as object), data: next }),
+    getId: (item) => item.id,
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.imageUrl && !imageFile) {
@@ -61,8 +75,13 @@ export default function BeerArtPage() {
         imageUrl: finalImageUrl,
       };
 
-      if (editingId) await api.put(`/api/beer-art/${editingId}`, payload);
-      else await api.post("/api/beer-art", payload);
+      if (editingId) {
+        await api.put(`/api/beer-art/${editingId}`, payload);
+      } else {
+        const created = await api.post<{ data: { id: string } }>("/api/beer-art", payload);
+        highlight.flash(created.data.id);
+      }
+      toast.success(editingId ? tc("saved") : tc("created"));
       setShowModal(false);
       setEditingId(null);
       setForm(emptyForm);
@@ -86,6 +105,7 @@ export default function BeerArtPage() {
       artistName: item.artistName || "",
       isPopular: item.isPopular,
       isPublished: item.isPublished,
+      position: "",
     });
     setImageFile(null);
     setFormError("");
@@ -131,6 +151,9 @@ export default function BeerArtPage() {
         loading={loading}
         onEdit={handleEdit}
         onDelete={(id) => setDeleteConfirmId(id)}
+        reorderEnabled={reorderEnabled}
+        onReorder={reorderItems}
+        getHighlightProps={highlight.getHighlightProps}
       />
 
       {/* Pagination Container */}

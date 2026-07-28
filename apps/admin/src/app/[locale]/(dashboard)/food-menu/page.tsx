@@ -3,8 +3,11 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
+import { useReorder } from "@/shared/hooks/use-reorder";
+import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 import { Food, Category, FormData, emptyForm } from "./_components/types";
 import { FoodMenuHeader } from "./_components/FoodMenuHeader";
 import { FoodFilters } from "./_components/FoodFilters";
@@ -79,6 +82,39 @@ export default function FoodMenuPage() {
   const categories = categoriesQuery.data?.data ?? [];
   const loading = foodsQuery.isPending;
 
+  // Drag & drop is category-scoped. It is enabled only when a single category
+  // is selected, there is no active search, and the whole category fits on one
+  // page — so the loaded list is the complete, ordered scope the API expects.
+  const reorderEnabled = !!filterCategory && !debouncedSearch && totalPages <= 1;
+  const scopeCategoryId = categories.find((c) => c.slug === filterCategory)?.id ?? null;
+  const foodsQueryKey = [
+    "foods",
+    {
+      page: currentPage,
+      search: debouncedSearch,
+      category: filterCategory,
+      status: filterStatus,
+    },
+  ];
+
+  const highlight = useHighlightNew();
+  const { reorder } = useReorder<Food>({
+    module: "food",
+    queryKey: foodsQueryKey,
+    selectItems: (data) => (data as { data: Food[] }).data,
+    applyItems: (data, next) => ({ ...(data as object), data: next }),
+    getId: (item) => item.id,
+    scopeValue: scopeCategoryId,
+  });
+
+  const { reorder: reorderCategories } = useReorder<Category>({
+    module: "food-category",
+    queryKey: ["food-categories"],
+    selectItems: (data) => (data as { data: Category[] }).data,
+    applyItems: (data, next) => ({ ...(data as object), data: next }),
+    getId: (item) => item.id,
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/api/menu/${id}`),
     onSuccess: () => {
@@ -106,7 +142,7 @@ export default function FoodMenuPage() {
       ingredients: food.ingredients || "",
       calories: food.calories?.toString() || "",
       status: food.status,
-      sortOrder: food.sortOrder.toString(),
+      position: "",
     });
     setShowModal(true);
   };
@@ -126,7 +162,7 @@ export default function FoodMenuPage() {
       ingredients: food.ingredients || "",
       calories: food.calories?.toString() || "",
       status: "DRAFT",
-      sortOrder: food.sortOrder.toString(),
+      position: "",
     });
     setShowModal(true);
   };
@@ -172,6 +208,9 @@ export default function FoodMenuPage() {
         totalPages={totalPages}
         totalItems={totalItems}
         onPageChange={setCurrentPage}
+        reorderEnabled={reorderEnabled}
+        onReorder={reorder}
+        getHighlightProps={highlight.getHighlightProps}
       />
 
       <FoodFormModal
@@ -183,11 +222,13 @@ export default function FoodMenuPage() {
           setShowModal(false);
           setEditingId(null);
         }}
-        onSubmitSuccess={() => {
+        onSubmitSuccess={(createdId) => {
           setShowModal(false);
           setEditingId(null);
           setForm(emptyForm);
           queryClient.invalidateQueries({ queryKey: ["foods"] });
+          if (createdId) highlight.flash(createdId);
+          toast.success(editingId ? tCommon("saved") : tCommon("created"));
         }}
       />
 
@@ -195,6 +236,8 @@ export default function FoodMenuPage() {
         isOpen={showCategoryModal}
         categories={categories}
         onClose={() => setShowCategoryModal(false)}
+        onReorder={reorderCategories}
+        getHighlightProps={highlight.getHighlightProps}
         onDataChange={() => {
           queryClient.invalidateQueries({ queryKey: ["food-categories"] });
           queryClient.invalidateQueries({ queryKey: ["foods"] });

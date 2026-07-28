@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
 import { deleteMediaByUrl } from "@/lib/supabase";
 import { drinkUpdateSchema } from "@/lib/validation";
+import { normalizeScope, updateOrdered } from "@/lib/ordering";
 
 export const GET = withAuthParams(async (_request, { params }) => {
   try {
@@ -31,7 +32,7 @@ export const PUT = withAuthParams(
         );
       }
 
-      const data = parsed.data;
+      const { position, ...data } = parsed.data;
       const existing = await prisma.drink.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Drink not found" }, { status: 404 });
 
@@ -41,11 +42,24 @@ export const PUT = withAuthParams(
           return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
       }
 
-      const drink = await prisma.drink.update({
-        where: { id: params.id },
-        data,
-        include: { category: true },
-      });
+      const drink = await updateOrdered(
+        "drink",
+        params.id,
+        {
+          previousScope: existing.categoryId,
+          nextScope: data.categoryId ?? existing.categoryId,
+          position,
+        },
+        (tx, resolvedSortOrder) =>
+          tx.drink.update({
+            where: { id: params.id },
+            data: {
+              ...data,
+              ...(resolvedSortOrder !== undefined ? { sortOrder: resolvedSortOrder } : {}),
+            },
+            include: { category: true },
+          })
+      );
 
       // DB updated successfully — now it is safe to remove the replaced image
       if (data.imageUrl !== undefined && data.imageUrl !== existing.imageUrl) {
@@ -69,6 +83,7 @@ export const DELETE = withAuthParams(
       if (!existing) return NextResponse.json({ message: "Drink not found" }, { status: 404 });
       // Soft delete first, then clean up storage
       await prisma.drink.update({ where: { id: params.id }, data: { deletedAt: new Date() } });
+      await normalizeScope("drink", existing.categoryId);
       if (existing.imageUrl) {
         await deleteMediaByUrl(existing.imageUrl);
       }

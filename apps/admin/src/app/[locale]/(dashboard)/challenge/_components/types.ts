@@ -19,7 +19,7 @@ export interface Winner {
 export type RuleForm = {
   title: string;
   description: string;
-  sortOrder: number;
+  position: string;
   isActive: boolean;
 };
 
@@ -35,7 +35,7 @@ export type WinnerForm = {
 export const emptyRule: RuleForm = {
   title: "",
   description: "",
-  sortOrder: 0,
+  position: "",
   isActive: true,
 };
 

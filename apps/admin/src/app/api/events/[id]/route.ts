@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
 import { deleteMediaByUrl } from "@/lib/supabase";
+import { normalizeScope, updateOrdered } from "@/lib/ordering";
+import { positionValue } from "@/lib/validation";
 
 export const PUT = withAuthParams(
   async (request, { params }) => {
@@ -10,14 +12,20 @@ export const PUT = withAuthParams(
       const existing = await prisma.event.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Event not found" }, { status: 404 });
 
-      const event = await prisma.event.update({
-        where: { id: params.id },
-        data: {
-          ...body,
-          startDate: body.startDate ? new Date(body.startDate) : undefined,
-          endDate: body.endDate ? new Date(body.endDate) : undefined,
-        },
-      });
+      const position = positionValue.parse(body.position);
+      delete body.position;
+      delete body.sortOrder;
+
+      const event = await updateOrdered("event", params.id, { position }, (tx) =>
+        tx.event.update({
+          where: { id: params.id },
+          data: {
+            ...body,
+            startDate: body.startDate ? new Date(body.startDate) : undefined,
+            endDate: body.endDate ? new Date(body.endDate) : undefined,
+          },
+        })
+      );
       return NextResponse.json({ data: event });
     } catch (error) {
       console.error("Update event error:", error);
@@ -38,6 +46,7 @@ export const DELETE = withAuthParams(
       }
 
       await prisma.event.delete({ where: { id: params.id } });
+      await normalizeScope("event");
       return NextResponse.json({ message: "Event deleted successfully" });
     } catch (error) {
       console.error("Delete event error:", error);

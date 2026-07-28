@@ -31,7 +31,7 @@ export type FormData = {
   imageUrl: string;
   isPopular: boolean;
   status: string;
-  sortOrder: string;
+  position: string;
   alcoholPercent: string;
   volume: string;
 };
@@ -40,7 +40,7 @@ export type CategoryFormData = {
   name: string;
   slug: string;
   description: string;
-  sortOrder: string;
+  position: string;
 };
 
 export const emptyForm: FormData = {
@@ -52,7 +52,7 @@ export const emptyForm: FormData = {
   imageUrl: "",
   isPopular: false,
   status: "DRAFT",
-  sortOrder: "0",
+  position: "",
   alcoholPercent: "",
   volume: "",
 };
@@ -61,7 +61,7 @@ export const emptyCategoryForm: CategoryFormData = {
   name: "",
   slug: "",
   description: "",
-  sortOrder: "0",
+  position: "",
 };
 
 import { toSlug } from "@resto-hub/utils";

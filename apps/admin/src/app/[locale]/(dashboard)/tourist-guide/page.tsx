@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { useReorder } from "@/shared/hooks/use-reorder";
+import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 import { Place, Category } from "./_components/types";
 import { PlaceFormModal } from "./_components/PlaceFormModal";
 import { CategoryFormModal } from "./_components/CategoryFormModal";
@@ -65,6 +67,15 @@ export default function TouristGuidePage() {
   const categoriesTotal = categoriesQuery.data?.meta?.total ?? 0;
   const allCategories = allCategoriesQuery.data?.data ?? [];
   const loading = tab === "places" ? placesQuery.isPending : categoriesQuery.isPending;
+
+  const categoryHighlight = useHighlightNew();
+  const { reorder: reorderCategories } = useReorder<Category>({
+    module: "tour-category",
+    queryKey: ["tour-categories", { page: categoriesPage }],
+    selectItems: (data) => (data as { data: Category[] }).data,
+    applyItems: (data, next) => ({ ...(data as object), data: next }),
+    getId: (item) => item.id,
+  });
 
   const handleDataChange = () => {
     queryClient.invalidateQueries({ queryKey: ["tour-places"] });
@@ -168,6 +179,9 @@ export default function TouristGuidePage() {
               setDeleteConfirmType("categories");
               setDeleteConfirmId(id);
             }}
+            onReorder={reorderCategories}
+            getHighlightProps={categoryHighlight.getHighlightProps}
+            disabled={categoriesTotalPages > 1}
           />
 
           {categoriesTotalPages > 1 && (
@@ -222,7 +236,10 @@ export default function TouristGuidePage() {
           setShowCategoryModal(false);
           setEditingId(null);
         }}
-        onDataChange={handleDataChange}
+        onDataChange={(createdId) => {
+          handleDataChange();
+          if (createdId) categoryHighlight.flash(createdId);
+        }}
       />
 
       <ConfirmModal

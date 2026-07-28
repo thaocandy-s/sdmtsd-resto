@@ -38,14 +38,14 @@ export type FormData = {
   ingredients: string;
   calories: string;
   status: string;
-  sortOrder: string;
+  position: string;
 };
 
 export type CategoryFormData = {
   name: string;
   slug: string;
   description: string;
-  sortOrder: string;
+  position: string;
 };
 
 export const emptyForm: FormData = {
@@ -61,14 +61,14 @@ export const emptyForm: FormData = {
   ingredients: "",
   calories: "",
   status: "DRAFT",
-  sortOrder: "0",
+  position: "",
 };
 
 export const emptyCategoryForm: CategoryFormData = {
   name: "",
   slug: "",
   description: "",
-  sortOrder: "0",
+  position: "",
 };
 
 import { toSlug } from "@resto-hub/utils";

@@ -15,10 +15,12 @@ export interface FaqCategory {
   sortOrder: number;
 }
 
+// Forms no longer expose sortOrder directly. `position` is an optional
+// Advanced-only field (string so the input can be cleared); empty = append.
 export type FaqForm = {
   question: string;
   answer: string;
-  sortOrder: number;
+  position: string;
   isPublished: boolean;
   categoryId: string;
 };
@@ -27,13 +29,13 @@ export type CatForm = {
   name: string;
   slug: string;
   description: string;
-  sortOrder: number;
+  position: string;
 };
 
 export const emptyFaq: FaqForm = {
   question: "",
   answer: "",
-  sortOrder: 0,
+  position: "",
   isPublished: true,
   categoryId: "",
 };
@@ -42,5 +44,5 @@ export const emptyCat: CatForm = {
   name: "",
   slug: "",
   description: "",
-  sortOrder: 0,
+  position: "",
 };
