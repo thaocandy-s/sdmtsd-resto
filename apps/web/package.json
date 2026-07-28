@@ -16,6 +16,8 @@
     "@resto-hub/ui": "workspace:*",
     "@resto-hub/utils": "workspace:*",
     "@supabase/supabase-js": "^2.49.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "embla-carousel-react": "^8.5.2",
     "framer-motion": "^12.4.0",
     "lucide-react": "^0.469.0",

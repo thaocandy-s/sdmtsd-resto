@@ -8,6 +8,8 @@ import { Header } from "@/shared/components/header";
 import { Footer } from "@/shared/components/footer";
 import { MobileBottomNav } from "@/shared/components/mobile-bottom-nav";
 import { TrackPageView } from "@/shared/components/TrackPageView";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const notoSans = Noto_Sans({
   subsets: ["latin"],
@@ -143,6 +145,8 @@ export default async function LocaleLayout({
             <TrackPageView />
           </div>
         </NextIntlClientProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
