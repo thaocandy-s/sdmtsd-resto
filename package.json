@@ -18,7 +18,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
-    "@prisma/client": "^6.19.3",
+    "@prisma/client": "6.19.3",
     "@typescript-eslint/eslint-plugin": "^8.19.0",
     "@typescript-eslint/parser": "^8.19.0",
     "bcryptjs": "^3.0.2",
@@ -27,14 +27,18 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.0.8",
     "prettier": "^3.4.2",
-    "prisma": "^6.5.0",
+    "prisma": "6.19.3",
     "tsx": "^4.19.0",
     "turbo": "^2.5.0",
     "typescript": "^5.7.0"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": ["prettier --write"],
-    "*.{json,md}": ["prettier --write"]
+    "*.{ts,tsx,js,jsx}": [
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

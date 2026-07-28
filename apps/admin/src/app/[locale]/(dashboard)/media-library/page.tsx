@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
+import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 interface Media {
@@ -106,16 +108,14 @@ function uploadWithProgress(
 }
 
 export default function MediaLibraryPage() {
-  const [items, setItems] = useState<Media[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [modalTab, setModalTab] = useState<"upload" | "url">("upload");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search);
   const [folder, setFolder] = useState("");
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
 
   // Upload tab state
   const [selected, setSelected] = useState<SelectedFile[]>([]);
@@ -132,33 +132,30 @@ export default function MediaLibraryPage() {
   const [urlForm, setUrlForm] = useState<UrlFormData>(emptyUrlForm);
 
   useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, folder]);
+    setPage(1);
+  }, [debouncedSearch]);
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
+  const mediaQuery = useQuery({
+    queryKey: ["media", { page, search: debouncedSearch, folder }],
+    queryFn: () => {
       const params = new URLSearchParams({ page: String(page), limit: "20" });
-      if (search) params.set("search", search);
+      if (debouncedSearch) params.set("search", debouncedSearch);
       if (folder) params.set("folder", folder);
-      const res = await api.get<{ data: Media[]; meta: { total: number; totalPages: number } }>(
+      return api.get<{ data: Media[]; meta: { total: number; totalPages: number } }>(
         `/api/media?${params}`
       );
-      setItems(res.data || []);
-      setTotal(res.meta.total);
-      setTotalPages(res.meta.totalPages);
-    } catch (err) {
-      console.error("Load error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    placeholderData: keepPreviousData,
+  });
+
+  const items = mediaQuery.data?.data ?? [];
+  const total = mediaQuery.data?.meta.total ?? 0;
+  const totalPages = mediaQuery.data?.meta.totalPages ?? 0;
+  const loading = mediaQuery.isPending;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
-    loadData();
   };
 
   const resetModal = () => {
@@ -239,7 +236,7 @@ export default function MediaLibraryPage() {
       const token = useAuthStore.getState().accessToken;
       await uploadWithProgress(formData, token, setProgress);
       closeModal();
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["media"] });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
@@ -260,7 +257,7 @@ export default function MediaLibraryPage() {
       if (editingId) await api.put(`/api/media/${editingId}`, payload);
       else await api.post("/api/media", payload);
       closeModal();
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["media"] });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
     }
@@ -295,7 +292,7 @@ export default function MediaLibraryPage() {
     if (!deleteConfirmId) return;
     try {
       await api.delete(`/api/media/${deleteConfirmId}`);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["media"] });
     } catch (err) {
       console.error("Delete error:", err);
     } finally {

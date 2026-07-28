@@ -1,49 +1,74 @@
-"use client";
-
-import { useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { formatPriceWithTax } from "@resto-hub/utils";
-import { Food, RelatedFood } from "./_components/types";
-import { FoodDetailImage } from "./_components/FoodDetailImage";
-import { FoodDetailInfo } from "./_components/FoodDetailInfo";
-import { RelatedFoods } from "./_components/RelatedFoods";
+import { prisma } from "@/lib/prisma";
+import { FoodDetail } from "./_components/FoodDetail";
 
-export default function FoodDetailPage() {
-  const t = useTranslations("menu");
-  const params = useParams();
-  const slug = params.slug as string;
-  const [food, setFood] = useState<Food | null>(null);
-  const [related, setRelated] = useState<RelatedFood[]>([]);
-  const [loading, setLoading] = useState(true);
+// ISR: serve cached HTML, regenerate at most every 5 minutes
+export const revalidate = 300;
 
-  useEffect(() => {
-    if (slug) {
-      fetch(`/api/menu/${slug}`)
-        .then((r) => r.json())
-        .then((data) => {
-          setFood(data.data);
-          setRelated(data.related || []);
-        })
-        .catch(console.error)
-        .finally(() => setLoading(false));
-    }
-  }, [slug]);
+export async function generateStaticParams() {
+  const foods = await prisma.food.findMany({
+    where: { deletedAt: null, status: "PUBLISHED" },
+    select: { slug: true },
+  });
+  return foods.map(({ slug }) => ({ slug }));
+}
 
-  const formatPrice = (price: number) => formatPriceWithTax(price);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const food = await prisma.food.findFirst({
+    where: { slug, deletedAt: null, status: "PUBLISHED" },
+    select: { name: true, description: true, imageUrl: true },
+  });
+  if (!food) return {};
+  return {
+    title: food.name,
+    description: food.description || undefined,
+    alternates: {
+      canonical: `/${locale}/menu/${slug}`,
+      languages: { en: `/en/menu/${slug}`, ja: `/ja/menu/${slug}` },
+    },
+    openGraph: {
+      title: food.name,
+      description: food.description || undefined,
+      images: food.imageUrl ? [food.imageUrl] : undefined,
+    },
+  };
+}
 
-  if (loading) {
-    return (
-      <main className="max-w-4xl mx-auto px-4 py-12">
-        <div className="animate-pulse">
-          <div className="h-96 bg-background-secondary rounded-lg mb-8" />
-          <div className="h-8 bg-background-secondary rounded w-1/3 mb-4" />
-          <div className="h-4 bg-background-secondary rounded w-2/3" />
-        </div>
-      </main>
-    );
-  }
+export default async function FoodDetailPage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("menu");
+
+  const food = await prisma.food.findFirst({
+    where: { slug, deletedAt: null, status: "PUBLISHED" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      price: true,
+      originalPrice: true,
+      imageUrl: true,
+      images: true,
+      isPopular: true,
+      isRecommended: true,
+      ingredients: true,
+      calories: true,
+      categoryId: true,
+      category: { select: { id: true, name: true, slug: true } },
+    },
+  });
 
   if (!food) {
     return (
@@ -56,6 +81,19 @@ export default function FoodDetailPage() {
     );
   }
 
+  // Related foods from the same category
+  const related = await prisma.food.findMany({
+    where: {
+      categoryId: food.categoryId,
+      id: { not: food.id },
+      deletedAt: null,
+      status: "PUBLISHED",
+    },
+    select: { id: true, name: true, slug: true, imageUrl: true, price: true },
+    take: 4,
+    orderBy: { isPopular: "desc" },
+  });
+
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">
       <Link
@@ -65,16 +103,7 @@ export default function FoodDetailPage() {
         &larr; {t("backToList")}
       </Link>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Image */}
-        <FoodDetailImage imageUrl={food.imageUrl} name={food.name} />
-
-        {/* Details */}
-        <FoodDetailInfo food={food} formatPrice={formatPrice} />
-      </div>
-
-      {/* Related Items */}
-      <RelatedFoods related={related} formatPrice={formatPrice} />
+      <FoodDetail food={food} related={related} />
     </main>
   );
 }

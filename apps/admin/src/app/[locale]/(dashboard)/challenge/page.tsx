@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
@@ -14,18 +15,14 @@ import { WinnerFormModal } from "./_components/WinnerFormModal";
 export default function ChallengePage() {
   const t = useTranslations("challenge");
   const tc = useTranslations("common");
+  const queryClient = useQueryClient();
 
   const [tab, setTab] = useState<"rules" | "winners">("rules");
-  const [rules, setRules] = useState<Rule[]>([]);
-  const [winners, setWinners] = useState<Winner[]>([]);
-  const [challengeImage, setChallengeImage] = useState<string>("/images/katanuki.png");
+  const [savedChallengeImage, setSavedChallengeImage] = useState<string | null>(null);
   const [isSavingImage, setIsSavingImage] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   // Pagination states for winners
   const [winnersPage, setWinnersPage] = useState(1);
-  const [totalWinnersPages, setTotalWinnersPages] = useState(1);
-  const [totalWinners, setTotalWinners] = useState(0);
 
   // Modal State
   const [showRuleModal, setShowRuleModal] = useState(false);
@@ -43,14 +40,10 @@ export default function ChallengePage() {
     id: string;
   } | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, [winnersPage]);
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get<{
+  const challengeQuery = useQuery({
+    queryKey: ["challenge", { winnersPage }],
+    queryFn: () =>
+      api.get<{
         data: {
           rules: Rule[];
           winners: Winner[];
@@ -61,22 +54,17 @@ export default function ChallengePage() {
             totalWinnersPages: number;
           };
         };
-      }>(`/api/challenge?winnersPage=${winnersPage}&winnersLimit=10`);
-      setRules(res.data.rules || []);
-      setWinners(res.data.winners || []);
-      if (res.data.challengeImage) {
-        setChallengeImage(res.data.challengeImage);
-      }
-      if (res.data.meta) {
-        setTotalWinnersPages(res.data.meta.totalWinnersPages || 1);
-        setTotalWinners(res.data.meta.totalWinners || 0);
-      }
-    } catch (error) {
-      console.error("Load error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      }>(`/api/challenge?winnersPage=${winnersPage}&winnersLimit=10`),
+    placeholderData: keepPreviousData,
+  });
+
+  const rules = challengeQuery.data?.data.rules ?? [];
+  const winners = challengeQuery.data?.data.winners ?? [];
+  const totalWinnersPages = challengeQuery.data?.data.meta?.totalWinnersPages ?? 1;
+  const totalWinners = challengeQuery.data?.data.meta?.totalWinners ?? 0;
+  const challengeImage =
+    savedChallengeImage ?? challengeQuery.data?.data.challengeImage ?? "/images/katanuki.png";
+  const loading = challengeQuery.isPending;
 
   const handleImageChange = async (url: string, file?: File | null) => {
     setIsSavingImage(true);
@@ -90,7 +78,8 @@ export default function ChallengePage() {
         value: finalUrl,
         group: "challenge",
       });
-      setChallengeImage(finalUrl);
+      setSavedChallengeImage(finalUrl);
+      queryClient.invalidateQueries({ queryKey: ["challenge"] });
     } catch (error) {
       console.error("Error saving challenge image:", error);
     } finally {
@@ -106,7 +95,7 @@ export default function ChallengePage() {
       setShowRuleModal(false);
       setEditingId(null);
       setRuleForm(emptyRule);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["challenge"] });
     } catch (error) {
       console.error("Save error:", error);
     }
@@ -130,7 +119,7 @@ export default function ChallengePage() {
       setEditingId(null);
       setWinnerForm(emptyWinner);
       setWinnerImageFile(null);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["challenge"] });
     } catch (error) {
       console.error("Save error:", error);
     }
@@ -170,7 +159,7 @@ export default function ChallengePage() {
     try {
       await api.delete(`/api/challenge/${deleteTarget.type}/${deleteTarget.id}`);
       setDeleteTarget(null);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["challenge"] });
     } catch (error) {
       console.error("Delete error:", error);
     }

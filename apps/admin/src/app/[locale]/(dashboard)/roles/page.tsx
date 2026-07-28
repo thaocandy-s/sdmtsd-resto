@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
@@ -43,8 +44,7 @@ const ACTIONS = ["create", "read", "update", "delete", "publish"];
 
 export default function RolesPage() {
   const { hasPermission } = useAuthStore();
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [formData, setFormData] = useState({
@@ -54,21 +54,14 @@ export default function RolesPage() {
     permissions: [] as { module: string; action: string }[],
   });
 
-  const fetchRoles = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await api.get<{ data: Role[] }>("/roles");
-      setRoles(response.data);
-    } catch (error) {
-      console.error("Failed to fetch roles:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const rolesQuery = useQuery({
+    queryKey: ["roles"],
+    queryFn: () => api.get<{ data: Role[] }>("/api/roles"),
+    staleTime: 30 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    fetchRoles();
-  }, [fetchRoles]);
+  const roles = rolesQuery.data?.data ?? [];
+  const loading = rolesQuery.isPending;
 
   const handleCreate = () => {
     setEditingRole(null);
@@ -112,8 +105,8 @@ export default function RolesPage() {
   const handleConfirmDelete = async () => {
     if (!deleteConfirmRole) return;
     try {
-      await api.delete(`/roles/${deleteConfirmRole.id}`);
-      fetchRoles();
+      await api.delete(`/api/roles/${deleteConfirmRole.id}`);
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
     } catch (error) {
       console.error("Failed to delete role:", error);
       alert("Failed to delete role");
@@ -145,16 +138,16 @@ export default function RolesPage() {
 
     try {
       if (editingRole) {
-        await api.put(`/roles/${editingRole.id}`, {
+        await api.put(`/api/roles/${editingRole.id}`, {
           label: formData.label,
           description: formData.description,
           permissions: formData.permissions,
         });
       } else {
-        await api.post("/roles", formData);
+        await api.post("/api/roles", formData);
       }
       setShowModal(false);
-      fetchRoles();
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
     } catch (error) {
       console.error("Failed to save role:", error);
       alert("Failed to save role");

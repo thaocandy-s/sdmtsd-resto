@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 
@@ -43,27 +44,18 @@ const emptyForm: FormData = {
 };
 
 export default function SeoPage() {
-  const [items, setItems] = useState<SeoMeta[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>(emptyForm);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const seoQuery = useQuery({
+    queryKey: ["seo-metas"],
+    queryFn: () => api.get<{ data: SeoMeta[] }>("/api/seo"),
+  });
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get<{ data: SeoMeta[] }>("/api/seo");
-      setItems(res.data || []);
-    } catch (error) {
-      console.error("Load error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const items = seoQuery.data?.data ?? [];
+  const loading = seoQuery.isPending;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +70,7 @@ export default function SeoPage() {
       setShowModal(false);
       setEditingId(null);
       setForm(emptyForm);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["seo-metas"] });
     } catch (error) {
       console.error("Save error:", error);
     }
@@ -111,7 +103,7 @@ export default function SeoPage() {
     if (!deleteConfirmId) return;
     try {
       await api.delete(`/api/seo/${deleteConfirmId}`);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["seo-metas"] });
     } catch (error) {
       console.error("Delete error:", error);
     } finally {

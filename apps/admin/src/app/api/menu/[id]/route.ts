@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
 import { deleteMediaByUrl } from "@/lib/supabase";
+import { foodUpdateSchema } from "@/lib/validation";
 
 // GET /api/menu/[id] - Get food by id
 export const GET = withAuthParams(async (_request, { params }) => {
@@ -27,6 +28,15 @@ export const PUT = withAuthParams(
   async (request, { params }) => {
     try {
       const body = await request.json();
+      const parsed = foodUpdateSchema.safeParse(body);
+
+      if (!parsed.success) {
+        return NextResponse.json(
+          { message: "Invalid input", errors: parsed.error.flatten().fieldErrors },
+          { status: 400 }
+        );
+      }
+
       const {
         name,
         slug,
@@ -42,17 +52,13 @@ export const PUT = withAuthParams(
         calories,
         sortOrder,
         status,
-      } = body;
+      } = parsed.data;
 
       const existing = await prisma.food.findUnique({
         where: { id: params.id },
       });
       if (!existing) {
         return NextResponse.json({ message: "Food not found" }, { status: 404 });
-      }
-
-      if (imageUrl !== undefined && imageUrl !== existing.imageUrl) {
-        await deleteMediaByUrl(existing.imageUrl);
       }
 
       // Check slug uniqueness if changed
@@ -69,25 +75,25 @@ export const PUT = withAuthParams(
           name,
           slug,
           description,
-          price: price !== undefined ? parseInt(price) : undefined,
-          originalPrice:
-            originalPrice !== undefined
-              ? originalPrice
-                ? parseInt(originalPrice)
-                : null
-              : undefined,
+          price,
+          originalPrice,
           categoryId,
           imageUrl,
           images,
           isPopular,
           isRecommended,
           ingredients,
-          calories: calories !== undefined ? (calories ? parseInt(calories) : null) : undefined,
-          sortOrder: sortOrder !== undefined ? (sortOrder ? parseInt(sortOrder) : 0) : undefined,
+          calories,
+          sortOrder,
           status,
         },
         include: { category: true },
       });
+
+      // DB updated successfully — now it is safe to remove the replaced image
+      if (imageUrl !== undefined && imageUrl !== existing.imageUrl) {
+        await deleteMediaByUrl(existing.imageUrl);
+      }
 
       return NextResponse.json({ data: food });
     } catch (error) {
@@ -110,14 +116,15 @@ export const DELETE = withAuthParams(
         return NextResponse.json({ message: "Food not found" }, { status: 404 });
       }
 
-      if (existing.imageUrl) {
-        await deleteMediaByUrl(existing.imageUrl);
-      }
-
+      // Soft delete first, then clean up storage
       await prisma.food.update({
         where: { id: params.id },
         data: { deletedAt: new Date() },
       });
+
+      if (existing.imageUrl) {
+        await deleteMediaByUrl(existing.imageUrl);
+      }
 
       return NextResponse.json({ message: "Food deleted successfully" });
     } catch (error) {

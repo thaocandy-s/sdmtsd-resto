@@ -1,7 +1,8 @@
-import type { Linter } from "eslint";
-
-const config: Linter.Config = {
-  ignores: ["node_modules/", ".next/", ".turbo/", "dist/"],
-};
+/** @type {import("eslint").Linter.Config[]} */
+const config = [
+  {
+    ignores: ["**/node_modules/", "**/.next/", "**/.turbo/", "**/dist/"],
+  },
+];
 
 export default config;

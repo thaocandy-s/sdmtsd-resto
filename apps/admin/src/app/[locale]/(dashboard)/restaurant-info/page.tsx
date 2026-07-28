@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toSlug } from "@resto-hub/utils";
 import { api } from "@/lib/api-client";
@@ -13,9 +14,8 @@ import { SocialLinksSection } from "./_components/SocialLinksSection";
 export default function RestaurantInfoPage() {
   const t = useTranslations("restaurantInfo");
   const tCommon = useTranslations("common");
+  const queryClient = useQueryClient();
 
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -53,55 +53,50 @@ export default function RestaurantInfoPage() {
     isActive: true,
   });
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const infoQuery = useQuery({
+    queryKey: ["restaurant-info"],
+    queryFn: () => api.get<{ data: Restaurant | null }>("/api/info"),
+  });
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get<{ data: Restaurant | null }>("/api/info");
-      if (res.data) {
-        setRestaurant(res.data);
-        setForm({
-          name: res.data.name,
-          slug: res.data.slug,
-          description: res.data.description || "",
-          address: res.data.address || "",
-          phone: res.data.phone || "",
-          email: res.data.email || "",
-          latitude: res.data.latitude?.toString() || "",
-          longitude: res.data.longitude?.toString() || "",
-          googlePlaceId: res.data.googlePlaceId || "",
-          googleMapQuery: res.data.googleMapQuery || "",
-          openingHours: {
-            monday: res.data.openingHours?.monday || "11:00 - 22:00",
-            tuesday: res.data.openingHours?.tuesday || "11:00 - 22:00",
-            wednesday: res.data.openingHours?.wednesday || "11:00 - 22:00",
-            thursday: res.data.openingHours?.thursday || "11:00 - 22:00",
-            friday: res.data.openingHours?.friday || "11:00 - 23:00",
-            saturday: res.data.openingHours?.saturday || "11:00 - 23:00",
-            sunday: res.data.openingHours?.sunday || "11:00 - 22:00",
-            ...res.data.openingHours,
-          },
-          holidays: Array.isArray(res.data.holidays) ? res.data.holidays.join(", ") : "",
-          socialLinks: {
-            instagram: res.data.socialLinks?.instagram || "",
-            facebook: res.data.socialLinks?.facebook || "",
-            twitter: res.data.socialLinks?.twitter || "",
-            line: res.data.socialLinks?.line || "",
-            tiktok: res.data.socialLinks?.tiktok || "",
-            ...res.data.socialLinks,
-          },
-          isActive: res.data.isActive,
-        });
-      }
-    } catch (error) {
-      console.error("Load info error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const restaurant = infoQuery.data?.data ?? null;
+  const loading = infoQuery.isPending;
+
+  // Seed the form whenever fresh info arrives
+  useEffect(() => {
+    if (!restaurant) return;
+    setForm({
+      name: restaurant.name,
+      slug: restaurant.slug,
+      description: restaurant.description || "",
+      address: restaurant.address || "",
+      phone: restaurant.phone || "",
+      email: restaurant.email || "",
+      latitude: restaurant.latitude?.toString() || "",
+      longitude: restaurant.longitude?.toString() || "",
+      googlePlaceId: restaurant.googlePlaceId || "",
+      googleMapQuery: restaurant.googleMapQuery || "",
+      openingHours: {
+        monday: restaurant.openingHours?.monday || "11:00 - 22:00",
+        tuesday: restaurant.openingHours?.tuesday || "11:00 - 22:00",
+        wednesday: restaurant.openingHours?.wednesday || "11:00 - 22:00",
+        thursday: restaurant.openingHours?.thursday || "11:00 - 22:00",
+        friday: restaurant.openingHours?.friday || "11:00 - 23:00",
+        saturday: restaurant.openingHours?.saturday || "11:00 - 23:00",
+        sunday: restaurant.openingHours?.sunday || "11:00 - 22:00",
+        ...restaurant.openingHours,
+      },
+      holidays: Array.isArray(restaurant.holidays) ? restaurant.holidays.join(", ") : "",
+      socialLinks: {
+        instagram: restaurant.socialLinks?.instagram || "",
+        facebook: restaurant.socialLinks?.facebook || "",
+        twitter: restaurant.socialLinks?.twitter || "",
+        line: restaurant.socialLinks?.line || "",
+        tiktok: restaurant.socialLinks?.tiktok || "",
+        ...restaurant.socialLinks,
+      },
+      isActive: restaurant.isActive,
+    });
+  }, [restaurant]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,7 +118,7 @@ export default function RestaurantInfoPage() {
         type: "success",
         text: t("successMessage"),
       });
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["restaurant-info"] });
     } catch (error) {
       console.error("Save info error:", error);
       setMessage({

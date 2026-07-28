@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { Food, Category, FormData, emptyForm } from "./_components/types";
 import { FoodMenuHeader } from "./_components/FoodMenuHeader";
 import { FoodFilters } from "./_components/FoodFilters";
@@ -14,21 +16,17 @@ import { ConfirmModal } from "@/shared/components/confirm-modal";
 export default function FoodMenuPage() {
   const tFood = useTranslations("foodMenu");
   const tCommon = useTranslations("common");
-
-  const [foods, setFoods] = useState<Food[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   // Delete confirmation state
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
 
   // Filter states
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search);
   const [filterCategory, setFilterCategory] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
@@ -42,38 +40,53 @@ export default function FoodMenuPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, filterCategory, filterStatus]);
+  }, [debouncedSearch, filterCategory, filterStatus]);
 
-  useEffect(() => {
-    loadData();
-  }, [currentPage, search, filterCategory, filterStatus]);
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
+  const foodsQuery = useQuery({
+    queryKey: [
+      "foods",
+      {
+        page: currentPage,
+        search: debouncedSearch,
+        category: filterCategory,
+        status: filterStatus,
+      },
+    ],
+    queryFn: () => {
       const params = new URLSearchParams();
-      if (search) params.set("search", search);
+      if (debouncedSearch) params.set("search", debouncedSearch);
       if (filterCategory) params.set("category", filterCategory);
       if (filterStatus) params.set("status", filterStatus);
       params.set("page", currentPage.toString());
       params.set("limit", "10");
+      return api.get<{ data: Food[]; meta: { totalPages: number; total: number } }>(
+        `/api/menu?${params.toString()}`
+      );
+    },
+    placeholderData: keepPreviousData,
+  });
 
-      const [foodsRes, catRes] = await Promise.all([
-        api.get<{ data: Food[]; meta: { totalPages: number; total: number } }>(
-          `/api/menu?${params.toString()}`
-        ),
-        api.get<{ data: Category[] }>("/api/menu/categories"),
-      ]);
-      setFoods(foodsRes.data || []);
-      setTotalPages(foodsRes.meta?.totalPages || 1);
-      setTotalItems(foodsRes.meta?.total || 0);
-      setCategories(catRes.data || []);
-    } catch (error) {
-      console.error("Load foods error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const categoriesQuery = useQuery({
+    queryKey: ["food-categories"],
+    queryFn: () => api.get<{ data: Category[] }>("/api/menu/categories"),
+    staleTime: 30 * 60 * 1000,
+  });
+
+  const foods = foodsQuery.data?.data ?? [];
+  const totalPages = foodsQuery.data?.meta?.totalPages ?? 1;
+  const totalItems = foodsQuery.data?.meta?.total ?? 0;
+  const categories = categoriesQuery.data?.data ?? [];
+  const loading = foodsQuery.isPending;
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/api/menu/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["foods"] });
+    },
+    onError: (error) => {
+      console.error("Delete food error:", error);
+    },
+  });
 
   const handleEdit = (food: Food) => {
     setEditingId(food.id);
@@ -119,15 +132,10 @@ export default function FoodMenuPage() {
     setDeleteConfirmId(id);
   };
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = () => {
     if (!deleteConfirmId) return;
-    try {
-      await api.delete(`/api/menu/${deleteConfirmId}`);
-      setDeleteConfirmId(null);
-      loadData();
-    } catch (error) {
-      console.error("Delete food error:", error);
-    }
+    deleteMutation.mutate(deleteConfirmId);
+    setDeleteConfirmId(null);
   };
 
   return (
@@ -176,7 +184,7 @@ export default function FoodMenuPage() {
           setShowModal(false);
           setEditingId(null);
           setForm(emptyForm);
-          loadData();
+          queryClient.invalidateQueries({ queryKey: ["foods"] });
         }}
       />
 
@@ -185,7 +193,8 @@ export default function FoodMenuPage() {
         categories={categories}
         onClose={() => setShowCategoryModal(false)}
         onDataChange={() => {
-          loadData();
+          queryClient.invalidateQueries({ queryKey: ["food-categories"] });
+          queryClient.invalidateQueries({ queryKey: ["foods"] });
         }}
       />
 

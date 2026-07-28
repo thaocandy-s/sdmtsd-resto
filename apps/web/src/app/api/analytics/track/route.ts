@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { trackEventSchema } from "@/lib/validation";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+// Max tracking events per IP per minute
+const TRACK_LIMIT = 60;
+const TRACK_WINDOW_MS = 60 * 1000;
 
 // Valid tracking event types mapped to DailyStatistic columns
 const EVENT_COLUMN_MAP: Record<string, string> = {
@@ -23,8 +29,17 @@ const EVENT_COLUMN_MAP: Record<string, string> = {
 // Public endpoint (no auth) — fire-and-forget from client
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    if (!rateLimit(`track:${ip}`, TRACK_LIMIT, TRACK_WINDOW_MS)) {
+      return new NextResponse(null, { status: 429 });
+    }
+
     const body = await request.json();
-    const { event, path, locale, referrer, isNewVisitor } = body;
+    const parsed = trackEventSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ message: "Invalid input" }, { status: 400 });
+    }
+    const { event, path, locale, referrer, isNewVisitor } = parsed.data;
 
     // Validate event type
     if (!event || !EVENT_COLUMN_MAP[event]) {

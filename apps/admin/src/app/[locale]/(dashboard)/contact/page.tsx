@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { MessageTable } from "./_components/MessageTable";
@@ -21,27 +22,27 @@ interface Contact {
 
 export default function ContactPage() {
   const t = useTranslations("contact");
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [filterStatus, setFilterStatus] = useState("");
 
-  useEffect(() => {
-    loadData();
-  }, [filterStatus]);
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
+  const contactsQuery = useQuery({
+    queryKey: ["contacts", { status: filterStatus }],
+    queryFn: () => {
       const params = new URLSearchParams({ limit: "100" });
       if (filterStatus) params.set("status", filterStatus);
-      const res = await api.get<{ data: Contact[] }>(`/api/contact?${params}`);
-      setContacts(res.data || []);
-    } catch (error) {
-      console.error("Load contacts error:", error);
-    } finally {
-      setLoading(false);
-    }
+      return api.get<{ data: Contact[] }>(`/api/contact?${params}`);
+    },
+    placeholderData: keepPreviousData,
+  });
+
+  const contacts = contactsQuery.data?.data ?? [];
+  const loading = contactsQuery.isPending;
+
+  // Contact mutations also refresh the dashboard widgets that show unread counts
+  const invalidateContacts = () => {
+    queryClient.invalidateQueries({ queryKey: ["contacts"] });
+    queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
   };
 
   const viewContact = async (contact: Contact) => {
@@ -49,7 +50,7 @@ export default function ContactPage() {
     if (!contact.isRead) {
       try {
         await api.put(`/api/contact/${contact.id}`, { status: contact.status, isRead: true });
-        loadData();
+        invalidateContacts();
       } catch (error) {
         console.error("Mark read error:", error);
       }
@@ -59,7 +60,7 @@ export default function ContactPage() {
   const updateStatus = async (id: string, status: string) => {
     try {
       await api.put(`/api/contact/${id}`, { status });
-      loadData();
+      invalidateContacts();
       setSelectedContact(null);
     } catch (error) {
       console.error("Update status error:", error);
@@ -76,7 +77,7 @@ export default function ContactPage() {
     if (!deleteConfirmId) return;
     try {
       await api.delete(`/api/contact/${deleteConfirmId}`);
-      loadData();
+      invalidateContacts();
       setSelectedContact(null);
     } catch (error) {
       console.error("Delete error:", error);

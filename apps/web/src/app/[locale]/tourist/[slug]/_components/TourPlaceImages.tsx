@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 interface TourPlaceImagesProps {
   name: string;
   imageUrl: string | null;
@@ -15,9 +17,16 @@ export function TourPlaceImages({ name, imageUrl, images, onSelectImage }: TourP
         <div className="mb-6">
           <button
             onClick={() => onSelectImage(imageUrl)}
-            className="w-full h-64 md:h-96 rounded-lg overflow-hidden hover:opacity-90 transition-opacity"
+            className="relative block w-full h-64 md:h-96 rounded-lg overflow-hidden hover:opacity-90 transition-opacity"
           >
-            <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+            <Image
+              src={imageUrl}
+              alt={name}
+              fill
+              priority
+              sizes="(min-width: 896px) 896px, 100vw"
+              className="object-cover"
+            />
           </button>
         </div>
       )}
@@ -29,9 +38,15 @@ export function TourPlaceImages({ name, imageUrl, images, onSelectImage }: TourP
             <button
               key={idx}
               onClick={() => onSelectImage(img)}
-              className="aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+              className="relative aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
             >
-              <img src={img} alt={`${name} ${idx + 2}`} className="w-full h-full object-cover" />
+              <Image
+                src={img}
+                alt={`${name} ${idx + 2}`}
+                fill
+                sizes="(min-width: 896px) 224px, 25vw"
+                className="object-cover"
+              />
             </button>
           ))}
         </div>

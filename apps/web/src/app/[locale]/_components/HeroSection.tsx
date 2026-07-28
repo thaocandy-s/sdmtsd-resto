@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import Image from "next/image";
@@ -117,24 +117,24 @@ export function HeroSection({ initialBanners }: HeroSectionProps) {
     setCurrentIndex((prev) => (prev + 1) % banners.length);
   };
 
-  // Touch swiping handlers for mobile devices
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  // Touch swiping handlers for mobile devices (refs — drag tracking needs no re-render)
+  const touchStart = useRef<number | null>(null);
+  const touchEnd = useRef<number | null>(null);
 
   const minSwipeDistance = 50;
 
   const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    touchEnd.current = null;
+    touchStart.current = e.targetTouches[0].clientX;
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    touchEnd.current = e.targetTouches[0].clientX;
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
+    if (touchStart.current === null || touchEnd.current === null) return;
+    const distance = touchStart.current - touchEnd.current;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
@@ -145,26 +145,26 @@ export function HeroSection({ initialBanners }: HeroSectionProps) {
     }
   };
 
-  // Mouse drag swiping handlers for desktop
-  const [mouseDownStart, setMouseDownStart] = useState<number | null>(null);
-  const [mouseDragEnd, setMouseDragEnd] = useState<number | null>(null);
+  // Mouse drag swiping handlers for desktop (refs — drag tracking needs no re-render)
+  const mouseDownStart = useRef<number | null>(null);
+  const mouseDragEnd = useRef<number | null>(null);
 
   const onMouseDown = (e: React.MouseEvent) => {
-    setMouseDragEnd(null);
-    setMouseDownStart(e.clientX);
+    mouseDragEnd.current = null;
+    mouseDownStart.current = e.clientX;
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
-    if (mouseDownStart === null) return;
-    setMouseDragEnd(e.clientX);
+    if (mouseDownStart.current === null) return;
+    mouseDragEnd.current = e.clientX;
   };
 
   const onMouseUp = () => {
-    if (mouseDownStart === null || mouseDragEnd === null) {
-      setMouseDownStart(null);
+    if (mouseDownStart.current === null || mouseDragEnd.current === null) {
+      mouseDownStart.current = null;
       return;
     }
-    const distance = mouseDownStart - mouseDragEnd;
+    const distance = mouseDownStart.current - mouseDragEnd.current;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
@@ -173,12 +173,12 @@ export function HeroSection({ initialBanners }: HeroSectionProps) {
     } else if (isRightSwipe) {
       handlePrev();
     }
-    setMouseDownStart(null);
+    mouseDownStart.current = null;
   };
 
   const onMouseLeave = () => {
     setIsHovered(false);
-    setMouseDownStart(null);
+    mouseDownStart.current = null;
   };
 
   if (banners.length === 0) {

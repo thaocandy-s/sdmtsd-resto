@@ -1,130 +1,83 @@
-"use client";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { prisma } from "@/lib/prisma";
+import { MenuContent } from "./_components/MenuContent";
 
-import { useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
-import { formatPriceWithTax } from "@resto-hub/utils";
-import { Category, Food, GroupedCategory } from "./_components/types";
-import { CategoryFilter } from "./_components/CategoryFilter";
-import { CategorySliceSection } from "./_components/CategorySliceSection";
-import { FoodSkeleton } from "./_components/FoodSkeleton";
+// ISR: serve cached HTML, regenerate at most every 5 minutes
+export const revalidate = 300;
 
-export default function MenuPage() {
-  const t = useTranslations("menu");
-  const [foods, setFoods] = useState<Food[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [loading, setLoading] = useState(true);
+export default async function MenuPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("menu");
 
-  useEffect(() => {
-    fetch("/api/menu/categories")
-      .then((r) => r.json())
-      .then((categoriesData) => {
-        const activeCats = (categoriesData.data || []).filter(
-          (cat: Category) => (cat._count?.foods ?? 0) > 0
-        );
-        setCategories(activeCats);
-      })
-      .catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    const url = selectedCategory
-      ? `/api/menu?category=${selectedCategory}&limit=100`
-      : "/api/menu?limit=100";
-
-    fetch(url)
-      .then((r) => r.json())
-      .then((data) => {
-        setFoods(data.data || []);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [selectedCategory]);
-
-  const formatPrice = (price: number) => formatPriceWithTax(price);
-
-  // Group foods by category slice
-  const baseGroupedCategories: GroupedCategory[] = (
-    categories.length > 0
-      ? categories.map((cat) => ({
-          category: cat,
-          foods: foods.filter((f) => f.category?.id === cat.id),
-        }))
-      : Array.from(new Set(foods.map((f) => f.category?.id))).map((catId) => {
-          const firstFood = foods.find((f) => f.category?.id === catId);
-          const categoryFoods = foods.filter((f) => f.category?.id === catId);
-          return {
-            category: firstFood?.category || {
-              id: catId || "unknown",
-              name: t("otherMenu"),
-              slug: "other",
-              description: null,
-            },
-            foods: categoryFoods,
-          };
-        })
-  ).filter((group) => group.foods.length > 0);
-
-  // Append any foods that do not belong to matched categories
-  const matchedFoodIds = new Set(baseGroupedCategories.flatMap((g) => g.foods.map((f) => f.id)));
-  const remainingFoods = foods.filter((f) => !matchedFoodIds.has(f.id));
-  if (remainingFoods.length > 0) {
-    baseGroupedCategories.push({
-      category: {
-        id: "others",
-        name: t("others"),
-        slug: "others",
-        description: null,
-        _count: { foods: remainingFoods.length },
+  const [foods, categories] = await Promise.all([
+    prisma.food.findMany({
+      where: { deletedAt: null, status: "PUBLISHED" },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        price: true,
+        imageUrl: true,
+        isPopular: true,
+        isRecommended: true,
+        category: { select: { id: true, name: true, slug: true } },
       },
-      foods: remainingFoods,
-    });
-  }
-
-  // Prepend Recommended section at the top if recommended items exist
-  const recommendedFoods = foods.filter((f) => f.isRecommended);
-  const groupedCategories: GroupedCategory[] = [];
-
-  if (recommendedFoods.length > 0) {
-    groupedCategories.push({
-      category: {
-        id: "recommended-section",
-        name: t("recommended"),
-        slug: "recommended",
-        description: t("recommendedDesc"),
-        _count: { foods: recommendedFoods.length },
+      orderBy: { sortOrder: "asc" },
+      // Payload guardrail — revisit server pagination if content exceeds this
+      take: 200,
+    }),
+    prisma.foodCategory.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        _count: {
+          select: { foods: { where: { deletedAt: null, status: "PUBLISHED" } } },
+        },
       },
-      foods: recommendedFoods,
-    });
-  }
+      orderBy: { sortOrder: "asc" },
+    }),
+  ]);
 
-  groupedCategories.push(...baseGroupedCategories);
+  const activeCategories = categories.filter((cat) => cat._count.foods > 0);
+
+  // schema.org Menu structured data built from the already-fetched foods
+  const menuJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Menu",
+    name: t("title"),
+    hasMenuSection: activeCategories.map((cat) => ({
+      "@type": "MenuSection",
+      name: cat.name,
+      hasMenuItem: foods
+        .filter((food) => food.category.id === cat.id)
+        .map((food) => ({
+          "@type": "MenuItem",
+          name: food.name,
+          ...(food.description ? { description: food.description } : {}),
+          ...(food.imageUrl ? { image: food.imageUrl } : {}),
+          offers: {
+            "@type": "Offer",
+            price: food.price,
+            priceCurrency: "JPY",
+          },
+        })),
+    })),
+  };
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(menuJsonLd) }}
+      />
       <h1 className="text-4xl font-jp font-bold text-gold-400 mb-4">{t("title")}</h1>
       <p className="text-foreground-secondary mb-8">{t("subtitle")}</p>
 
-      {/* Category Filter Pills */}
-      <CategoryFilter
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-      />
-
-      {/* Category Slices / Food Menu Carousel */}
-      {loading ? (
-        <FoodSkeleton />
-      ) : groupedCategories.length === 0 ? (
-        <p className="text-center text-foreground-secondary py-12">{t("noItems")}</p>
-      ) : (
-        <div className="space-y-12">
-          {groupedCategories.map((group) => (
-            <CategorySliceSection key={group.category.id} group={group} formatPrice={formatPrice} />
-          ))}
-        </div>
-      )}
+      <MenuContent foods={foods} categories={activeCategories} />
     </main>
   );
 }

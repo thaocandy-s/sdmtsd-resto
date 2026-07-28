@@ -1,6 +1,3 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import { FooterLogo } from "./FooterLogo";
 import { FooterLinks } from "./FooterLinks";
 import { FooterSocial } from "./FooterSocial";
@@ -14,25 +11,11 @@ interface FooterProps {
 }
 
 export function Footer({ initialInfo }: FooterProps) {
-  const [socialLinks, setSocialLinks] = useState<Record<string, string> | null>(
-    initialInfo?.socialLinks ? (initialInfo.socialLinks as Record<string, string>) : null
-  );
-  const [logoUrl, setLogoUrl] = useState<string>(initialInfo?.logoUrl || "/images/logo.png");
-
-  useEffect(() => {
-    if (initialInfo) return;
-    fetch("/api/info")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data?.data?.socialLinks) {
-          setSocialLinks(data.data.socialLinks);
-        }
-        if (data?.data?.logoUrl) {
-          setLogoUrl(data.data.logoUrl);
-        }
-      })
-      .catch(console.error);
-  }, [initialInfo]);
+  // Server-provided restaurant info (no client fetch fallback)
+  const socialLinks = initialInfo?.socialLinks
+    ? (initialInfo.socialLinks as Record<string, string>)
+    : null;
+  const logoUrl = initialInfo?.logoUrl || "/images/logo.png";
 
   const validSocialLinks = Object.entries(socialLinks || {}).filter(
     ([_, url]) => typeof url === "string" && url.trim().length > 0

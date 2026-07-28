@@ -3,8 +3,15 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+];
+
 const nextConfig: NextConfig = {
-  transpilePackages: ["@resto-hub/ui", "@resto-hub/types", "@resto-hub/utils"],
+  transpilePackages: ["@resto-hub/ui", "@resto-hub/types", "@resto-hub/utils", "@resto-hub/db"],
   compress: true,
   poweredByHeader: false,
   images: {
@@ -35,6 +42,10 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/(.*)",
+        headers: securityHeaders,
+      },
       {
         source: "/api/feed",
         headers: [{ key: "Cache-Control", value: "public, max-age=3600, s-maxage=3600" }],

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { uploadImage } from "@/shared/components/image-upload";
 import { useTranslations } from "next-intl";
@@ -29,12 +30,9 @@ interface Event {
 
 export default function HomeManagementPage() {
   const t = useTranslations("homeManagement");
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"banners" | "events" | "assets">("banners");
 
-  const [restaurantInfo, setRestaurantInfo] = useState<any>(null);
   const [logoUrl, setLogoUrl] = useState("");
   const [faviconUrl, setFaviconUrl] = useState("");
   const [logoSubtitle, setLogoSubtitle] = useState("");
@@ -43,31 +41,54 @@ export default function HomeManagementPage() {
   const [faviconFile, setFaviconFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    loadData();
+  // Auto-dismiss toast; clears any pending timer so it never fires after unmount
+  const showToast = useCallback((next: { type: "success" | "error"; message: string }) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast(next);
+    toastTimerRef.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const [bannersRes, eventsRes, infoRes] = await Promise.all([
-        api.get<{ data: Banner[] }>("/api/banners"),
-        api.get<{ data: Event[] }>("/api/events"),
-        api.get<{ data: any }>("/api/info"),
-      ]);
-      setBanners(bannersRes.data || []);
-      setEvents(eventsRes.data || []);
-      setRestaurantInfo(infoRes.data || null);
-      setLogoUrl(infoRes.data?.logoUrl || "");
-      setFaviconUrl(infoRes.data?.faviconUrl || "");
-      setLogoSubtitle(infoRes.data?.logoSubtitle || "鉄板・もんじゃ・居酒屋");
-      setRestaurantName(infoRes.data?.name || "三代目土信田商店");
-    } catch (error) {
-      console.error("Load data error:", error);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
+
+  const bannersQuery = useQuery({
+    queryKey: ["banners"],
+    queryFn: () => api.get<{ data: Banner[] }>("/api/banners"),
+  });
+
+  const eventsQuery = useQuery({
+    queryKey: ["events"],
+    queryFn: () => api.get<{ data: Event[] }>("/api/events"),
+  });
+
+  const infoQuery = useQuery({
+    queryKey: ["restaurant-info"],
+    queryFn: () => api.get<{ data: any }>("/api/info"),
+  });
+
+  const banners = bannersQuery.data?.data ?? [];
+  const events = eventsQuery.data?.data ?? [];
+  const restaurantInfo = infoQuery.data?.data ?? null;
+  const loading = bannersQuery.isPending || eventsQuery.isPending || infoQuery.isPending;
+
+  // Seed the brand asset form whenever fresh info arrives
+  useEffect(() => {
+    if (!restaurantInfo) return;
+    setLogoUrl(restaurantInfo.logoUrl || "");
+    setFaviconUrl(restaurantInfo.faviconUrl || "");
+    setLogoSubtitle(restaurantInfo.logoSubtitle || "鉄板・もんじゃ・居酒屋");
+    setRestaurantName(restaurantInfo.name || "三代目土信田商店");
+  }, [restaurantInfo]);
+
+  const refreshData = () => {
+    queryClient.invalidateQueries({ queryKey: ["banners"] });
+    queryClient.invalidateQueries({ queryKey: ["events"] });
+    queryClient.invalidateQueries({ queryKey: ["restaurant-info"] });
   };
 
   const handleSaveAssets = async () => {
@@ -91,21 +112,14 @@ export default function HomeManagementPage() {
         name: restaurantName,
       });
 
-      setToast({ type: "success", message: t("saveSuccess") });
-      setTimeout(() => setToast(null), 3000);
+      showToast({ type: "success", message: t("saveSuccess") });
 
-      const infoRes = await api.get<{ data: any }>("/api/info");
-      setRestaurantInfo(infoRes.data);
-      setLogoUrl(infoRes.data?.logoUrl || "");
-      setFaviconUrl(infoRes.data?.faviconUrl || "");
-      setLogoSubtitle(infoRes.data?.logoSubtitle || "鉄板・もんじゃ・居酒屋");
-      setRestaurantName(infoRes.data?.name || "三代目土信田商店");
       setLogoFile(null);
       setFaviconFile(null);
+      queryClient.invalidateQueries({ queryKey: ["restaurant-info"] });
     } catch (err: any) {
       console.error(err);
-      setToast({ type: "error", message: err.message || t("saveFailed") });
-      setTimeout(() => setToast(null), 3000);
+      showToast({ type: "error", message: err.message || t("saveFailed") });
     } finally {
       setSaving(false);
     }
@@ -129,10 +143,11 @@ export default function HomeManagementPage() {
     try {
       if (deleteConfirmType === "banner") {
         await api.delete(`/api/banners/${deleteConfirmId}`);
+        queryClient.invalidateQueries({ queryKey: ["banners"] });
       } else {
         await api.delete(`/api/events/${deleteConfirmId}`);
+        queryClient.invalidateQueries({ queryKey: ["events"] });
       }
-      loadData();
     } catch (error) {
       console.error(`Delete ${deleteConfirmType} error:`, error);
     } finally {
@@ -193,7 +208,7 @@ export default function HomeManagementPage() {
           ))}
         </div>
       ) : activeTab === "banners" ? (
-        <BannerTab banners={banners} onDelete={deleteBanner} onRefresh={loadData} />
+        <BannerTab banners={banners} onDelete={deleteBanner} onRefresh={refreshData} />
       ) : activeTab === "assets" ? (
         <BrandAssetsTab
           logoUrl={logoUrl}

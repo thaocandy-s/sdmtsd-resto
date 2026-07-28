@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 
 interface AuditLog {
@@ -15,40 +16,33 @@ interface AuditLog {
 }
 
 export default function AuditLogPage() {
-  const [logs, setLogs] = useState<AuditLog[]>([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
   const [moduleFilter, setModuleFilter] = useState("");
   const [actionFilter, setActionFilter] = useState("");
+  // Filters only apply once the Filter button is pressed
+  const [appliedFilters, setAppliedFilters] = useState({ module: "", action: "" });
 
-  useEffect(() => {
-    loadData();
-  }, [page]);
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
+  const logsQuery = useQuery({
+    queryKey: ["audit-logs", { page, ...appliedFilters }],
+    queryFn: () => {
       const params = new URLSearchParams({ page: String(page), limit: "30" });
-      if (moduleFilter) params.set("module", moduleFilter);
-      if (actionFilter) params.set("action", actionFilter);
-      const res = await api.get<{ data: AuditLog[]; meta: { total: number; totalPages: number } }>(
+      if (appliedFilters.module) params.set("module", appliedFilters.module);
+      if (appliedFilters.action) params.set("action", appliedFilters.action);
+      return api.get<{ data: AuditLog[]; meta: { total: number; totalPages: number } }>(
         `/api/audit-log?${params}`
       );
-      setLogs(res.data || []);
-      setTotal(res.meta.total);
-      setTotalPages(res.meta.totalPages);
-    } catch (error) {
-      console.error("Load error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    placeholderData: keepPreviousData,
+  });
+
+  const logs = logsQuery.data?.data ?? [];
+  const total = logsQuery.data?.meta.total ?? 0;
+  const totalPages = logsQuery.data?.meta.totalPages ?? 0;
+  const loading = logsQuery.isPending;
 
   const handleFilter = () => {
     setPage(1);
-    loadData();
+    setAppliedFilters({ module: moduleFilter, action: actionFilter });
   };
 
   const actionColors: Record<string, string> = {

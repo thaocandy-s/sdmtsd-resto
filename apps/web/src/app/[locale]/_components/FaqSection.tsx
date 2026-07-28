@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { AnimatedSection } from "@/shared/components/animated-section";
+import { AnimatedSection } from "@/shared/components/animated-section-lazy";
 
 interface Faq {
   id: string;

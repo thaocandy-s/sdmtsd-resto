@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, Phone, Globe } from "lucide-react";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
 interface HeaderProps {
   initialInfo?: {
@@ -22,38 +21,17 @@ export function Header({ initialInfo }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [phone, setPhone] = useState<string>(initialInfo?.phone || "+81-3-1234-5678");
-  const [logoUrl, setLogoUrl] = useState<string>(initialInfo?.logoUrl || "/images/logo.png");
-  const [logoSubtitle, setLogoSubtitle] = useState<string>(
-    initialInfo && "logoSubtitle" in initialInfo
-      ? initialInfo.logoSubtitle || ""
-      : "鉄板・もんじゃ・居酒屋"
-  );
-  const [restaurantName, setRestaurantName] = useState<string>(
-    initialInfo && "name" in initialInfo ? initialInfo.name || "" : "三代目土信田商店"
-  );
   const headerRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    if (initialInfo) return;
-    fetch("/api/info")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.data) {
-          if (data.data.phone) setPhone(data.data.phone);
-          if (data.data.logoUrl) setLogoUrl(data.data.logoUrl);
-
-          // Support explicit null or empty values by checking if key exists
-          if ("logoSubtitle" in data.data) {
-            setLogoSubtitle(data.data.logoSubtitle || "");
-          }
-          if ("name" in data.data) {
-            setRestaurantName(data.data.name || "");
-          }
-        }
-      })
-      .catch(console.error);
-  }, [initialInfo]);
+  // Server-provided restaurant info (no client fetch fallback)
+  const phone = initialInfo?.phone || "+81-3-1234-5678";
+  const logoUrl = initialInfo?.logoUrl || "/images/logo.png";
+  const logoSubtitle =
+    initialInfo && "logoSubtitle" in initialInfo
+      ? initialInfo.logoSubtitle || ""
+      : "鉄板・もんじゃ・居酒屋";
+  const restaurantName =
+    initialInfo && "name" in initialInfo ? initialInfo.name || "" : "三代目土信田商店";
 
   useEffect(() => {
     setIsOpen(false);
@@ -76,8 +54,8 @@ export function Header({ initialInfo }: HeaderProps) {
 
   const toggleLanguage = () => {
     const nextLocale = locale === "ja" ? "en" : "ja";
-    const newPath = pathname.replace(`/${locale}`, `/${nextLocale}`);
-    router.push(newPath);
+    // Locale-aware navigation keeps the current path and swaps only the locale
+    router.replace(pathname, { locale: nextLocale });
   };
 
   const navItems = [
@@ -99,7 +77,7 @@ export function Header({ initialInfo }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link
-          href={`/${locale}`}
+          href="/"
           className="flex items-center gap-1.5 sm:gap-2"
           onClick={() => setIsOpen(false)}
         >
@@ -132,7 +110,7 @@ export function Header({ initialInfo }: HeaderProps) {
           {navItems.map((item) => (
             <Link
               key={item.href}
-              href={`/${locale}${item.href}`}
+              href={item.href}
               className="text-sm text-foreground-secondary hover:text-gold-400 transition-colors"
             >
               {item.label}
@@ -147,6 +125,9 @@ export function Header({ initialInfo }: HeaderProps) {
             onClick={toggleLanguage}
             className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-semibold border border-border bg-background hover:bg-background-tertiary text-foreground transition-colors cursor-pointer"
             title="Switch Language"
+            aria-label={
+              locale === "ja" ? "Switch language to English" : "Switch language to Japanese"
+            }
           >
             <Globe className="w-3.5 h-3.5 text-gold-400" />
             <span>{locale === "ja" ? "EN" : "JA"}</span>
@@ -166,6 +147,7 @@ export function Header({ initialInfo }: HeaderProps) {
             onClick={() => setIsOpen(!isOpen)}
             className="lg:hidden text-foreground-secondary hover:text-gold-400 transition-colors"
             aria-label="Toggle menu"
+            aria-expanded={isOpen}
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -179,7 +161,7 @@ export function Header({ initialInfo }: HeaderProps) {
             {navItems.map((item) => (
               <Link
                 key={item.href}
-                href={`/${locale}${item.href}`}
+                href={item.href}
                 onClick={() => setIsOpen(false)}
                 className="block py-2 text-foreground-secondary hover:text-gold-400 transition-colors"
               >

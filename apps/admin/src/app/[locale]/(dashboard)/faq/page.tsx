@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { FaqItem, FaqCategory, FaqForm, CatForm, emptyFaq, emptyCat } from "./_components/types";
@@ -13,11 +14,9 @@ import { FaqCategoryFormModal } from "./_components/FaqCategoryFormModal";
 export default function FaqPage() {
   const t = useTranslations("faq");
   const tc = useTranslations("common");
+  const queryClient = useQueryClient();
 
   const [tab, setTab] = useState<"items" | "categories">("items");
-  const [items, setItems] = useState<FaqItem[]>([]);
-  const [categories, setCategories] = useState<FaqCategory[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Modal State
   const [showFaqModal, setShowFaqModal] = useState(false);
@@ -34,25 +33,20 @@ export default function FaqPage() {
     id: string;
   } | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const itemsQuery = useQuery({
+    queryKey: ["faqs"],
+    queryFn: () => api.get<{ data: FaqItem[] }>("/api/faq"),
+  });
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const [fRes, cRes] = await Promise.all([
-        api.get<{ data: FaqItem[] }>("/api/faq"),
-        api.get<{ data: FaqCategory[] }>("/api/faq/categories"),
-      ]);
-      setItems(fRes.data || []);
-      setCategories(cRes.data || []);
-    } catch (error) {
-      console.error("Load error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const categoriesQuery = useQuery({
+    queryKey: ["faq-categories"],
+    queryFn: () => api.get<{ data: FaqCategory[] }>("/api/faq/categories"),
+    staleTime: 30 * 60 * 1000,
+  });
+
+  const items = itemsQuery.data?.data ?? [];
+  const categories = categoriesQuery.data?.data ?? [];
+  const loading = itemsQuery.isPending || categoriesQuery.isPending;
 
   const handleFaqSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +57,7 @@ export default function FaqPage() {
       setShowFaqModal(false);
       setEditingId(null);
       setFaqForm(emptyFaq);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["faqs"] });
     } catch (error) {
       console.error("Save error:", error);
     }
@@ -77,7 +71,8 @@ export default function FaqPage() {
       setShowCatModal(false);
       setEditingId(null);
       setCatForm(emptyCat);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["faq-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["faqs"] });
     } catch (error) {
       console.error("Save error:", error);
     }
@@ -115,11 +110,13 @@ export default function FaqPage() {
     try {
       if (deleteTarget.type === "items") {
         await api.delete(`/api/faq/${deleteTarget.id}`);
+        queryClient.invalidateQueries({ queryKey: ["faqs"] });
       } else {
         await api.delete(`/api/faq/categories/${deleteTarget.id}`);
+        queryClient.invalidateQueries({ queryKey: ["faq-categories"] });
+        queryClient.invalidateQueries({ queryKey: ["faqs"] });
       }
       setDeleteTarget(null);
-      loadData();
     } catch (error) {
       console.error("Delete error:", error);
     }

@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { contactSchema } from "@/lib/validation";
 
 // POST /api/contact - Submit contact form
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, subject, message } = body;
+    const parsed = contactSchema.safeParse(body);
 
-    if (!name || !email || !subject || !message) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { message: "Name, email, subject, and message are required" },
+        { message: "Invalid input", errors: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+
+    const { name, email, phone, subject, message } = parsed.data;
 
     const contact = await prisma.contact.create({
       data: {

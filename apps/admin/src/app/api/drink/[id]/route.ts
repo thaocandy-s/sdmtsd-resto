@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
 import { deleteMediaByUrl } from "@/lib/supabase";
+import { drinkUpdateSchema } from "@/lib/validation";
 
 export const GET = withAuthParams(async (_request, { params }) => {
   try {
@@ -21,45 +22,36 @@ export const PUT = withAuthParams(
   async (request, { params }) => {
     try {
       const body = await request.json();
+      const parsed = drinkUpdateSchema.safeParse(body);
+
+      if (!parsed.success) {
+        return NextResponse.json(
+          { message: "Invalid input", errors: parsed.error.flatten().fieldErrors },
+          { status: 400 }
+        );
+      }
+
+      const data = parsed.data;
       const existing = await prisma.drink.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Drink not found" }, { status: 404 });
 
-      if (body.imageUrl !== undefined && body.imageUrl !== existing.imageUrl) {
-        await deleteMediaByUrl(existing.imageUrl);
-      }
-
-      if (body.slug && body.slug !== existing.slug) {
-        const slugExists = await prisma.drink.findUnique({ where: { slug: body.slug } });
+      if (data.slug && data.slug !== existing.slug) {
+        const slugExists = await prisma.drink.findUnique({ where: { slug: data.slug } });
         if (slugExists)
           return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
       }
 
       const drink = await prisma.drink.update({
         where: { id: params.id },
-        data: {
-          ...body,
-          price: body.price !== undefined ? parseInt(body.price) : undefined,
-          originalPrice:
-            body.originalPrice !== undefined
-              ? body.originalPrice
-                ? parseInt(body.originalPrice)
-                : null
-              : undefined,
-          alcoholPercent:
-            body.alcoholPercent !== undefined
-              ? body.alcoholPercent
-                ? parseFloat(body.alcoholPercent)
-                : null
-              : undefined,
-          sortOrder:
-            body.sortOrder !== undefined
-              ? body.sortOrder
-                ? parseInt(body.sortOrder)
-                : 0
-              : undefined,
-        },
+        data,
         include: { category: true },
       });
+
+      // DB updated successfully — now it is safe to remove the replaced image
+      if (data.imageUrl !== undefined && data.imageUrl !== existing.imageUrl) {
+        await deleteMediaByUrl(existing.imageUrl);
+      }
+
       return NextResponse.json({ data: drink });
     } catch (error) {
       console.error("Update drink error:", error);
@@ -75,10 +67,11 @@ export const DELETE = withAuthParams(
     try {
       const existing = await prisma.drink.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Drink not found" }, { status: 404 });
+      // Soft delete first, then clean up storage
+      await prisma.drink.update({ where: { id: params.id }, data: { deletedAt: new Date() } });
       if (existing.imageUrl) {
         await deleteMediaByUrl(existing.imageUrl);
       }
-      await prisma.drink.update({ where: { id: params.id }, data: { deletedAt: new Date() } });
       return NextResponse.json({ message: "Drink deleted successfully" });
     } catch (error) {
       console.error("Delete drink error:", error);

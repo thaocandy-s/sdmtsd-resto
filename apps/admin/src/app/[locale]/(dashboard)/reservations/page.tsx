@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 
@@ -19,32 +20,26 @@ interface Reservation {
 }
 
 export default function ReservationsPage() {
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [filterStatus, setFilterStatus] = useState("");
 
-  useEffect(() => {
-    loadData();
-  }, [filterStatus]);
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
+  const reservationsQuery = useQuery({
+    queryKey: ["reservations", { status: filterStatus }],
+    queryFn: () => {
       const params = new URLSearchParams({ limit: "100" });
       if (filterStatus) params.set("status", filterStatus);
-      const res = await api.get<{ data: Reservation[] }>(`/api/reservations?${params}`);
-      setReservations(res.data || []);
-    } catch (error) {
-      console.error("Load reservations error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return api.get<{ data: Reservation[] }>(`/api/reservations?${params}`);
+    },
+    placeholderData: keepPreviousData,
+  });
+
+  const reservations = reservationsQuery.data?.data ?? [];
+  const loading = reservationsQuery.isPending;
 
   const updateStatus = async (id: string, status: string) => {
     try {
       await api.put(`/api/reservations/${id}`, { status });
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["reservations"] });
     } catch (error) {
       console.error("Update status error:", error);
     }
@@ -60,7 +55,7 @@ export default function ReservationsPage() {
     if (!deleteConfirmId) return;
     try {
       await api.delete(`/api/reservations/${deleteConfirmId}`);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["reservations"] });
     } catch (error) {
       console.error("Delete error:", error);
     } finally {

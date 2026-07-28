@@ -1,37 +1,21 @@
-"use client";
-
-import { useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getRestaurant } from "@/lib/restaurant";
 import { Restaurant } from "./_components/types";
 import { RestaurantAddressSection } from "./_components/RestaurantAddressSection";
 import { OpeningHoursSection } from "./_components/OpeningHoursSection";
 import { MapLocationSection } from "./_components/MapLocationSection";
 import { SocialLinksSection } from "./_components/SocialLinksSection";
 
-export default function InfoPage() {
-  const t = useTranslations("info");
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const [loading, setLoading] = useState(true);
+// ISR: restaurant info changes rarely, regenerate at most every hour
+export const revalidate = 3600;
 
-  useEffect(() => {
-    fetch("/api/info")
-      .then((r) => r.json())
-      .then((data) => setRestaurant(data.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+export default async function InfoPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("info");
 
-  if (loading) {
-    return (
-      <main className="max-w-4xl mx-auto px-4 py-12">
-        <div className="animate-pulse space-y-8">
-          <div className="h-10 bg-background-secondary rounded w-1/3" />
-          <div className="h-32 bg-background-secondary rounded-lg" />
-          <div className="h-32 bg-background-secondary rounded-lg" />
-        </div>
-      </main>
-    );
-  }
+  const record = await getRestaurant();
+  const restaurant = record ? (JSON.parse(JSON.stringify(record)) as Restaurant) : null;
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">

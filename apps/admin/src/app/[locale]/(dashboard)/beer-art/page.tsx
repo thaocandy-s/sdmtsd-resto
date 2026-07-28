@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { BeerArt, FormData, emptyForm } from "./_components/types";
 import { BeerArtList } from "./_components/BeerArtList";
@@ -12,8 +13,7 @@ import { uploadImage } from "@/shared/components/image-upload";
 export default function BeerArtPage() {
   const t = useTranslations("beerArt");
   const tc = useTranslations("common");
-  const [items, setItems] = useState<BeerArt[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>(emptyForm);
@@ -22,32 +22,23 @@ export default function BeerArtPage() {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
 
   // Delete confirmation state
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, [currentPage]);
+  const itemsQuery = useQuery({
+    queryKey: ["beer-arts", { page: currentPage }],
+    queryFn: () =>
+      api.get<{ data: BeerArt[]; meta: { totalPages: number; total: number } }>(
+        `/api/beer-art?page=${currentPage}&limit=10`
+      ),
+    placeholderData: keepPreviousData,
+  });
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get<{
-        data: BeerArt[];
-        meta: { totalPages: number; total: number };
-      }>(`/api/beer-art?page=${currentPage}&limit=10`);
-      setItems(res.data || []);
-      setTotalPages(res.meta?.totalPages || 1);
-      setTotalItems(res.meta?.total || 0);
-    } catch (error) {
-      console.error("Load beer art error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const items = itemsQuery.data?.data ?? [];
+  const totalPages = itemsQuery.data?.meta?.totalPages ?? 1;
+  const totalItems = itemsQuery.data?.meta?.total ?? 0;
+  const loading = itemsQuery.isPending;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +60,7 @@ export default function BeerArtPage() {
       setEditingId(null);
       setForm(emptyForm);
       setImageFile(null);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["beer-arts"] });
     } catch (error) {
       console.error("Save error:", error);
     } finally {
@@ -97,7 +88,7 @@ export default function BeerArtPage() {
     try {
       await api.delete(`/api/beer-art/${deleteConfirmId}`);
       setDeleteConfirmId(null);
-      loadData();
+      queryClient.invalidateQueries({ queryKey: ["beer-arts"] });
     } catch (error) {
       console.error("Delete error:", error);
     }

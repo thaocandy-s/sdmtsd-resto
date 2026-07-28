@@ -19,6 +19,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   setAuth: (user: AuthUser, accessToken: string) => void;
+  setUser: (user: AuthUser) => void;
   setAccessToken: (token: string) => void;
   clearAuth: () => void;
   setLoading: (loading: boolean) => void;
@@ -35,6 +36,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({
       user,
       accessToken,
+      isAuthenticated: true,
+      isLoading: false,
+    }),
+
+  // Update user info without touching the access token (used by auth bootstrap)
+  setUser: (user) =>
+    set({
+      user,
       isAuthenticated: true,
       isLoading: false,
     }),

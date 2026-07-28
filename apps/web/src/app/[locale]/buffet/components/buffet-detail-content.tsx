@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Phone } from "lucide-react";
@@ -9,21 +9,12 @@ import { BuffetCourse } from "./buffet-course-card";
 
 interface BuffetDetailContentProps {
   course: BuffetCourse;
+  phone: string;
 }
 
-export function BuffetDetailContent({ course }: BuffetDetailContentProps) {
+export function BuffetDetailContent({ course, phone }: BuffetDetailContentProps) {
   const t = useTranslations("buffet");
   const tCommon = useTranslations("common");
-  const [phone, setPhone] = useState<string>("+81-3-1234-5678");
-
-  useEffect(() => {
-    fetch("/api/info")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.data?.phone) setPhone(data.data.phone);
-      })
-      .catch(console.error);
-  }, []);
 
   const formatPrice = (price: number) => formatPriceWithTax(price);
 
@@ -37,9 +28,16 @@ export function BuffetDetailContent({ course }: BuffetDetailContentProps) {
       </Link>
 
       <div className="grid md:grid-cols-2 gap-8">
-        <div className="aspect-square bg-background-secondary rounded-lg overflow-hidden">
+        <div className="relative aspect-square bg-background-secondary rounded-lg overflow-hidden">
           {course.imageUrl ? (
-            <img src={course.imageUrl} alt={course.name} className="w-full h-full object-cover" />
+            <Image
+              src={course.imageUrl}
+              alt={course.name}
+              fill
+              priority
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="object-cover"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-foreground-tertiary">
               {t("noImage")}
