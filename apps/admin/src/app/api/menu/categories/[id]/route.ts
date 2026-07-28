@@ -50,7 +50,9 @@ export const DELETE = withAuthParams(
         return NextResponse.json({ message: "Category not found" }, { status: 404 });
       }
 
-      const foodCount = await prisma.food.count({ where: { categoryId: params.id } });
+      const foodCount = await prisma.food.count({
+        where: { categoryId: params.id, deletedAt: null },
+      });
       if (foodCount > 0) {
         return NextResponse.json(
           {
@@ -60,7 +62,11 @@ export const DELETE = withAuthParams(
         );
       }
 
-      await prisma.foodCategory.delete({ where: { id: params.id } });
+      // Purge soft-deleted foods still referencing this category, then delete it
+      await prisma.$transaction([
+        prisma.food.deleteMany({ where: { categoryId: params.id, deletedAt: { not: null } } }),
+        prisma.foodCategory.delete({ where: { id: params.id } }),
+      ]);
 
       return NextResponse.json({ message: "Category deleted successfully" });
     } catch (error) {
