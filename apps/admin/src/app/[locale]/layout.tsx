@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import "@resto-hub/ui/styles/globals.css";
 import { Providers } from "@/shared/providers";
+import { Analytics } from "@vercel/analytics/next";
 
 const notoSans = Noto_Sans({
   subsets: ["latin"],
@@ -69,6 +70,7 @@ export default async function AdminLocaleLayout({
             <div className="min-h-screen bg-background text-foreground">{children}</div>
           </Providers>
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );
