@@ -33,6 +33,7 @@ export default function FaqPage() {
     type: "items" | "categories";
     id: string;
   } | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const itemsQuery = useQuery({
     queryKey: ["faqs"],
@@ -108,11 +109,13 @@ export default function FaqPage() {
   };
 
   const handleDeleteTrigger = (type: "items" | "categories", id: string) => {
+    setDeleteError("");
     setDeleteTarget({ type, id });
   };
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
+    setDeleteError("");
     try {
       if (deleteTarget.type === "items") {
         await api.delete(`/api/faq/${deleteTarget.id}`);
@@ -125,6 +128,7 @@ export default function FaqPage() {
       setDeleteTarget(null);
     } catch (error) {
       console.error("Delete error:", error);
+      setDeleteError(error instanceof Error ? error.message : "Delete failed");
     }
   };
 
@@ -229,6 +233,7 @@ export default function FaqPage() {
         isOpen={deleteTarget !== null}
         title={tc("delete")}
         message={t("deleteConfirm")}
+        error={deleteError}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />

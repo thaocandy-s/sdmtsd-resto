@@ -65,11 +65,13 @@ export function CategoryManagerModal({
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirmId) return;
+    setError("");
     try {
       await api.delete(`/api/drink/categories/${deleteConfirmId}`);
       onDataChange();
     } catch (error) {
       console.error("Delete category error:", error);
+      setError(error instanceof Error ? error.message : "Delete failed");
     } finally {
       setDeleteConfirmId(null);
     }
@@ -183,6 +185,7 @@ export function CategoryManagerModal({
           )}
 
           {/* Category Table */}
+          {!isAddingCat && error && <FormError message={error} />}
           <div className="hidden md:block border border-border rounded-lg overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-background-tertiary border-b border-border">

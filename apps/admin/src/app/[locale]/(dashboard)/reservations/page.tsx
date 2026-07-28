@@ -46,6 +46,7 @@ export default function ReservationsPage() {
   };
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const handleDelete = (id: string) => {
     setDeleteConfirmId(id);
@@ -53,13 +54,14 @@ export default function ReservationsPage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirmId) return;
+    setDeleteError("");
     try {
       await api.delete(`/api/reservations/${deleteConfirmId}`);
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
+      setDeleteConfirmId(null);
     } catch (error) {
       console.error("Delete error:", error);
-    } finally {
-      setDeleteConfirmId(null);
+      setDeleteError(error instanceof Error ? error.message : "Delete failed");
     }
   };
 
@@ -175,8 +177,12 @@ export default function ReservationsPage() {
         isOpen={deleteConfirmId !== null}
         title="Delete Reservation"
         message="Are you sure you want to delete this reservation?"
+        error={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirmId(null)}
+        onCancel={() => {
+          setDeleteConfirmId(null);
+          setDeleteError("");
+        }}
       />
     </>
   );

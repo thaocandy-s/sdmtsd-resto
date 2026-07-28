@@ -283,6 +283,7 @@ export default function MediaLibraryPage() {
   };
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const handleDelete = (id: string) => {
     setDeleteConfirmId(id);
@@ -290,13 +291,14 @@ export default function MediaLibraryPage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirmId) return;
+    setDeleteError("");
     try {
       await api.delete(`/api/media/${deleteConfirmId}`);
       queryClient.invalidateQueries({ queryKey: ["media"] });
+      setDeleteConfirmId(null);
     } catch (err) {
       console.error("Delete error:", err);
-    } finally {
-      setDeleteConfirmId(null);
+      setDeleteError(err instanceof Error ? err.message : "Delete failed");
     }
   };
 
@@ -755,8 +757,12 @@ export default function MediaLibraryPage() {
         isOpen={deleteConfirmId !== null}
         title="Delete Media"
         message="Delete this media? The stored file will also be removed."
+        error={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirmId(null)}
+        onCancel={() => {
+          setDeleteConfirmId(null);
+          setDeleteError("");
+        }}
       />
     </>
   );

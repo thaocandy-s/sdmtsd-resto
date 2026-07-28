@@ -40,6 +40,7 @@ export default function ChallengePage() {
     type: "rules" | "winners";
     id: string;
   } | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const challengeQuery = useQuery({
     queryKey: ["challenge", { winnersPage }],
@@ -163,12 +164,14 @@ export default function ChallengePage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
+    setDeleteError("");
     try {
       await api.delete(`/api/challenge/${deleteTarget.type}/${deleteTarget.id}`);
       setDeleteTarget(null);
       queryClient.invalidateQueries({ queryKey: ["challenge"] });
     } catch (error) {
       console.error("Delete error:", error);
+      setDeleteError(error instanceof Error ? error.message : "Delete failed");
     }
   };
 
@@ -319,8 +322,12 @@ export default function ChallengePage() {
         isOpen={deleteTarget !== null}
         title={tc("delete")}
         message={t("deleteConfirm")}
+        error={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteTarget(null)}
+        onCancel={() => {
+          setDeleteTarget(null);
+          setDeleteError("");
+        }}
       />
     </>
   );

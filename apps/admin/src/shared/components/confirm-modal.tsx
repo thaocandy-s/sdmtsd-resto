@@ -1,14 +1,23 @@
 import { useTranslations } from "next-intl";
+import { FormError } from "@/shared/components/form-error";
 
 interface ConfirmModalProps {
   isOpen: boolean;
   title: string;
   message: string;
+  error?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel }: ConfirmModalProps) {
+export function ConfirmModal({
+  isOpen,
+  title,
+  message,
+  error,
+  onConfirm,
+  onCancel,
+}: ConfirmModalProps) {
   const tc = useTranslations("common");
   if (!isOpen) return null;
 
@@ -17,6 +26,11 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel }: Co
       <div className="bg-background-secondary border border-border rounded-lg p-6 max-w-sm w-full shadow-2xl">
         <h3 className="text-lg font-bold text-foreground mb-2">{title}</h3>
         <p className="text-sm text-foreground-secondary mb-6">{message}</p>
+        {error && (
+          <div className="mb-4">
+            <FormError message={error} />
+          </div>
+        )}
         <div className="flex gap-3 justify-end">
           <button
             onClick={onCancel}

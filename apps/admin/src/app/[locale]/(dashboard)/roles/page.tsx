@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { FormError } from "@/shared/components/form-error";
 
 interface Permission {
   id: string;
@@ -46,6 +47,7 @@ export default function RolesPage() {
   const { hasPermission } = useAuthStore();
   const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
+  const [formError, setFormError] = useState("");
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -71,6 +73,7 @@ export default function RolesPage() {
       description: "",
       permissions: [],
     });
+    setFormError("");
     setShowModal(true);
   };
 
@@ -89,10 +92,12 @@ export default function RolesPage() {
         action: p.action,
       })),
     });
+    setFormError("");
     setShowModal(true);
   };
 
   const [deleteConfirmRole, setDeleteConfirmRole] = useState<Role | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const handleDelete = (role: Role) => {
     if (role.name === "ADMIN") {
@@ -104,14 +109,14 @@ export default function RolesPage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirmRole) return;
+    setDeleteError("");
     try {
       await api.delete(`/api/roles/${deleteConfirmRole.id}`);
       queryClient.invalidateQueries({ queryKey: ["roles"] });
+      setDeleteConfirmRole(null);
     } catch (error) {
       console.error("Failed to delete role:", error);
-      alert("Failed to delete role");
-    } finally {
-      setDeleteConfirmRole(null);
+      setDeleteError(error instanceof Error ? error.message : "Failed to delete role");
     }
   };
 
@@ -135,6 +140,7 @@ export default function RolesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
 
     try {
       if (editingRole) {
@@ -150,7 +156,7 @@ export default function RolesPage() {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
     } catch (error) {
       console.error("Failed to save role:", error);
-      alert("Failed to save role");
+      setFormError(error instanceof Error ? error.message : "Failed to save role");
     }
   };
 
@@ -249,6 +255,7 @@ export default function RolesPage() {
           <div className="bg-background-secondary border border-border rounded-lg p-6 w-full max-w-2xl my-8 mx-4">
             <h2 className="text-xl font-bold mb-4">{editingRole ? "Edit Role" : "Add Role"}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {formError && <FormError message={formError} />}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Name</label>
@@ -347,8 +354,12 @@ export default function RolesPage() {
         isOpen={deleteConfirmRole !== null}
         title="Delete Role"
         message={`Are you sure you want to delete the role "${deleteConfirmRole?.label}"?`}
+        error={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirmRole(null)}
+        onCancel={() => {
+          setDeleteConfirmRole(null);
+          setDeleteError("");
+        }}
       />
     </div>
   );

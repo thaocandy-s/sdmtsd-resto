@@ -24,6 +24,7 @@ export default function BuffetMenuPage() {
 
   // Delete confirmation state
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -110,9 +111,11 @@ export default function BuffetMenuPage() {
     mutationFn: (id: string) => api.delete(`/api/buffet/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["buffets"] });
+      setDeleteConfirmId(null);
     },
     onError: (error) => {
       console.error("Delete buffet error:", error);
+      setDeleteError(error instanceof Error ? error.message : "Delete failed");
     },
   });
 
@@ -189,8 +192,8 @@ export default function BuffetMenuPage() {
 
   const handleConfirmDelete = () => {
     if (!deleteConfirmId) return;
+    setDeleteError("");
     deleteMutation.mutate(deleteConfirmId);
-    setDeleteConfirmId(null);
   };
 
   return (
@@ -268,8 +271,12 @@ export default function BuffetMenuPage() {
         isOpen={deleteConfirmId !== null}
         title={tc("delete")}
         message={t("deleteConfirm")}
+        error={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirmId(null)}
+        onCancel={() => {
+          setDeleteConfirmId(null);
+          setDeleteError("");
+        }}
       />
     </>
   );

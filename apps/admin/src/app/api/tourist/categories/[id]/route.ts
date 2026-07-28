@@ -19,7 +19,22 @@ export const PUT = withAuthParams(
 export const DELETE = withAuthParams(
   async (_request, { params }) => {
     try {
-      await prisma.tourCategory.delete({ where: { id: params.id } });
+      const placeCount = await prisma.tourPlace.count({
+        where: { categoryId: params.id, deletedAt: null },
+      });
+      if (placeCount > 0) {
+        return NextResponse.json(
+          {
+            message: `Cannot delete: category still has ${placeCount} place(s). Move or delete them first.`,
+          },
+          { status: 400 }
+        );
+      }
+      // Purge soft-deleted places still referencing this category, then delete it
+      await prisma.$transaction([
+        prisma.tourPlace.deleteMany({ where: { categoryId: params.id, deletedAt: { not: null } } }),
+        prisma.tourCategory.delete({ where: { id: params.id } }),
+      ]);
       return NextResponse.json({ message: "Category deleted" });
     } catch (error) {
       console.error("Delete tour category error:", error);

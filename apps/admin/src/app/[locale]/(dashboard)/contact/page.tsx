@@ -68,6 +68,7 @@ export default function ContactPage() {
   };
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const handleDelete = (id: string) => {
     setDeleteConfirmId(id);
@@ -75,14 +76,15 @@ export default function ContactPage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirmId) return;
+    setDeleteError("");
     try {
       await api.delete(`/api/contact/${deleteConfirmId}`);
       invalidateContacts();
       setSelectedContact(null);
+      setDeleteConfirmId(null);
     } catch (error) {
       console.error("Delete error:", error);
-    } finally {
-      setDeleteConfirmId(null);
+      setDeleteError(error instanceof Error ? error.message : "Delete failed");
     }
   };
 
@@ -153,8 +155,12 @@ export default function ContactPage() {
         isOpen={deleteConfirmId !== null}
         title={t("delete")}
         message={t("deleteConfirm")}
+        error={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirmId(null)}
+        onCancel={() => {
+          setDeleteConfirmId(null);
+          setDeleteError("");
+        }}
       />
     </>
   );

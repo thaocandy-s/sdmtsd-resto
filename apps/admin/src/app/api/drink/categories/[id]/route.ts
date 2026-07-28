@@ -56,7 +56,23 @@ export const DELETE = withAuthParams(
         return NextResponse.json({ message: "Category not found" }, { status: 404 });
       }
 
-      await prisma.drinkCategory.delete({ where: { id: params.id } });
+      const drinkCount = await prisma.drink.count({
+        where: { categoryId: params.id, deletedAt: null },
+      });
+      if (drinkCount > 0) {
+        return NextResponse.json(
+          {
+            message: `Cannot delete: category still has ${drinkCount} drink(s). Move or delete them first.`,
+          },
+          { status: 400 }
+        );
+      }
+
+      // Purge soft-deleted drinks still referencing this category, then delete it
+      await prisma.$transaction([
+        prisma.drink.deleteMany({ where: { categoryId: params.id, deletedAt: { not: null } } }),
+        prisma.drinkCategory.delete({ where: { id: params.id } }),
+      ]);
 
       return NextResponse.json({ message: "Category deleted successfully" });
     } catch (error) {

@@ -127,6 +127,7 @@ export default function HomeManagementPage() {
 
   const [deleteConfirmType, setDeleteConfirmType] = useState<"banner" | "event" | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const deleteBanner = (id: string) => {
     setDeleteConfirmType("banner");
@@ -140,6 +141,7 @@ export default function HomeManagementPage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirmType || !deleteConfirmId) return;
+    setDeleteError("");
     try {
       if (deleteConfirmType === "banner") {
         await api.delete(`/api/banners/${deleteConfirmId}`);
@@ -148,11 +150,11 @@ export default function HomeManagementPage() {
         await api.delete(`/api/events/${deleteConfirmId}`);
         queryClient.invalidateQueries({ queryKey: ["events"] });
       }
-    } catch (error) {
-      console.error(`Delete ${deleteConfirmType} error:`, error);
-    } finally {
       setDeleteConfirmType(null);
       setDeleteConfirmId(null);
+    } catch (error) {
+      console.error(`Delete ${deleteConfirmType} error:`, error);
+      setDeleteError(error instanceof Error ? error.message : "Delete failed");
     }
   };
 
@@ -247,9 +249,11 @@ export default function HomeManagementPage() {
           deleteConfirmType === "banner" ? t("deleteBannerConfirm") : t("deleteEventConfirm")
         }
         onConfirm={handleConfirmDelete}
+        error={deleteError}
         onCancel={() => {
           setDeleteConfirmType(null);
           setDeleteConfirmId(null);
+          setDeleteError("");
         }}
       />
     </>

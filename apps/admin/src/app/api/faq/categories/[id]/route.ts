@@ -19,7 +19,22 @@ export const PUT = withAuthParams(
 export const DELETE = withAuthParams(
   async (_request, { params }) => {
     try {
-      await prisma.faqCategory.delete({ where: { id: params.id } });
+      const faqCount = await prisma.faq.count({
+        where: { categoryId: params.id, deletedAt: null },
+      });
+      if (faqCount > 0) {
+        return NextResponse.json(
+          {
+            message: `Cannot delete: category still has ${faqCount} FAQ(s). Move or delete them first.`,
+          },
+          { status: 400 }
+        );
+      }
+      // Purge soft-deleted FAQs still referencing this category, then delete it
+      await prisma.$transaction([
+        prisma.faq.deleteMany({ where: { categoryId: params.id, deletedAt: { not: null } } }),
+        prisma.faqCategory.delete({ where: { id: params.id } }),
+      ]);
       return NextResponse.json({ message: "Category deleted" });
     } catch (error) {
       console.error("Delete FAQ category error:", error);

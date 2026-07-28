@@ -103,6 +103,7 @@ export default function DashboardPage() {
   };
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const handleDelete = (id: string) => {
     setDeleteConfirmId(id);
@@ -110,15 +111,16 @@ export default function DashboardPage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirmId) return;
+    setDeleteError("");
     try {
       await api.delete(`/api/contact/${deleteConfirmId}`);
       queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       setSelectedContact(null);
+      setDeleteConfirmId(null);
     } catch (error) {
       console.error("Delete error:", error);
-    } finally {
-      setDeleteConfirmId(null);
+      setDeleteError(error instanceof Error ? error.message : "Delete failed");
     }
   };
 
@@ -177,8 +179,12 @@ export default function DashboardPage() {
         isOpen={deleteConfirmId !== null}
         title={tContact("delete")}
         message={tContact("deleteConfirm")}
+        error={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirmId(null)}
+        onCancel={() => {
+          setDeleteConfirmId(null);
+          setDeleteError("");
+        }}
       />
     </>
   );
