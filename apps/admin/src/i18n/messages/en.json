@@ -21,10 +21,12 @@
     "loggingOut": "Logging out...",
     "language": "Language",
     "saving": "Saving...",
+    "imageRequired": "Image is required",
     "previous": "Previous",
     "next": "Next"
   },
   "sidebar": {
+    "dashboard": "Dashboard",
     "homeManagement": "Home Management",
     "foodMenu": "Food Menu",
     "drinkMenu": "Drink Menu",
@@ -175,6 +177,7 @@
     "descriptionLabel": "Description",
     "additionalImages": "Additional Images",
     "categoryLabel": "Category",
+    "selectCategory": "Select category",
     "noCategoryOption": "No category",
     "addressLabel": "Address",
     "publishedLabel": "Published",
@@ -273,6 +276,7 @@
     "questionLabel": "Question",
     "answerLabel": "Answer",
     "categoryLabel": "Category",
+    "selectCategory": "Select category",
     "sortOrderLabel": "Sort Order",
     "publishedLabel": "Published",
     "noCategoryOption": "No category",

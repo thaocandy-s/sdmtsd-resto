@@ -19,6 +19,7 @@ export default function BeerArtPage() {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState("");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,7 +43,12 @@ export default function BeerArtPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.imageUrl && !imageFile) {
+      setFormError(tc("imageRequired"));
+      return;
+    }
     setIsSaving(true);
+    setFormError("");
     try {
       let finalImageUrl = form.imageUrl;
       if (imageFile) {
@@ -63,6 +69,7 @@ export default function BeerArtPage() {
       queryClient.invalidateQueries({ queryKey: ["beer-arts"] });
     } catch (error) {
       console.error("Save error:", error);
+      setFormError(error instanceof Error ? error.message : "Save failed");
     } finally {
       setIsSaving(false);
     }
@@ -80,6 +87,7 @@ export default function BeerArtPage() {
       isPublished: item.isPublished,
     });
     setImageFile(null);
+    setFormError("");
     setShowModal(true);
   };
 
@@ -106,6 +114,7 @@ export default function BeerArtPage() {
             setEditingId(null);
             setForm(emptyForm);
             setImageFile(null);
+            setFormError("");
             setShowModal(true);
           }}
           className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
@@ -160,6 +169,7 @@ export default function BeerArtPage() {
         imageFile={imageFile}
         setImageFile={setImageFile}
         isSaving={isSaving}
+        error={formError}
       />
 
       <ConfirmModal

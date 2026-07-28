@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
+import { FormError } from "@/shared/components/form-error";
 
 interface Banner {
   id: string;
@@ -38,10 +39,12 @@ export function BannerFormModal({
   const [isActive, setIsActive] = useState(true);
 
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (isOpen) {
       setImageFile(null);
+      setError("");
       if (editingId && initialData) {
         setTitle(initialData.title);
         setSubtitle(initialData.subtitle || "");
@@ -62,17 +65,16 @@ export function BannerFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!imageUrl && !imageFile) {
+      setError(tc("imageRequired"));
+      return;
+    }
     setIsSaving(true);
+    setError("");
     try {
       let finalImageUrl = imageUrl;
       if (imageFile) {
         finalImageUrl = await uploadImage(imageFile, "banners");
-      }
-
-      if (!finalImageUrl) {
-        alert("Image is required");
-        setIsSaving(false);
-        return;
       }
 
       const data = {
@@ -95,7 +97,7 @@ export function BannerFormModal({
       onClose();
     } catch (err: any) {
       console.error(err);
-      alert(err.message || "Failed to save banner");
+      setError(err.message || "Failed to save banner");
     } finally {
       setIsSaving(false);
     }
@@ -114,9 +116,10 @@ export function BannerFormModal({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
+          {error && <FormError message={error} />}
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
-              {t("bannerTitle")} *
+              {t("bannerTitle")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -141,6 +144,7 @@ export function BannerFormModal({
 
           <ImageUpload
             label={t("bannerImage")}
+            required
             value={imageUrl}
             onChange={(url, file) => {
               setImageUrl(url);

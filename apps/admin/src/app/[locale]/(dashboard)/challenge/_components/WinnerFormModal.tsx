@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { ImageUpload } from "@/shared/components/image-upload";
+import { FormError } from "@/shared/components/form-error";
 import { WinnerForm } from "./types";
 
 interface WinnerFormModalProps {
@@ -11,6 +12,7 @@ interface WinnerFormModalProps {
   onSubmit: (e: React.FormEvent) => void;
   imageFile: File | null;
   setImageFile: (file: File | null) => void;
+  error?: string;
 }
 
 export function WinnerFormModal({
@@ -22,6 +24,7 @@ export function WinnerFormModal({
   onSubmit,
   imageFile,
   setImageFile,
+  error,
 }: WinnerFormModalProps) {
   const t = useTranslations("challenge");
   const tc = useTranslations("common");
@@ -43,9 +46,10 @@ export function WinnerFormModal({
           </button>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
+          {error && <FormError message={error} />}
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("winnerNameLabel")} *
+              {t("winnerNameLabel")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"

@@ -33,6 +33,7 @@ export default function ChallengePage() {
   const [ruleForm, setRuleForm] = useState<RuleForm>(emptyRule);
   const [winnerForm, setWinnerForm] = useState<WinnerForm>(emptyWinner);
   const [winnerImageFile, setWinnerImageFile] = useState<File | null>(null);
+  const [formError, setFormError] = useState("");
 
   // Delete Confirm State
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -89,6 +90,7 @@ export default function ChallengePage() {
 
   const handleRuleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
     try {
       if (editingId) await api.put(`/api/challenge/rules/${editingId}`, ruleForm);
       else await api.post("/api/challenge/rules", ruleForm);
@@ -98,11 +100,13 @@ export default function ChallengePage() {
       queryClient.invalidateQueries({ queryKey: ["challenge"] });
     } catch (error) {
       console.error("Save error:", error);
+      setFormError(error instanceof Error ? error.message : "Save failed");
     }
   };
 
   const handleWinnerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
     try {
       let finalImageUrl = winnerForm.imageUrl;
       if (winnerImageFile) {
@@ -122,6 +126,7 @@ export default function ChallengePage() {
       queryClient.invalidateQueries({ queryKey: ["challenge"] });
     } catch (error) {
       console.error("Save error:", error);
+      setFormError(error instanceof Error ? error.message : "Save failed");
     }
   };
 
@@ -133,6 +138,7 @@ export default function ChallengePage() {
       sortOrder: item.sortOrder,
       isActive: item.isActive,
     });
+    setFormError("");
     setShowRuleModal(true);
   };
 
@@ -147,6 +153,7 @@ export default function ChallengePage() {
       isPublished: item.isPublished,
     });
     setWinnerImageFile(null);
+    setFormError("");
     setShowWinnerModal(true);
   };
 
@@ -214,6 +221,7 @@ export default function ChallengePage() {
         <button
           onClick={() => {
             setEditingId(null);
+            setFormError("");
             if (tab === "rules") {
               setRuleForm(emptyRule);
               setShowRuleModal(true);
@@ -288,6 +296,7 @@ export default function ChallengePage() {
           setEditingId(null);
         }}
         onSubmit={handleRuleSubmit}
+        error={formError}
       />
 
       <WinnerFormModal
@@ -303,6 +312,7 @@ export default function ChallengePage() {
         onSubmit={handleWinnerSubmit}
         imageFile={winnerImageFile}
         setImageFile={setWinnerImageFile}
+        error={formError}
       />
 
       <ConfirmModal

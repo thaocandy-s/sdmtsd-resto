@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { ImageUpload, MultiImageUpload, uploadImage } from "@/shared/components/image-upload";
+import { FormError } from "@/shared/components/form-error";
 import { toSlug } from "@resto-hub/utils";
 import { Place, PlaceForm, emptyPlace, Category } from "./types";
 
@@ -28,11 +29,13 @@ export function PlaceFormModal({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (isOpen) {
       setImageFile(null);
       setGalleryFiles([]);
+      setError("");
       if (editingId && initialData) {
         setForm({
           name: initialData.name,
@@ -58,6 +61,7 @@ export function PlaceFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    setError("");
     try {
       let finalImageUrl = form.imageUrl;
       if (imageFile) {
@@ -85,7 +89,6 @@ export function PlaceFormModal({
         images: finalImages,
         latitude: form.latitude ? parseFloat(form.latitude) : null,
         longitude: form.longitude ? parseFloat(form.longitude) : null,
-        categoryId: form.categoryId || null,
       };
 
       if (editingId) {
@@ -97,6 +100,7 @@ export function PlaceFormModal({
       onClose();
     } catch (error) {
       console.error("Save place error:", error);
+      setError(error instanceof Error ? error.message : "Save failed");
     } finally {
       setIsSaving(false);
     }
@@ -119,7 +123,7 @@ export function PlaceFormModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("nameLabel")} *
+              {t("nameLabel")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -178,14 +182,15 @@ export function PlaceFormModal({
           />
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("categoryLabel")}
+              {t("categoryLabel")} <span className="text-red-400">*</span>
             </label>
             <select
               value={form.categoryId}
               onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+              required
               className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
             >
-              <option value="">{t("noCategoryOption")}</option>
+              <option value="">{t("selectCategory")}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -214,6 +219,7 @@ export function PlaceFormModal({
             />
             <span className="text-sm text-foreground">{t("publishedLabel")}</span>
           </label>
+          {error && <FormError message={error} />}
           <div className="flex gap-3 pt-4">
             <button
               type="submit"

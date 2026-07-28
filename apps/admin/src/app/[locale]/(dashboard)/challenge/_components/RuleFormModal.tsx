@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { FormError } from "@/shared/components/form-error";
 import { RuleForm } from "./types";
 
 interface RuleFormModalProps {
@@ -8,6 +9,7 @@ interface RuleFormModalProps {
   setForm: (form: RuleForm) => void;
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
+  error?: string;
 }
 
 export function RuleFormModal({
@@ -17,6 +19,7 @@ export function RuleFormModal({
   setForm,
   onClose,
   onSubmit,
+  error,
 }: RuleFormModalProps) {
   const t = useTranslations("challenge");
   const tc = useTranslations("common");
@@ -38,9 +41,10 @@ export function RuleFormModal({
           </button>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
+          {error && <FormError message={error} />}
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("ruleTitleLabel")} *
+              {t("ruleTitleLabel")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -52,7 +56,7 @@ export function RuleFormModal({
           </div>
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("ruleDescriptionLabel")} *
+              {t("ruleDescriptionLabel")} <span className="text-red-400">*</span>
             </label>
             <textarea
               value={form.description}

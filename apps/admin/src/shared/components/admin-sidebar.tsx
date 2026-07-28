@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import {
   Home,
+  LayoutDashboard,
   UtensilsCrossed,
   GlassWater,
   ChefHat,
@@ -26,6 +27,7 @@ import { cn } from "@resto-hub/ui";
 import { getApiUrl } from "@/lib/api-client";
 
 const navItems = [
+  { href: "", key: "dashboard", icon: LayoutDashboard, exact: true },
   { href: "/home-management", key: "homeManagement", icon: Home },
   { href: "/food-menu", key: "foodMenu", icon: UtensilsCrossed },
   { href: "/drink-menu", key: "drinkMenu", icon: GlassWater },
@@ -98,7 +100,7 @@ export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
           {navItems.map((item) => {
             const Icon = item.icon;
             const fullHref = `/${locale}${item.href}`;
-            const isActive = pathname.startsWith(fullHref);
+            const isActive = item.exact ? pathname === fullHref : pathname.startsWith(fullHref);
 
             return (
               <Link

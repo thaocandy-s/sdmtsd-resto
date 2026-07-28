@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { toSlug } from "@resto-hub/utils";
 import { ImageUpload } from "@/shared/components/image-upload";
+import { FormError } from "@/shared/components/form-error";
 import { BuffetFormData, MenuItemOption, CategoryOption } from "./types";
 
 interface BuffetFormModalProps {
@@ -18,6 +19,7 @@ interface BuffetFormModalProps {
   imageFile: File | null;
   setImageFile: (file: File | null) => void;
   isSaving: boolean;
+  error?: string;
 }
 
 export function BuffetFormModal({
@@ -32,6 +34,7 @@ export function BuffetFormModal({
   imageFile,
   setImageFile,
   isSaving,
+  error,
 }: BuffetFormModalProps) {
   const t = useTranslations("buffetMenu");
   const tc = useTranslations("common");
@@ -93,9 +96,10 @@ export function BuffetFormModal({
           </button>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
+          {error && <FormError message={error} />}
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("nameLabel")} *
+              {t("nameLabel")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -126,7 +130,7 @@ export function BuffetFormModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-foreground-secondary mb-1">
-                {t("priceLabel")} *
+                {t("priceLabel")} <span className="text-red-400">*</span>
               </label>
               <input
                 type="number"
@@ -138,7 +142,7 @@ export function BuffetFormModal({
             </div>
             <div>
               <label className="block text-sm text-foreground-secondary mb-1">
-                {t("durationLabel")} *
+                {t("durationLabel")} <span className="text-red-400">*</span>
               </label>
               <input
                 type="number"

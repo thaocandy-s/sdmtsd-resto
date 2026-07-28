@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { FormError } from "@/shared/components/form-error";
 import { Category, CategoryFormData, emptyCategoryForm, toSlug } from "./types";
 
 interface CategoryManagerModalProps {
@@ -23,11 +24,13 @@ export function CategoryManagerModal({
   const [editingCatId, setEditingCatId] = useState<string | null>(null);
   const [catForm, setCatForm] = useState<CategoryFormData>(emptyCategoryForm);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
   if (!isOpen) return null;
 
   const handleCatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     try {
       if (editingCatId) {
         await api.put(`/api/drink/categories/${editingCatId}`, catForm);
@@ -40,11 +43,13 @@ export function CategoryManagerModal({
       onDataChange();
     } catch (error) {
       console.error("Save category error:", error);
+      setError(error instanceof Error ? error.message : "Save failed");
     }
   };
 
   const handleCatEdit = (cat: Category) => {
     setEditingCatId(cat.id);
+    setError("");
     setCatForm({
       name: cat.name,
       slug: cat.slug,
@@ -74,6 +79,7 @@ export function CategoryManagerModal({
     setIsAddingCat(false);
     setEditingCatId(null);
     setCatForm(emptyCategoryForm);
+    setError("");
     onClose();
   };
 
@@ -105,7 +111,7 @@ export function CategoryManagerModal({
               </h4>
               <div>
                 <label className="block text-xs text-foreground-secondary mb-1">
-                  {t("nameLabel")} *
+                  {t("nameLabel")} <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -141,6 +147,7 @@ export function CategoryManagerModal({
                   className="w-full bg-background-secondary border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-gold-500"
                 />
               </div>
+              <FormError message={error} />
               <div className="flex gap-2 pt-2">
                 <button
                   type="submit"
@@ -167,6 +174,7 @@ export function CategoryManagerModal({
                 setIsAddingCat(true);
                 setEditingCatId(null);
                 setCatForm(emptyCategoryForm);
+                setError("");
               }}
               className="w-full py-2 border border-dashed border-gold-500/50 hover:border-gold-500 text-gold-400 rounded-lg text-sm font-medium transition-colors text-center"
             >

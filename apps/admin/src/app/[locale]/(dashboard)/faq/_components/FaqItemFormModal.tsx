@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { FormError } from "@/shared/components/form-error";
 import { FaqCategory, FaqForm } from "./types";
 
 interface FaqItemFormModalProps {
@@ -6,6 +7,7 @@ interface FaqItemFormModalProps {
   editingId: string | null;
   form: FaqForm;
   categories: FaqCategory[];
+  error: string;
   setForm: (form: FaqForm) => void;
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -16,6 +18,7 @@ export function FaqItemFormModal({
   editingId,
   form,
   categories,
+  error,
   setForm,
   onClose,
   onSubmit,
@@ -42,7 +45,7 @@ export function FaqItemFormModal({
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("questionLabel")} *
+              {t("questionLabel")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -54,7 +57,7 @@ export function FaqItemFormModal({
           </div>
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("answerLabel")} *
+              {t("answerLabel")} <span className="text-red-400">*</span>
             </label>
             <textarea
               value={form.answer}
@@ -67,14 +70,15 @@ export function FaqItemFormModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-foreground-secondary mb-1">
-                {t("categoryLabel")}
+                {t("categoryLabel")} <span className="text-red-400">*</span>
               </label>
               <select
                 value={form.categoryId}
                 onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+                required
                 className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
               >
-                <option value="">{t("noCategoryOption")}</option>
+                <option value="">{t("selectCategory")}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -103,6 +107,7 @@ export function FaqItemFormModal({
             />
             <span className="text-sm text-foreground">{t("publishedLabel")}</span>
           </label>
+          <FormError message={error} />
           <div className="flex gap-3 pt-4">
             <button
               type="submit"

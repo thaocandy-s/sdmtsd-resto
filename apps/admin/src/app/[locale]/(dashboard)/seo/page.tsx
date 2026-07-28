@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { FormError } from "@/shared/components/form-error";
 
 interface SeoMeta {
   id: string;
@@ -48,6 +49,7 @@ export default function SeoPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>(emptyForm);
+  const [formError, setFormError] = useState("");
 
   const seoQuery = useQuery({
     queryKey: ["seo-metas"],
@@ -59,6 +61,7 @@ export default function SeoPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
     const payload = {
       ...form,
       keywords: form.keywords ? form.keywords.split(",").map((k) => k.trim()) : [],
@@ -73,6 +76,7 @@ export default function SeoPage() {
       queryClient.invalidateQueries({ queryKey: ["seo-metas"] });
     } catch (error) {
       console.error("Save error:", error);
+      setFormError(error instanceof Error ? error.message : "Save failed");
     }
   };
 
@@ -90,6 +94,7 @@ export default function SeoPage() {
       noIndex: item.noIndex,
       jsonLd: item.jsonLd || "",
     });
+    setFormError("");
     setShowModal(true);
   };
 
@@ -122,6 +127,7 @@ export default function SeoPage() {
           onClick={() => {
             setEditingId(null);
             setForm(emptyForm);
+            setFormError("");
             setShowModal(true);
           }}
           className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
@@ -212,8 +218,11 @@ export default function SeoPage() {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {formError && <FormError message={formError} />}
               <div>
-                <label className="block text-sm text-foreground-secondary mb-1">Page Path *</label>
+                <label className="block text-sm text-foreground-secondary mb-1">
+                  Page Path <span className="text-red-400">*</span>
+                </label>
                 <input
                   type="text"
                   value={form.pagePath}

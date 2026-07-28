@@ -21,10 +21,12 @@
     "loggingOut": "ログアウト中...",
     "language": "言語",
     "saving": "保存中...",
+    "imageRequired": "画像は必須です",
     "previous": "前へ",
     "next": "次へ"
   },
   "sidebar": {
+    "dashboard": "ダッシュボード",
     "homeManagement": "ホーム管理",
     "foodMenu": "フードメニュー",
     "drinkMenu": "ドリンクメニュー",
@@ -175,6 +177,7 @@
     "descriptionLabel": "説明",
     "additionalImages": "追加の画像",
     "categoryLabel": "カテゴリー",
+    "selectCategory": "カテゴリーを選択",
     "noCategoryOption": "カテゴリーなし",
     "addressLabel": "住所",
     "publishedLabel": "公開中",
@@ -273,6 +276,7 @@
     "questionLabel": "質問 (Question)",
     "answerLabel": "回答 (Answer)",
     "categoryLabel": "カテゴリー",
+    "selectCategory": "カテゴリーを選択",
     "sortOrderLabel": "表示順",
     "publishedLabel": "公開済み",
     "noCategoryOption": "カテゴリーなし",

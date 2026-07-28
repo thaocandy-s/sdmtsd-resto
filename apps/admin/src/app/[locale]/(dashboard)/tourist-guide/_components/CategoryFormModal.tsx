@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { toSlug } from "@resto-hub/utils";
+import { FormError } from "@/shared/components/form-error";
 import { Category, CatForm, emptyCat } from "./types";
 
 interface CategoryFormModalProps {
@@ -22,8 +23,10 @@ export function CategoryFormModal({
   const t = useTranslations("touristGuide");
   const tc = useTranslations("common");
   const [form, setForm] = useState<CatForm>(emptyCat);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    setError("");
     if (editingId && initialData) {
       setForm({
         name: initialData.name,
@@ -40,6 +43,7 @@ export function CategoryFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     try {
       if (editingId) {
         await api.put(`/api/tourist/categories/${editingId}`, form);
@@ -50,6 +54,7 @@ export function CategoryFormModal({
       onClose();
     } catch (error) {
       console.error("Save category error:", error);
+      setError(error instanceof Error ? error.message : "Save failed");
     }
   };
 
@@ -68,9 +73,10 @@ export function CategoryFormModal({
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && <FormError message={error} />}
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("nameLabel")} *
+              {t("nameLabel")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"

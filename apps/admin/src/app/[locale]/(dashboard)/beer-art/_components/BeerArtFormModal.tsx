@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { ImageUpload } from "@/shared/components/image-upload";
+import { FormError } from "@/shared/components/form-error";
 import { FormData } from "./types";
 
 interface BeerArtFormModalProps {
@@ -12,6 +13,7 @@ interface BeerArtFormModalProps {
   imageFile: File | null;
   setImageFile: (file: File | null) => void;
   isSaving: boolean;
+  error?: string;
 }
 
 export function BeerArtFormModal({
@@ -24,6 +26,7 @@ export function BeerArtFormModal({
   imageFile,
   setImageFile,
   isSaving,
+  error,
 }: BeerArtFormModalProps) {
   const t = useTranslations("beerArt");
   const tc = useTranslations("common");
@@ -45,9 +48,10 @@ export function BeerArtFormModal({
           </button>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
+          {error && <FormError message={error} />}
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              {t("titleLabel")} *
+              {t("titleLabel")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
