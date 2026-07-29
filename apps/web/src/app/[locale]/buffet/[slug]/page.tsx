@@ -4,6 +4,7 @@ import Link from "next/link";
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { getRestaurant } from "@/lib/restaurant";
+import { getTaxRate } from "@/lib/settings";
 import { BuffetDetailContent } from "../components/buffet-detail-content";
 
 // ISR: serve cached HTML, regenerate at most every 5 minutes
@@ -71,7 +72,11 @@ export default async function BuffetDetailPage({
   setRequestLocale(locale);
   const t = await getTranslations("buffet");
 
-  const [course, restaurant] = await Promise.all([getCourse(slug), getRestaurant()]);
+  const [course, restaurant, taxRate] = await Promise.all([
+    getCourse(slug),
+    getRestaurant(),
+    getTaxRate(),
+  ]);
 
   if (!course) {
     return (
@@ -84,5 +89,11 @@ export default async function BuffetDetailPage({
     );
   }
 
-  return <BuffetDetailContent course={course} phone={restaurant?.phone || "+81-3-1234-5678"} />;
+  return (
+    <BuffetDetailContent
+      course={course}
+      phone={restaurant?.phone || "+81-3-1234-5678"}
+      taxRate={taxRate}
+    />
+  );
 }

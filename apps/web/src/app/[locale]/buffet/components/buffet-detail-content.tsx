@@ -10,13 +10,14 @@ import { BuffetCourse } from "./buffet-course-card";
 interface BuffetDetailContentProps {
   course: BuffetCourse;
   phone: string;
+  taxRate: number;
 }
 
-export function BuffetDetailContent({ course, phone }: BuffetDetailContentProps) {
+export function BuffetDetailContent({ course, phone, taxRate }: BuffetDetailContentProps) {
   const t = useTranslations("buffet");
   const tCommon = useTranslations("common");
 
-  const formatPrice = (price: number) => formatPriceWithTax(price);
+  const formatPrice = (price: number) => formatPriceWithTax(price, taxRate);
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">

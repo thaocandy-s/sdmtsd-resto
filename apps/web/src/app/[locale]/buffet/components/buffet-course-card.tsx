@@ -23,13 +23,14 @@ export interface BuffetCourse {
 
 interface BuffetCourseCardProps {
   course: BuffetCourse;
+  taxRate: number;
 }
 
-export function BuffetCourseCard({ course }: BuffetCourseCardProps) {
+export function BuffetCourseCard({ course, taxRate }: BuffetCourseCardProps) {
   const t = useTranslations("buffet");
   const tCommon = useTranslations("common");
 
-  const formatPrice = (price: number) => formatPriceWithTax(price);
+  const formatPrice = (price: number) => formatPriceWithTax(price, taxRate);
 
   return (
     <Link

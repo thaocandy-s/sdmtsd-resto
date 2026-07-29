@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Food } from "./types";
 import { formatPriceWithTax } from "@resto-hub/utils";
+import { useTaxRate } from "@/shared/hooks/use-tax-rate";
 import { StatusBadge } from "./StatusBadge";
 import { FoodBadges } from "./FoodBadges";
 import { FoodCard } from "./FoodCard";
@@ -29,6 +30,7 @@ export function FoodTable({
   onPageChange,
 }: FoodTableProps) {
   const t = useTranslations("foodMenu");
+  const taxRate = useTaxRate();
   const tc = useTranslations("common");
 
   if (loading) {
@@ -148,7 +150,7 @@ export function FoodTable({
                   </td>
 
                   <td className="px-4 py-3 text-foreground text-sm whitespace-nowrap">
-                    {formatPriceWithTax(food.price)}
+                    {formatPriceWithTax(food.price, taxRate)}
                   </td>
 
                   <td className="px-4 py-3">

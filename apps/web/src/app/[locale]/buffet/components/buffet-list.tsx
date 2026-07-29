@@ -6,9 +6,10 @@ import { BuffetCourse, BuffetCourseCard } from "./buffet-course-card";
 
 interface BuffetListProps {
   courses: BuffetCourse[];
+  taxRate: number;
 }
 
-export function BuffetList({ courses }: BuffetListProps) {
+export function BuffetList({ courses, taxRate }: BuffetListProps) {
   const t = useTranslations("buffet");
   const tc = useTranslations("common");
 
@@ -27,7 +28,7 @@ export function BuffetList({ courses }: BuffetListProps) {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {visibleCourses.map((course) => (
-          <BuffetCourseCard key={course.id} course={course} />
+          <BuffetCourseCard key={course.id} course={course} taxRate={taxRate} />
         ))}
       </div>
 

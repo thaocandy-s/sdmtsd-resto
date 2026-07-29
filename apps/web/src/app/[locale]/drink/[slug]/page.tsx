@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
+import { getTaxRate } from "@/lib/settings";
 import { DrinkDetail } from "./_components/DrinkDetail";
 
 // ISR: serve cached HTML, regenerate at most every 5 minutes
@@ -82,6 +83,8 @@ export default async function DrinkDetailPage({
     );
   }
 
+  const taxRate = await getTaxRate();
+
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">
       <Link
@@ -91,7 +94,7 @@ export default async function DrinkDetailPage({
         &larr; {t("backToList")}
       </Link>
 
-      <DrinkDetail drink={drink} />
+      <DrinkDetail drink={drink} taxRate={taxRate} />
     </main>
   );
 }

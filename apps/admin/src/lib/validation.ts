@@ -24,6 +24,11 @@ export const positionValue = z.preprocess(
   z.coerce.number().int().optional()
 );
 
+// System-wide consumption tax rate, stored as a percent (0–100) in Setting.
+export const taxRateSchema = z.object({
+  taxRate: z.coerce.number().min(0).max(100),
+});
+
 export const foodCreateSchema = z.object({
   name: z.string().trim().min(1).max(200),
   slug: z.string().trim().min(1).max(200),

@@ -202,6 +202,9 @@ export const ja = {
     saving: "保存中...",
     successMessage: "店舗情報が正常に更新されました！",
     errorMessage: "店舗情報の更新に失敗しました。",
+    pricingTitle: "料金設定",
+    taxRateLabel: "消費税率 (%)",
+    taxRateHint: "メニュー価格の税込表示および全ての金額計算に使用されます",
   },
   touristGuide: {
     title: "観光ガイド",

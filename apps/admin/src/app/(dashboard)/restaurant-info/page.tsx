@@ -6,18 +6,23 @@ import { useTranslations } from "next-intl";
 import { toSlug } from "@resto-hub/utils";
 import { api } from "@/lib/api-client";
 import { showSuccessToast, showApiErrorToast } from "@/lib/toast";
+import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { Restaurant, RestaurantFormData } from "./_components/types";
 import { BasicInfoSection } from "./_components/BasicInfoSection";
 import { MapLocationSection } from "./_components/MapLocationSection";
 import { OpeningHoursSection } from "./_components/OpeningHoursSection";
 import { SocialLinksSection } from "./_components/SocialLinksSection";
+import { TaxRateSection } from "./_components/TaxRateSection";
 
 export default function RestaurantInfoPage() {
   const t = useTranslations("restaurantInfo");
   const tCommon = useTranslations("common");
   const queryClient = useQueryClient();
+  const { hasPermission } = useAuthStore();
+  const canEditTax = hasPermission("settings", "update");
 
   const [saving, setSaving] = useState(false);
+  const [taxRate, setTaxRate] = useState("");
 
   const [form, setForm] = useState<RestaurantFormData>({
     name: "",
@@ -53,6 +58,11 @@ export default function RestaurantInfoPage() {
   const infoQuery = useQuery({
     queryKey: ["restaurant-info"],
     queryFn: () => api.get<{ data: Restaurant | null }>("/api/info"),
+  });
+
+  const taxQuery = useQuery({
+    queryKey: ["settings", "tax-rate"],
+    queryFn: () => api.get<{ data: { taxRate: number } }>("/api/settings/tax-rate"),
   });
 
   const restaurant = infoQuery.data?.data ?? null;
@@ -95,6 +105,12 @@ export default function RestaurantInfoPage() {
     });
   }, [restaurant]);
 
+  // Seed the tax rate field from the settings API
+  useEffect(() => {
+    const value = taxQuery.data?.data?.taxRate;
+    if (typeof value === "number") setTaxRate(String(value));
+  }, [taxQuery.data]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -110,6 +126,10 @@ export default function RestaurantInfoPage() {
           : [],
       };
       await api.put("/api/info", payload);
+      if (canEditTax && taxRate !== "") {
+        await api.put("/api/settings/tax-rate", { taxRate: Number(taxRate) });
+        queryClient.invalidateQueries({ queryKey: ["settings", "tax-rate"] });
+      }
       showSuccessToast(t("successMessage"));
       queryClient.invalidateQueries({ queryKey: ["restaurant-info"] });
     } catch (error) {
@@ -149,6 +169,9 @@ export default function RestaurantInfoPage() {
 
         {/* Follow Us / Social Links Section */}
         <SocialLinksSection form={form} setForm={setForm} />
+
+        {/* Pricing / Tax Rate Section */}
+        <TaxRateSection taxRate={taxRate} onChangeTaxRate={setTaxRate} disabled={!canEditTax} />
 
         {/* Footer */}
         <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">

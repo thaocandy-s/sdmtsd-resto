@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Drink } from "./types";
 import { formatPriceWithTax } from "@resto-hub/utils";
+import { useTaxRate } from "@/shared/hooks/use-tax-rate";
 import { StatusBadge } from "./StatusBadge";
 import { DrinkBadges } from "./DrinkBadges";
 import { ActionsMenu } from "./ActionsMenu";
@@ -14,6 +15,7 @@ interface DrinkCardProps {
 
 export function DrinkCard({ drink, onEdit, onDelete, onDuplicate }: DrinkCardProps) {
   const t = useTranslations("drinkMenu");
+  const taxRate = useTaxRate();
 
   return (
     <div className="bg-background-secondary border border-border rounded-xl p-4 flex flex-col gap-3 shadow-sm hover:border-border/80 transition-colors">
@@ -66,7 +68,7 @@ export function DrinkCard({ drink, onEdit, onDelete, onDuplicate }: DrinkCardPro
       <div className="flex items-center justify-between text-sm font-medium pt-1">
         <span className="text-foreground-secondary text-xs">{t("priceInclTax")}</span>
         <span className="text-gold-400 font-semibold text-base">
-          {formatPriceWithTax(drink.price)}
+          {formatPriceWithTax(drink.price, taxRate)}
         </span>
       </div>
     </div>

@@ -5,11 +5,12 @@ import { ChallengeSection } from "./_components/ChallengeSection";
 import { TouristSection } from "./_components/TouristSection";
 import { FaqSection } from "./_components/FaqSection";
 import { prisma } from "@/lib/prisma";
+import { getTaxRate } from "@/lib/settings";
 
 export const revalidate = 3600; // Cache page static response for 1 hour (ISR)
 
 export default async function HomePage() {
-  const [banners, popularFoods, beerArts, tourPlaces, faqs] = await Promise.all([
+  const [banners, popularFoods, beerArts, tourPlaces, faqs, taxRate] = await Promise.all([
     prisma.heroBanner.findMany({
       where: { isActive: true },
       orderBy: { sortOrder: "asc" },
@@ -34,6 +35,7 @@ export default async function HomePage() {
       take: 3,
       orderBy: { sortOrder: "asc" },
     }),
+    getTaxRate(),
   ]);
 
   const serializedBanners = banners.map((b) => ({
@@ -77,7 +79,7 @@ export default async function HomePage() {
     <main>
       <HeroSection initialBanners={serializedBanners} />
 
-      <PopularMenuSection popularFoods={serializedPopularFoods} loading={false} />
+      <PopularMenuSection popularFoods={serializedPopularFoods} loading={false} taxRate={taxRate} />
 
       <BeerArtSection beerArts={serializedBeerArts} loading={false} />
 

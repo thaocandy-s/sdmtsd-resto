@@ -7,6 +7,7 @@ import { FormError } from "@/shared/components/form-error";
 import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
 import { Category, FormData, toSlug } from "./types";
 import { formatPriceWithTax } from "@resto-hub/utils";
+import { useTaxRate } from "@/shared/hooks/use-tax-rate";
 
 interface DrinkFormModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export function DrinkFormModal({
 }: DrinkFormModalProps) {
   const t = useTranslations("drinkMenu");
   const tc = useTranslations("common");
+  const taxRate = useTaxRate();
   const [form, setForm] = useState<FormData>(initialForm);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -128,7 +130,7 @@ export function DrinkFormModal({
               />
               {parseFloat(form.price) > 0 && (
                 <p className="text-xs text-gold-400 mt-1">
-                  {t("pricePreview")}: {formatPriceWithTax(parseFloat(form.price))}
+                  {t("pricePreview")}: {formatPriceWithTax(parseFloat(form.price), taxRate)}
                 </p>
               )}
             </div>
