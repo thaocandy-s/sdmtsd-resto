@@ -1,8 +1,4 @@
-import createMiddleware from "next-intl/middleware";
-import { routing } from "./i18n/routing";
 import { NextRequest, NextResponse } from "next/server";
-
-const handleIntl = createMiddleware(routing);
 
 const publicPaths = ["/login", "/api/auth/login", "/api/auth/refresh"];
 
@@ -19,31 +15,24 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Remove locale prefix for auth checking
-  const pathnameWithoutLocale = pathname.replace(/^\/(ja|en)/, "") || "/";
-
   // Allow public paths
-  if (publicPaths.some((path) => pathnameWithoutLocale.startsWith(path))) {
-    return handleIntl(request);
+  if (publicPaths.some((path) => pathname.startsWith(path))) {
+    return NextResponse.next();
   }
 
   // Check for refresh token cookie (indicates logged in user)
   const refreshToken = request.cookies.get("refreshToken")?.value;
 
   if (!refreshToken) {
-    // Determine locale or default to 'ja'
-    const localeMatch = pathname.match(/^\/(ja|en)/);
-    const locale = localeMatch ? localeMatch[1] : "ja";
-
     const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = `/${locale}/login`;
-    loginUrl.searchParams.set("redirect", pathnameWithoutLocale);
+    loginUrl.pathname = "/login";
+    loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  return handleIntl(request);
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/", "/(ja|en)/:path*", "/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

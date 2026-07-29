@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
+import { getTaxRate } from "@/lib/settings";
 import { FoodDetail } from "./_components/FoodDetail";
 
 // ISR: serve cached HTML, regenerate at most every 5 minutes
@@ -85,17 +86,20 @@ export default async function FoodDetailPage({
   }
 
   // Related foods from the same category
-  const related = await prisma.food.findMany({
-    where: {
-      categoryId: food.categoryId,
-      id: { not: food.id },
-      deletedAt: null,
-      status: "PUBLISHED",
-    },
-    select: { id: true, name: true, slug: true, imageUrl: true, price: true },
-    take: 4,
-    orderBy: { isPopular: "desc" },
-  });
+  const [related, taxRate] = await Promise.all([
+    prisma.food.findMany({
+      where: {
+        categoryId: food.categoryId,
+        id: { not: food.id },
+        deletedAt: null,
+        status: "PUBLISHED",
+      },
+      select: { id: true, name: true, slug: true, imageUrl: true, price: true },
+      take: 4,
+      orderBy: [{ isPopular: "desc" }, { sortOrder: "asc" }],
+    }),
+    getTaxRate(),
+  ]);
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">
@@ -106,7 +110,7 @@ export default async function FoodDetailPage({
         &larr; {t("backToList")}
       </Link>
 
-      <FoodDetail food={food} related={related} />
+      <FoodDetail food={food} related={related} taxRate={taxRate} />
     </main>
   );
 }

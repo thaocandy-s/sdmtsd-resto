@@ -34,9 +34,7 @@ async function refreshAccessToken(): Promise<string | null> {
       if (!response.ok) {
         useAuthStore.getState().clearAuth();
         if (typeof window !== "undefined" && !isLoginPage) {
-          const localeMatch = window.location.pathname.match(/^\/(ja|en)/);
-          const locale = localeMatch ? localeMatch[1] : "en";
-          window.location.href = getApiUrl(`/${locale}/login`);
+          window.location.href = getApiUrl("/login");
         }
         return null;
       }
@@ -51,9 +49,7 @@ async function refreshAccessToken(): Promise<string | null> {
         typeof window !== "undefined" &&
         (window.location.pathname === "/login" || window.location.pathname.endsWith("/login"));
       if (typeof window !== "undefined" && !isLoginPage) {
-        const localeMatch = window.location.pathname.match(/^\/(ja|en)/);
-        const locale = localeMatch ? localeMatch[1] : "en";
-        window.location.href = getApiUrl(`/${locale}/login`);
+        window.location.href = getApiUrl("/login");
       }
       return null;
     } finally {

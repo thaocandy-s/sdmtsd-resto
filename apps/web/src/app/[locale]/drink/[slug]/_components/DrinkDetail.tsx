@@ -25,13 +25,14 @@ export interface Drink {
 
 interface DrinkDetailProps {
   drink: Drink;
+  taxRate: number;
 }
 
-export function DrinkDetail({ drink }: DrinkDetailProps) {
+export function DrinkDetail({ drink, taxRate }: DrinkDetailProps) {
   const t = useTranslations("drink");
   const tCommon = useTranslations("common");
 
-  const formatPrice = (price: number) => formatPriceWithTax(price);
+  const formatPrice = (price: number) => formatPriceWithTax(price, taxRate);
 
   return (
     <div className="grid md:grid-cols-2 gap-8">

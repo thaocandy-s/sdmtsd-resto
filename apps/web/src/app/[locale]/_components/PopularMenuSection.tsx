@@ -17,9 +17,10 @@ interface Food {
 interface PopularMenuSectionProps {
   popularFoods: Food[];
   loading: boolean;
+  taxRate: number;
 }
 
-export function PopularMenuSection({ popularFoods, loading }: PopularMenuSectionProps) {
+export function PopularMenuSection({ popularFoods, loading, taxRate }: PopularMenuSectionProps) {
   const t = useTranslations("home");
   const tc = useTranslations("common");
 
@@ -80,7 +81,7 @@ export function PopularMenuSection({ popularFoods, loading }: PopularMenuSection
                   </p>
                 )}
                 <p className="text-gold-400 font-bold mt-2 text-sm">
-                  {formatPriceWithTax(food.price)}
+                  {formatPriceWithTax(food.price, taxRate)}
                 </p>
               </div>
             </Link>

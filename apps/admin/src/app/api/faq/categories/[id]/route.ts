@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
+import { normalizeScope, updateOrdered } from "@/lib/ordering";
+import { positionValue } from "@/lib/validation";
 
 export const PUT = withAuthParams(
   async (request, { params }) => {
     try {
       const body = await request.json();
-      const category = await prisma.faqCategory.update({ where: { id: params.id }, data: body });
+      const position = positionValue.parse(body.position);
+      delete body.position;
+      delete body.sortOrder;
+
+      const category = await updateOrdered("faq-category", params.id, { position }, (tx) =>
+        tx.faqCategory.update({ where: { id: params.id }, data: body })
+      );
       return NextResponse.json({ data: category });
     } catch (error) {
       console.error("Update FAQ category error:", error);
@@ -35,6 +43,7 @@ export const DELETE = withAuthParams(
         prisma.faq.deleteMany({ where: { categoryId: params.id, deletedAt: { not: null } } }),
         prisma.faqCategory.delete({ where: { id: params.id } }),
       ]);
+      await normalizeScope("faq-category");
       return NextResponse.json({ message: "Category deleted" });
     } catch (error) {
       console.error("Delete FAQ category error:", error);

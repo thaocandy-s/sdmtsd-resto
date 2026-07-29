@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
+import { normalizeScope, updateOrdered } from "@/lib/ordering";
+import { positionValue } from "@/lib/validation";
 
 // PUT /api/drink/categories/[id] - Update drink category
 export const PUT = withAuthParams(
   async (request, { params }) => {
     try {
       const body = await request.json();
-      const { name, slug, description, sortOrder, isActive } = body;
+      const { name, slug, description, isActive } = body;
+      const position = positionValue.parse(body.position);
 
       const existing = await prisma.drinkCategory.findUnique({
         where: { id: params.id },
@@ -25,16 +28,17 @@ export const PUT = withAuthParams(
         }
       }
 
-      const category = await prisma.drinkCategory.update({
-        where: { id: params.id },
-        data: {
-          name,
-          slug,
-          description: description !== undefined ? description : existing.description,
-          sortOrder: sortOrder !== undefined ? parseInt(sortOrder) : existing.sortOrder,
-          isActive: isActive !== undefined ? Boolean(isActive) : existing.isActive,
-        },
-      });
+      const category = await updateOrdered("drink-category", params.id, { position }, (tx) =>
+        tx.drinkCategory.update({
+          where: { id: params.id },
+          data: {
+            name,
+            slug,
+            description: description !== undefined ? description : existing.description,
+            isActive: isActive !== undefined ? Boolean(isActive) : existing.isActive,
+          },
+        })
+      );
 
       return NextResponse.json({ data: category });
     } catch (error) {
@@ -73,6 +77,7 @@ export const DELETE = withAuthParams(
         prisma.drink.deleteMany({ where: { categoryId: params.id, deletedAt: { not: null } } }),
         prisma.drinkCategory.delete({ where: { id: params.id } }),
       ]);
+      await normalizeScope("drink-category");
 
       return NextResponse.json({ message: "Category deleted successfully" });
     } catch (error) {

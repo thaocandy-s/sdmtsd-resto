@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
 import { deleteMediaByUrl } from "@/lib/supabase";
+import { normalizeScope, updateOrdered } from "@/lib/ordering";
+import { positionValue } from "@/lib/validation";
 
 export const PUT = withAuthParams(
   async (request, { params }) => {
@@ -10,14 +12,21 @@ export const PUT = withAuthParams(
       const existing = await prisma.heroBanner.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Banner not found" }, { status: 404 });
 
-      const banner = await prisma.heroBanner.update({
-        where: { id: params.id },
-        data: {
-          ...body,
-          startDate: body.startDate ? new Date(body.startDate) : null,
-          endDate: body.endDate ? new Date(body.endDate) : null,
-        },
-      });
+      // sortOrder is system-managed; only an explicit position may move items.
+      const position = positionValue.parse(body.position);
+      delete body.position;
+      delete body.sortOrder;
+
+      const banner = await updateOrdered("banner", params.id, { position }, (tx) =>
+        tx.heroBanner.update({
+          where: { id: params.id },
+          data: {
+            ...body,
+            startDate: body.startDate ? new Date(body.startDate) : null,
+            endDate: body.endDate ? new Date(body.endDate) : null,
+          },
+        })
+      );
       return NextResponse.json({ data: banner });
     } catch (error) {
       console.error("Update banner error:", error);
@@ -38,6 +47,7 @@ export const DELETE = withAuthParams(
       }
 
       await prisma.heroBanner.delete({ where: { id: params.id } });
+      await normalizeScope("banner");
       return NextResponse.json({ message: "Banner deleted successfully" });
     } catch (error) {
       console.error("Delete banner error:", error);

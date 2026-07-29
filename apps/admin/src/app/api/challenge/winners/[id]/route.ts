@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
 import { deleteMediaByUrl } from "@/lib/supabase";
+import { normalizeScope, updateOrdered } from "@/lib/ordering";
+import { positionValue } from "@/lib/validation";
 
 export const PUT = withAuthParams(
   async (request, { params }) => {
@@ -13,7 +15,16 @@ export const PUT = withAuthParams(
         await deleteMediaByUrl(oldWinner.imageUrl);
       }
 
-      const winner = await prisma.katanukiWinner.update({ where: { id: params.id }, data: body });
+      const winner = await updateOrdered(
+        "katanuki-winner",
+        params.id,
+        { position: positionValue.parse(body.position) },
+        (tx) => {
+          delete body.position;
+          delete body.sortOrder;
+          return tx.katanukiWinner.update({ where: { id: params.id }, data: body });
+        }
+      );
       return NextResponse.json({ data: winner });
     } catch (error) {
       console.error("Update winner error:", error);
@@ -31,6 +42,7 @@ export const DELETE = withAuthParams(
         await deleteMediaByUrl(winner.imageUrl);
       }
       await prisma.katanukiWinner.delete({ where: { id: params.id } });
+      await normalizeScope("katanuki-winner");
       return NextResponse.json({ message: "Winner deleted" });
     } catch (error) {
       console.error("Delete winner error:", error);

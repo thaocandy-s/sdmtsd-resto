@@ -9,10 +9,11 @@ import { RelatedFoods } from "./RelatedFoods";
 interface FoodDetailProps {
   food: Food;
   related: RelatedFood[];
+  taxRate: number;
 }
 
-export function FoodDetail({ food, related }: FoodDetailProps) {
-  const formatPrice = (price: number) => formatPriceWithTax(price);
+export function FoodDetail({ food, related, taxRate }: FoodDetailProps) {
+  const formatPrice = (price: number) => formatPriceWithTax(price, taxRate);
 
   return (
     <>

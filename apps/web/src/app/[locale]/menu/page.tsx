@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
+import { getTaxRate } from "@/lib/settings";
 import { MenuContent } from "./_components/MenuContent";
 
 // ISR: serve cached HTML, regenerate at most every 5 minutes
@@ -42,6 +43,8 @@ export default async function MenuPage({ params }: { params: Promise<{ locale: s
     }),
   ]);
 
+  const taxRate = await getTaxRate();
+
   const activeCategories = categories.filter((cat) => cat._count.foods > 0);
 
   // schema.org Menu structured data built from the already-fetched foods
@@ -77,7 +80,7 @@ export default async function MenuPage({ params }: { params: Promise<{ locale: s
       <h1 className="text-4xl font-jp font-bold text-gold-400 mb-4">{t("title")}</h1>
       <p className="text-foreground-secondary mb-8">{t("subtitle")}</p>
 
-      <MenuContent foods={foods} categories={activeCategories} />
+      <MenuContent foods={foods} categories={activeCategories} taxRate={taxRate} />
     </main>
   );
 }

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
+import { createOrdered } from "@/lib/ordering";
+import { positionValue } from "@/lib/validation";
 
 export const GET = withAuth(async (request: NextRequest) => {
   try {
@@ -55,7 +57,6 @@ export const POST = withAuth(
         images,
         openingHours,
         isPublished,
-        sortOrder,
       } = body;
       if (!name || !slug || !categoryId)
         return NextResponse.json(
@@ -66,25 +67,28 @@ export const POST = withAuth(
       const existing = await prisma.tourPlace.findUnique({ where: { slug } });
       if (existing) return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
 
-      const place = await prisma.tourPlace.create({
-        data: {
-          name,
-          slug,
-          description,
-          categoryId,
-          address,
-          latitude: latitude ? parseFloat(latitude) : null,
-          longitude: longitude ? parseFloat(longitude) : null,
-          websiteUrl,
-          phone,
-          imageUrl,
-          images: images || [],
-          openingHours,
-          isPublished: isPublished || false,
-          sortOrder: sortOrder ? parseInt(sortOrder) : 0,
-        },
-        include: { category: true },
-      });
+      const position = positionValue.parse(body.position ?? body.sortOrder);
+      const place = await createOrdered("tour-place", categoryId, position, (tx, sortOrder) =>
+        tx.tourPlace.create({
+          data: {
+            name,
+            slug,
+            description,
+            categoryId,
+            address,
+            latitude: latitude ? parseFloat(latitude) : null,
+            longitude: longitude ? parseFloat(longitude) : null,
+            websiteUrl,
+            phone,
+            imageUrl,
+            images: images || [],
+            openingHours,
+            isPublished: isPublished || false,
+            sortOrder,
+          },
+          include: { category: true },
+        })
+      );
       return NextResponse.json({ data: place }, { status: 201 });
     } catch (error) {
       console.error("Create tourist place error:", error);

@@ -19,7 +19,8 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
         answer: true,
         category: { select: { id: true, name: true, slug: true } },
       },
-      orderBy: { sortOrder: "asc" },
+      // Global FAQ ordering; createdAt/id break ties from legacy per-category numbering
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }],
       // Payload guardrail — revisit server pagination if content exceeds this
       take: 200,
     }),

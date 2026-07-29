@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
+import { getTaxRate } from "@/lib/settings";
 import { DrinkContent } from "./_components/DrinkContent";
 
 // ISR: serve cached HTML, regenerate at most every 5 minutes
@@ -44,6 +45,8 @@ export default async function DrinkPage({ params }: { params: Promise<{ locale: 
     }),
   ]);
 
+  const taxRate = await getTaxRate();
+
   const activeCategories = categories.filter((cat) => cat._count.drinks > 0);
 
   return (
@@ -51,7 +54,7 @@ export default async function DrinkPage({ params }: { params: Promise<{ locale: 
       <h1 className="text-4xl font-jp font-bold text-gold-400 mb-4">{t("title")}</h1>
       <p className="text-foreground-secondary mb-8">{t("subtitle")}</p>
 
-      <DrinkContent drinks={drinks} categories={activeCategories} />
+      <DrinkContent drinks={drinks} categories={activeCategories} taxRate={taxRate} />
     </main>
   );
 }

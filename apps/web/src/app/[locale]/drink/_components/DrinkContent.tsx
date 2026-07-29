@@ -10,13 +10,14 @@ import { CategorySliceSection } from "./CategorySliceSection";
 interface DrinkContentProps {
   drinks: Drink[];
   categories: Category[];
+  taxRate: number;
 }
 
-export function DrinkContent({ drinks, categories }: DrinkContentProps) {
+export function DrinkContent({ drinks, categories, taxRate }: DrinkContentProps) {
   const t = useTranslations("drink");
   const [selectedCategory, setSelectedCategory] = useState("");
 
-  const formatPrice = (price: number) => formatPriceWithTax(price);
+  const formatPrice = (price: number) => formatPriceWithTax(price, taxRate);
 
   // Filter client-side over the server-provided payload (no refetch)
   const visibleDrinks = useMemo(

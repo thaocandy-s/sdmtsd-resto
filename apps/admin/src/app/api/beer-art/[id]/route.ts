@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
 import { deleteMediaByUrl } from "@/lib/supabase";
+import { normalizeScope, updateOrdered } from "@/lib/ordering";
+import { positionValue } from "@/lib/validation";
 
 export const PUT = withAuthParams(
   async (request, { params }) => {
@@ -14,18 +16,16 @@ export const PUT = withAuthParams(
         await deleteMediaByUrl(existing.imageUrl);
       }
 
-      const item = await prisma.beerArt.update({
-        where: { id: params.id },
-        data: {
-          ...body,
-          sortOrder:
-            body.sortOrder !== undefined
-              ? body.sortOrder
-                ? parseInt(body.sortOrder)
-                : 0
-              : undefined,
-        },
-      });
+      const position = positionValue.parse(body.position ?? body.sortOrder);
+      delete body.position;
+      delete body.sortOrder;
+
+      const item = await updateOrdered("beer-art", params.id, { position }, (tx) =>
+        tx.beerArt.update({
+          where: { id: params.id },
+          data: body,
+        })
+      );
       return NextResponse.json({ data: item });
     } catch (error) {
       console.error("Update beer art error:", error);
@@ -45,6 +45,7 @@ export const DELETE = withAuthParams(
         await deleteMediaByUrl(existing.imageUrl);
       }
       await prisma.beerArt.update({ where: { id: params.id }, data: { deletedAt: new Date() } });
+      await normalizeScope("beer-art");
       return NextResponse.json({ message: "Item deleted successfully" });
     } catch (error) {
       console.error("Delete beer art error:", error);

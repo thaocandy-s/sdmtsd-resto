@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   Home,
   LayoutDashboard,
@@ -38,7 +38,7 @@ const navItems = [
   { href: "/faq", key: "faq", icon: HelpCircle },
   { href: "/restaurant-info", key: "restaurantInfo", icon: Info },
   // { href: "/reservations", key: "reservations", icon: CalendarCheck },
-  { href: "/contact", key: "contactMessages", icon: Mail },
+  // { href: "/contact", key: "contactMessages", icon: Mail },
   { href: "/analytics", key: "analytics", icon: BarChart3 },
   // { href: "/media-library", key: "mediaLibrary", icon: FolderOpen },
   { href: "/settings", key: "settings", icon: Settings },
@@ -52,7 +52,6 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
   const pathname = usePathname();
-  const locale = useLocale();
   const tSidebar = useTranslations("sidebar");
   const tCommon = useTranslations("common");
   const [logoUrl, setLogoUrl] = useState<string>(getApiUrl("/images/logo.png"));
@@ -81,7 +80,7 @@ export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
       >
         {/* Logo and close button */}
         <div className="p-4 border-b border-border flex items-center justify-between">
-          <Link href={`/${locale}`} onClick={onClose} className="flex items-center gap-2">
+          <Link href="/" onClick={onClose} className="flex items-center gap-2">
             <img src={logoUrl} alt="Logo" className="h-9 w-auto object-contain" />
             <div className="flex flex-col">
               <h1 className="text-sm font-bold text-gold-400 leading-tight">Admin CMS</h1>
@@ -99,7 +98,7 @@ export function AdminSidebar({ isOpen, onClose, onLogout }: AdminSidebarProps) {
         <nav className="flex-1 p-2 overflow-y-auto space-y-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const fullHref = `/${locale}${item.href}`;
+            const fullHref = item.href || "/";
             const isActive = item.exact ? pathname === fullHref : pathname.startsWith(fullHref);
 
             return (

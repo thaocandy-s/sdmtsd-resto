@@ -13,7 +13,28 @@ export function formatPrice(price: number, currency = "JPY"): string {
   }).format(price);
 }
 
-export function formatPriceWithTax(price: number, taxRate = 0.1, currency = "JPY"): string {
+// Centralized consumption-tax configuration. The live rate is stored as a
+// percent value in the Setting table (key: TAX_RATE_SETTING_KEY); these
+// defaults are the fallback whenever the setting row is missing or invalid.
+export const TAX_RATE_SETTING_KEY = "taxRate";
+export const DEFAULT_TAX_RATE_PERCENT = 10;
+export const DEFAULT_TAX_RATE = DEFAULT_TAX_RATE_PERCENT / 100;
+
+// Converts a stored percent value (e.g. 10) into a fraction (0.1) for price
+// math. Accepts unknown input because the setting is persisted as Json.
+export function taxRateFromPercent(percent: unknown): number {
+  const value = typeof percent === "string" ? Number(percent) : percent;
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > 100) {
+    return DEFAULT_TAX_RATE;
+  }
+  return value / 100;
+}
+
+export function formatPriceWithTax(
+  price: number,
+  taxRate = DEFAULT_TAX_RATE,
+  currency = "JPY"
+): string {
   const taxIncluded = Math.round(price * (1 + taxRate));
 
   if (currency === "JPY") {

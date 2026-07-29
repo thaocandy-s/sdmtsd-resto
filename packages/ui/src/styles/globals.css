@@ -64,3 +64,17 @@
     background: var(--color-gold-500);
   }
 }
+
+/* Brief highlight applied to a newly created ordered item so users can spot it. */
+@keyframes highlight-flash {
+  0% {
+    background-color: color-mix(in srgb, var(--color-gold-500) 28%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-highlight-flash {
+  animation: highlight-flash 2.2s ease-out;
+}

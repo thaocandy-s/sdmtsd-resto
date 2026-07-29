@@ -16,11 +16,18 @@ const optionalFloat = z.preprocess(
   z.coerce.number().nullable()
 );
 
-// Empty string falls back to 0 (matches previous parseInt behavior).
-const sortOrderValue = z.preprocess(
-  (v) => (v === "" || v === null || v === undefined ? 0 : v),
-  z.coerce.number().int()
+// Optional explicit position for ordered content (Advanced form field).
+// sortOrder itself is system-managed; clients request a position instead and
+// the ordering service (lib/ordering.ts) computes/normalizes sortOrder.
+export const positionValue = z.preprocess(
+  (v) => (v === "" || v === null || v === undefined ? undefined : v),
+  z.coerce.number().int().optional()
 );
+
+// System-wide consumption tax rate, stored as a percent (0–100) in Setting.
+export const taxRateSchema = z.object({
+  taxRate: z.coerce.number().min(0).max(100),
+});
 
 export const foodCreateSchema = z.object({
   name: z.string().trim().min(1).max(200),
@@ -35,7 +42,7 @@ export const foodCreateSchema = z.object({
   isRecommended: z.boolean().optional(),
   ingredients: z.string().max(2000).nullish(),
   calories: optionalInt,
-  sortOrder: sortOrderValue.optional(),
+  position: positionValue,
   status: contentStatus.optional(),
 });
 
@@ -54,7 +61,7 @@ export const drinkCreateSchema = z.object({
   isRecommended: z.boolean().optional(),
   alcoholPercent: optionalFloat,
   volume: z.string().max(50).nullish(),
-  sortOrder: sortOrderValue.optional(),
+  position: positionValue,
   status: contentStatus.optional(),
 });
 
@@ -74,7 +81,7 @@ export const buffetCreateSchema = z.object({
   imageUrl: z.string().max(1000).nullish(),
   images: z.array(z.string().max(1000)).max(20).optional(),
   isPopular: z.boolean().optional(),
-  sortOrder: sortOrderValue.optional(),
+  position: positionValue,
   status: contentStatus.optional(),
 });
 

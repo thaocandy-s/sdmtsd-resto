@@ -4,6 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "next-intl": ["./src/lib/next-intl-shim.ts"],
       "@resto-hub/ui": ["../../packages/ui/src"],
       "@resto-hub/ui/*": ["../../packages/ui/src/*"],
       "@resto-hub/types": ["../../packages/types/src"],

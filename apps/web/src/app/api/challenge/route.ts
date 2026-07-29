@@ -11,7 +11,7 @@ export async function GET() {
       }),
       prisma.katanukiWinner.findMany({
         where: { isPublished: true },
-        orderBy: { completedAt: "desc" },
+        orderBy: { sortOrder: "asc" },
         take: 20,
       }),
       prisma.setting.findUnique({ where: { key: "katanuki_image" } }),

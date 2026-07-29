@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
 import { deleteMediaByUrl } from "@/lib/supabase";
+import { normalizeScope, updateOrdered } from "@/lib/ordering";
+import { positionValue } from "@/lib/validation";
 
 export const PUT = withAuthParams(
   async (request, { params }) => {
@@ -41,30 +43,37 @@ export const PUT = withAuthParams(
         images,
         openingHours,
         isPublished,
-        sortOrder,
       } = body;
 
-      const place = await prisma.tourPlace.update({
-        where: { id: params.id },
-        data: {
-          name,
-          slug,
-          description,
-          categoryId,
-          address,
-          latitude: latitude ? parseFloat(latitude as any) : null,
-          longitude: longitude ? parseFloat(longitude as any) : null,
-          websiteUrl,
-          phone,
-          imageUrl,
-          images: images || [],
-          openingHours,
-          isPublished: isPublished !== undefined ? isPublished : undefined,
-          sortOrder:
-            sortOrder !== undefined ? (sortOrder ? parseInt(sortOrder as any) : 0) : undefined,
-        },
-        include: { category: true },
-      });
+      const position = positionValue.parse(body.position ?? body.sortOrder);
+      const nextCategoryId = categoryId ?? existing.categoryId;
+
+      const place = await updateOrdered(
+        "tour-place",
+        params.id,
+        { previousScope: existing.categoryId, nextScope: nextCategoryId, position },
+        (tx, resolvedSortOrder) =>
+          tx.tourPlace.update({
+            where: { id: params.id },
+            data: {
+              name,
+              slug,
+              description,
+              categoryId: nextCategoryId,
+              address,
+              latitude: latitude ? parseFloat(latitude as any) : null,
+              longitude: longitude ? parseFloat(longitude as any) : null,
+              websiteUrl,
+              phone,
+              imageUrl,
+              images: images || [],
+              openingHours,
+              isPublished: isPublished !== undefined ? isPublished : undefined,
+              ...(resolvedSortOrder !== undefined ? { sortOrder: resolvedSortOrder } : {}),
+            },
+            include: { category: true },
+          })
+      );
       return NextResponse.json({ data: place });
     } catch (error) {
       console.error("Update tourist place error:", error);
@@ -92,6 +101,7 @@ export const DELETE = withAuthParams(
       }
 
       await prisma.tourPlace.update({ where: { id: params.id }, data: { deletedAt: new Date() } });
+      await normalizeScope("tour-place", existing.categoryId);
       return NextResponse.json({ message: "Place deleted" });
     } catch (error) {
       console.error("Delete tourist place error:", error);

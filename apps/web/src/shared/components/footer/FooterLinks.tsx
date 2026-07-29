@@ -13,7 +13,7 @@ export function FooterLinks() {
           {[
             { href: "/menu", label: t("menu") },
             { href: "/drink", label: t("drink") },
-            { href: "/contact", label: t("contact") },
+            // Contact feature hidden: { href: "/contact", label: t("contact") },
           ].map((link) => (
             <Link
               key={link.href}

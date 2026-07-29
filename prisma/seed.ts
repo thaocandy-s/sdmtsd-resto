@@ -632,6 +632,14 @@ async function main() {
     },
   });
 
+  // Default consumption tax rate (%) — single source of truth for all
+  // tax-included price displays and calculations (admin + web).
+  await prisma.setting.upsert({
+    where: { key: "taxRate" },
+    update: {},
+    create: { key: "taxRate", value: 10, group: "general" },
+  });
+
   // Create Hero Banners
   await prisma.heroBanner.createMany({
     data: [

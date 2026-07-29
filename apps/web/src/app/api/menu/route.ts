@@ -10,8 +10,11 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search") || "";
     const category = searchParams.get("category") || "";
     const status = (searchParams.get("status") || "PUBLISHED").toUpperCase();
-    const sort = searchParams.get("sort") || "sortOrder";
-    const order = searchParams.get("order") || "asc";
+    // Allowlist sort fields so callers cannot override the admin-defined order arbitrarily
+    const validSorts = ["sortOrder", "price", "name", "createdAt"];
+    const sortParam = searchParams.get("sort") || "sortOrder";
+    const sort = validSorts.includes(sortParam) ? sortParam : "sortOrder";
+    const order = searchParams.get("order") === "desc" ? "desc" : "asc";
     const popular = searchParams.get("isPopular") ?? searchParams.get("popular");
 
     const skip = (page - 1) * limit;
@@ -58,7 +61,7 @@ export async function GET(request: NextRequest) {
             },
           },
         },
-        orderBy: { [sort]: order },
+        orderBy: [{ [sort]: order }, { sortOrder: "asc" }, { id: "asc" }],
       }),
       prisma.food.count({ where }),
     ]);

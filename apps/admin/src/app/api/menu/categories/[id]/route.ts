@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuthParams } from "@/lib/auth";
+import { normalizeScope, updateOrdered } from "@/lib/ordering";
+import { positionValue } from "@/lib/validation";
 
 // PUT /api/menu/categories/[id] - Update food category
 export const PUT = withAuthParams(
   async (request, { params }) => {
     try {
       const body = await request.json();
-      const { name, slug, sortOrder, isActive } = body;
+      const { name, slug, isActive } = body;
+      const position = positionValue.parse(body.position);
 
       const existing = await prisma.foodCategory.findUnique({
         where: { id: params.id },
@@ -25,10 +28,12 @@ export const PUT = withAuthParams(
         }
       }
 
-      const category = await prisma.foodCategory.update({
-        where: { id: params.id },
-        data: { name, slug, sortOrder, isActive },
-      });
+      const category = await updateOrdered("food-category", params.id, { position }, (tx) =>
+        tx.foodCategory.update({
+          where: { id: params.id },
+          data: { name, slug, isActive },
+        })
+      );
 
       return NextResponse.json({ data: category });
     } catch (error) {
@@ -67,6 +72,7 @@ export const DELETE = withAuthParams(
         prisma.food.deleteMany({ where: { categoryId: params.id, deletedAt: { not: null } } }),
         prisma.foodCategory.delete({ where: { id: params.id } }),
       ]);
+      await normalizeScope("food-category");
 
       return NextResponse.json({ message: "Category deleted successfully" });
     } catch (error) {
