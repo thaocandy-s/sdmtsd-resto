@@ -1,4 +1,4 @@
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 interface Contact {
@@ -25,14 +25,13 @@ export function RecentMessagesWidget({
   onViewContact,
 }: RecentMessagesWidgetProps) {
   const t = useTranslations("dashboard");
-  const locale = useLocale();
 
   return (
     <div className="bg-background-secondary border border-border rounded-lg p-6 flex flex-col h-full">
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <h3 className="text-lg font-semibold text-foreground">{t("recentMessages")}</h3>
         <Link
-          href={`/${locale}/contact`}
+          href="/contact"
           className="text-sm text-gold-400 hover:text-gold-300 font-medium transition-colors"
         >
           {t("viewAll")} &rarr;

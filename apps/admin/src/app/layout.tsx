@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
 import { Noto_Sans, Noto_Sans_JP } from "next/font/google";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
-import { notFound } from "next/navigation";
-import { routing } from "@/i18n/routing";
 import "@resto-hub/ui/styles/globals.css";
 import { Providers } from "@/shared/providers";
 import { Analytics } from "@vercel/analytics/next";
@@ -45,31 +41,13 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-type Locale = "en" | "ja";
-
-export default async function AdminLocaleLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-
-  if (!routing.locales.includes(locale as Locale)) {
-    notFound();
-  }
-
-  const messages = await getMessages();
-
+export default async function AdminRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={locale} className="dark" suppressHydrationWarning>
+    <html lang="ja" className="dark" suppressHydrationWarning>
       <body className={`${notoSans.variable} ${notoSansJP.variable} font-sans`}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <Providers>
-            <div className="min-h-screen bg-background text-foreground">{children}</div>
-          </Providers>
-        </NextIntlClientProvider>
+        <Providers>
+          <div className="min-h-screen bg-background text-foreground">{children}</div>
+        </Providers>
         <Analytics />
       </body>
     </html>

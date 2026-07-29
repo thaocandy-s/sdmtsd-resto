@@ -1,9 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
-import { Bell, User, LogOut, Menu, Globe } from "lucide-react";
-import { useLocale } from "next-intl";
-import { usePathname, useRouter } from "next/navigation";
+import { Bell, User, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
 
 interface AdminTopbarProps {
@@ -13,16 +11,6 @@ interface AdminTopbarProps {
 
 export function AdminTopbar({ onMenuClick, onLogout }: AdminTopbarProps) {
   const { user } = useAuthStore();
-  const locale = useLocale();
-  const pathname = usePathname();
-  const router = useRouter();
-
-  const toggleLanguage = () => {
-    const nextLocale = locale === "ja" ? "en" : "ja";
-    // Replace locale in current path
-    const newPath = pathname.replace(`/${locale}`, `/${nextLocale}`);
-    router.push(newPath);
-  };
 
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-border bg-background-secondary flex items-center justify-between px-4 md:px-6">
@@ -35,23 +23,13 @@ export function AdminTopbar({ onMenuClick, onLogout }: AdminTopbarProps) {
       </button>
 
       <div className="flex items-center gap-4 ml-auto">
-        {/* Simple Language Toggle (JA / EN) */}
-        <button
-          onClick={toggleLanguage}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold border border-border bg-background hover:bg-background-tertiary text-foreground transition-colors"
-          title="Switch Language"
-        >
-          <Globe className="w-3.5 h-3.5 text-gold-400" />
-          <span>{locale === "ja" ? "English (EN)" : "日本語 (JA)"}</span>
-        </button>
-
         {/* <button className="relative p-2 rounded-md hover:bg-background-tertiary transition-colors">
           <Bell className="w-5 h-5" />
           <span className="absolute top-1 right-1 w-2 h-2 bg-gold-500 rounded-full" />
         </button> */}
 
         <Link
-          href={`/${locale}/settings`}
+          href="/settings"
           className="flex items-center gap-3 hover:bg-background-tertiary px-2 py-1.5 rounded-md transition-colors cursor-pointer"
         >
           <div className="w-8 h-8 rounded-full bg-gold-500/20 flex items-center justify-center">

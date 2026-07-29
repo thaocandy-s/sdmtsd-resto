@@ -6,14 +6,13 @@ import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { api } from "@/lib/api-client";
 import { AdminSidebar } from "@/shared/components/admin-sidebar";
 import { AdminTopbar } from "@/shared/components/admin-topbar";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const router = useRouter();
-  const locale = useLocale();
   const t = useTranslations("common");
   const { clearAuth } = useAuthStore();
 
@@ -26,7 +25,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     } finally {
       clearAuth();
       setShowLogoutConfirm(false);
-      router.push(`/${locale}/login`);
+      router.push("/login");
       setLoggingOut(false);
     }
   };

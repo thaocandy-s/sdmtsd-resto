@@ -1,4 +1,4 @@
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 interface Stats {
@@ -15,26 +15,25 @@ interface DashboardStatsGridProps {
 
 export function DashboardStatsGrid({ stats }: DashboardStatsGridProps) {
   const t = useTranslations("dashboard");
-  const locale = useLocale();
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <Link
-        href={`/${locale}/food-menu`}
+        href="/food-menu"
         className="bg-background-secondary border border-border rounded-lg p-6 hover:border-gold-500/30 transition-all hover:translate-y-[-2px] duration-200"
       >
         <p className="text-sm text-foreground-tertiary font-medium">{t("foodItems")}</p>
         <p className="text-2xl font-bold text-gold-400 mt-2">{stats?.totalFoods ?? 0}</p>
       </Link>
       <Link
-        href={`/${locale}/drink-menu`}
+        href="/drink-menu"
         className="bg-background-secondary border border-border rounded-lg p-6 hover:border-gold-500/30 transition-all hover:translate-y-[-2px] duration-200"
       >
         <p className="text-sm text-foreground-tertiary font-medium">{t("drinkItems")}</p>
         <p className="text-2xl font-bold text-gold-400 mt-2">{stats?.totalDrinks ?? 0}</p>
       </Link>
       <Link
-        href={`/${locale}/contact`}
+        href="/contact"
         className="bg-background-secondary border border-border rounded-lg p-6 hover:border-gold-500/30 transition-all hover:translate-y-[-2px] duration-200"
       >
         <p className="text-sm text-foreground-tertiary font-medium">{t("messages")}</p>
