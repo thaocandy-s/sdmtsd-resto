@@ -38,7 +38,7 @@ const navItems = [
   { href: "/faq", key: "faq", icon: HelpCircle },
   { href: "/restaurant-info", key: "restaurantInfo", icon: Info },
   // { href: "/reservations", key: "reservations", icon: CalendarCheck },
-  { href: "/contact", key: "contactMessages", icon: Mail },
+  // { href: "/contact", key: "contactMessages", icon: Mail },
   { href: "/analytics", key: "analytics", icon: BarChart3 },
   // { href: "/media-library", key: "mediaLibrary", icon: FolderOpen },
   { href: "/settings", key: "settings", icon: Settings },

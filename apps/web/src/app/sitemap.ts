@@ -14,7 +14,7 @@ const staticPages = [
   "/faq",
   "/info",
   "/reservation",
-  "/contact",
+  // "/contact", // Contact feature hidden
   "/privacy",
   "/terms",
 ];

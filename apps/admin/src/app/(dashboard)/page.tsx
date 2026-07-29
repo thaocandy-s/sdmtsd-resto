@@ -1,15 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
-import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { DashboardStatsGrid } from "./_components/DashboardStatsGrid";
 import { DashboardPageViews } from "./_components/DashboardPageViews";
-import { RecentMessagesWidget } from "./_components/RecentMessagesWidget";
 import { PopularFoodsWidget } from "./_components/PopularFoodsWidget";
-import { MessageDetailModal } from "./contact/_components/MessageDetailModal";
 
 interface DashboardStats {
   totalFoods: number;
@@ -26,18 +22,6 @@ interface DashboardStats {
   totalUniqueVisitors: number;
 }
 
-interface Contact {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  subject: string;
-  message: string;
-  isRead: boolean;
-  status: string;
-  createdAt: string;
-}
-
 interface Food {
   id: string;
   name: string;
@@ -47,15 +31,11 @@ interface Food {
 
 interface DashboardData {
   stats: DashboardStats;
-  recentContacts: Contact[];
   popularFoods: Food[];
 }
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
-  const tContact = useTranslations("contact");
-  const queryClient = useQueryClient();
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
   const dashboardQuery = useQuery({
     queryKey: ["dashboard-stats"],
@@ -64,65 +44,6 @@ export default function DashboardPage() {
 
   const data = dashboardQuery.data?.data ?? null;
   const loading = dashboardQuery.isPending;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "NEW":
-        return "bg-blue-500/20 text-blue-400";
-      case "IN_PROGRESS":
-        return "bg-yellow-500/20 text-yellow-400";
-      case "RESOLVED":
-        return "bg-green-500/20 text-green-400";
-      default:
-        return "bg-gray-500/20 text-gray-400";
-    }
-  };
-
-  const viewContact = async (contact: Contact) => {
-    setSelectedContact(contact);
-    if (!contact.isRead) {
-      try {
-        await api.put(`/api/contact/${contact.id}`, { status: contact.status, isRead: true });
-        queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
-        queryClient.invalidateQueries({ queryKey: ["contacts"] });
-      } catch (error) {
-        console.error("Mark read error:", error);
-      }
-    }
-  };
-
-  const updateStatus = async (id: string, status: string) => {
-    try {
-      await api.put(`/api/contact/${id}`, { status });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["contacts"] });
-      setSelectedContact(null);
-    } catch (error) {
-      console.error("Update status error:", error);
-    }
-  };
-
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState("");
-
-  const handleDelete = (id: string) => {
-    setDeleteConfirmId(id);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!deleteConfirmId) return;
-    setDeleteError("");
-    try {
-      await api.delete(`/api/contact/${deleteConfirmId}`);
-      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["contacts"] });
-      setSelectedContact(null);
-      setDeleteConfirmId(null);
-    } catch (error) {
-      console.error("Delete error:", error);
-      setDeleteError(error instanceof Error ? error.message : "Delete failed");
-    }
-  };
 
   if (loading) {
     return (
@@ -157,35 +78,10 @@ export default function DashboardPage() {
 
       <DashboardPageViews stats={data?.stats} />
 
+      {/* Contact feature hidden — RecentMessagesWidget removed */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <RecentMessagesWidget
-          contacts={data?.recentContacts || []}
-          getStatusColor={getStatusColor}
-          onViewContact={viewContact}
-        />
         <PopularFoodsWidget foods={data?.popularFoods || []} />
       </div>
-
-      {selectedContact && (
-        <MessageDetailModal
-          contact={selectedContact}
-          onClose={() => setSelectedContact(null)}
-          onUpdateStatus={updateStatus}
-          onDelete={handleDelete}
-        />
-      )}
-
-      <ConfirmModal
-        isOpen={deleteConfirmId !== null}
-        title={tContact("delete")}
-        message={tContact("deleteConfirm")}
-        error={deleteError}
-        onConfirm={handleConfirmDelete}
-        onCancel={() => {
-          setDeleteConfirmId(null);
-          setDeleteError("");
-        }}
-      />
     </>
   );
 }
