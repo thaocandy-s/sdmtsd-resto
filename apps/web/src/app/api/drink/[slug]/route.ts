@@ -45,7 +45,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
         price: true,
       },
       take: 4,
-      orderBy: { isPopular: "desc" },
+      orderBy: [{ isPopular: "desc" }, { sortOrder: "asc" }],
     });
 
     return NextResponse.json({

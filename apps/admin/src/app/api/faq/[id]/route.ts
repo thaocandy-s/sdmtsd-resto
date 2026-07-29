@@ -11,31 +11,23 @@ export const PUT = withAuthParams(
       const existing = await prisma.faq.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "FAQ not found" }, { status: 404 });
 
-      // sortOrder is system-managed; explicit position and category changes
-      // are handled by the shared ordering service.
+      // sortOrder is system-managed and global across categories, so a
+      // category change keeps the item's position in the overall list.
       const position = positionValue.parse(body.position);
       const { question, answer, categoryId, isPublished } = body;
 
-      const faq = await updateOrdered(
-        "faq",
-        params.id,
-        {
-          previousScope: existing.categoryId,
-          nextScope: categoryId ?? existing.categoryId,
-          position,
-        },
-        (tx, sortOrder) =>
-          tx.faq.update({
-            where: { id: params.id },
-            data: {
-              question,
-              answer,
-              categoryId,
-              isPublished,
-              ...(sortOrder !== undefined ? { sortOrder } : {}),
-            },
-            include: { category: true },
-          })
+      const faq = await updateOrdered("faq", params.id, { position }, (tx, sortOrder) =>
+        tx.faq.update({
+          where: { id: params.id },
+          data: {
+            question,
+            answer,
+            categoryId,
+            isPublished,
+            ...(sortOrder !== undefined ? { sortOrder } : {}),
+          },
+          include: { category: true },
+        })
       );
       return NextResponse.json({ data: faq });
     } catch (error) {
@@ -49,11 +41,11 @@ export const PUT = withAuthParams(
 export const DELETE = withAuthParams(
   async (_request, { params }) => {
     try {
-      const faq = await prisma.faq.update({
+      await prisma.faq.update({
         where: { id: params.id },
         data: { deletedAt: new Date() },
       });
-      await normalizeScope("faq", faq.categoryId);
+      await normalizeScope("faq", undefined);
       return NextResponse.json({ message: "FAQ deleted" });
     } catch (error) {
       console.error("Delete FAQ error:", error);

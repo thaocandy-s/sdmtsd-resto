@@ -6,6 +6,7 @@ import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-quer
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { ReorderModal } from "@/shared/components/reorder-modal";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
 import { useReorder } from "@/shared/hooks/use-reorder";
 import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
@@ -44,6 +45,9 @@ export default function ChallengePage() {
     id: string;
   } | null>(null);
   const [deleteError, setDeleteError] = useState("");
+
+  // Reorder Mode dialog state (winners tab)
+  const [showReorderModal, setShowReorderModal] = useState(false);
 
   const challengeQuery = useQuery({
     queryKey: ["challenge", { winnersPage }],
@@ -241,22 +245,32 @@ export default function ChallengePage() {
             {t("winnersTab")} ({winners.length})
           </button>
         </div>
-        <button
-          onClick={() => {
-            setEditingId(null);
-            setFormError("");
-            if (tab === "rules") {
-              setRuleForm(emptyRule);
-              setShowRuleModal(true);
-            } else {
-              setWinnerForm(emptyWinner);
-              setShowWinnerModal(true);
-            }
-          }}
-          className="mb-3 bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          + {tab === "rules" ? t("addRule") : t("addWinner")}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {tab === "winners" && (
+            <button
+              onClick={() => setShowReorderModal(true)}
+              className="mb-3 bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+            >
+              {tc("reorder")}
+            </button>
+          )}
+          <button
+            onClick={() => {
+              setEditingId(null);
+              setFormError("");
+              if (tab === "rules") {
+                setRuleForm(emptyRule);
+                setShowRuleModal(true);
+              } else {
+                setWinnerForm(emptyWinner);
+                setShowWinnerModal(true);
+              }
+            }}
+            className="mb-3 bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            + {tab === "rules" ? t("addRule") : t("addWinner")}
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -350,6 +364,13 @@ export default function ChallengePage() {
           setDeleteTarget(null);
           setDeleteError("");
         }}
+      />
+
+      <ReorderModal
+        isOpen={showReorderModal}
+        onClose={() => setShowReorderModal(false)}
+        module="katanuki-winner"
+        invalidateKeys={[["challenge"]]}
       />
     </>
   );

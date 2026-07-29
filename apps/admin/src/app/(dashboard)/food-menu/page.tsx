@@ -15,6 +15,7 @@ import { FoodFormModal } from "./_components/FoodFormModal";
 import { CategoryManagerModal } from "./_components/CategoryManagerModal";
 import { FoodTable } from "./_components/FoodTable";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { ReorderModal } from "@/shared/components/reorder-modal";
 
 export default function FoodMenuPage() {
   const tFood = useTranslations("foodMenu");
@@ -41,6 +42,9 @@ export default function FoodMenuPage() {
 
   // Category Modal State
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+
+  // Reorder Mode dialog state
+  const [showReorderModal, setShowReorderModal] = useState(false);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -82,30 +86,7 @@ export default function FoodMenuPage() {
   const categories = categoriesQuery.data?.data ?? [];
   const loading = foodsQuery.isPending;
 
-  // Drag & drop is category-scoped. It is enabled only when a single category
-  // is selected, there is no active search, and the whole category fits on one
-  // page — so the loaded list is the complete, ordered scope the API expects.
-  const reorderEnabled = !!filterCategory && !debouncedSearch && totalPages <= 1;
-  const scopeCategoryId = categories.find((c) => c.slug === filterCategory)?.id ?? null;
-  const foodsQueryKey = [
-    "foods",
-    {
-      page: currentPage,
-      search: debouncedSearch,
-      category: filterCategory,
-      status: filterStatus,
-    },
-  ];
-
   const highlight = useHighlightNew();
-  const { reorder } = useReorder<Food>({
-    module: "food",
-    queryKey: foodsQueryKey,
-    selectItems: (data) => (data as { data: Food[] }).data,
-    applyItems: (data, next) => ({ ...(data as object), data: next }),
-    getId: (item) => item.id,
-    scopeValue: scopeCategoryId,
-  });
 
   const { reorder: reorderCategories } = useReorder<Category>({
     module: "food-category",
@@ -181,6 +162,7 @@ export default function FoodMenuPage() {
     <>
       <FoodMenuHeader
         onManageCategories={() => setShowCategoryModal(true)}
+        onReorder={() => setShowReorderModal(true)}
         onAddFood={() => {
           setEditingId(null);
           setForm(emptyForm);
@@ -208,9 +190,6 @@ export default function FoodMenuPage() {
         totalPages={totalPages}
         totalItems={totalItems}
         onPageChange={setCurrentPage}
-        reorderEnabled={reorderEnabled}
-        onReorder={reorder}
-        getHighlightProps={highlight.getHighlightProps}
       />
 
       <FoodFormModal
@@ -254,6 +233,15 @@ export default function FoodMenuPage() {
           setDeleteConfirmId(null);
           setDeleteError("");
         }}
+      />
+
+      <ReorderModal
+        isOpen={showReorderModal}
+        onClose={() => setShowReorderModal(false)}
+        module="food"
+        scopes={categories.map((c) => ({ value: c.id, label: c.name }))}
+        initialScope={categories.find((c) => c.slug === filterCategory)?.id}
+        invalidateKeys={[["foods"]]}
       />
     </>
   );

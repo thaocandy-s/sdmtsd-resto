@@ -10,7 +10,8 @@ export const GET = withAuth(async () => {
       prisma.faq.findMany({
         where: { deletedAt: null },
         include: { category: true },
-        orderBy: { sortOrder: "asc" },
+        // Global FAQ ordering; createdAt/id break ties from legacy per-category numbering
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }],
       }),
       prisma.faqCategory.findMany({ orderBy: { sortOrder: "asc" } }),
     ]);
@@ -33,7 +34,7 @@ export const POST = withAuth(
         );
 
       const position = positionValue.parse(body.position);
-      const faq = await createOrdered("faq", categoryId, position, (tx, sortOrder) =>
+      const faq = await createOrdered("faq", undefined, position, (tx, sortOrder) =>
         tx.faq.create({
           data: {
             question,

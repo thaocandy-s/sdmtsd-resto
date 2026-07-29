@@ -6,6 +6,7 @@ interface GuideHeaderProps {
   placesCount: number;
   categoriesCount: number;
   onAdd: () => void;
+  onReorder: () => void;
 }
 
 export function GuideHeader({
@@ -14,6 +15,7 @@ export function GuideHeader({
   placesCount,
   categoriesCount,
   onAdd,
+  onReorder,
 }: GuideHeaderProps) {
   const t = useTranslations("touristGuide");
   const tc = useTranslations("common");
@@ -25,12 +27,20 @@ export function GuideHeader({
           <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
           <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
         </div>
-        <button
-          onClick={onAdd}
-          className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          + {tc("add")} {tab === "places" ? t("placesTab") : t("categoriesTab")}
-        </button>
+        <div className="flex flex-wrap items-stretch gap-3">
+          <button
+            onClick={onReorder}
+            className="bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            {tc("reorder")}
+          </button>
+          <button
+            onClick={onAdd}
+            className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            + {tc("add")} {tab === "places" ? t("placesTab") : t("categoriesTab")}
+          </button>
+        </div>
       </header>
 
       <div className="flex gap-4 mb-6 border-b border-border">

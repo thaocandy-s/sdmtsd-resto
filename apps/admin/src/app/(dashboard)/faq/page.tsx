@@ -222,7 +222,7 @@ export default function FaqPage() {
           items={items}
           onEdit={handleEditFaq}
           onDelete={(id) => handleDeleteTrigger("items", id)}
-          onReorder={(categoryId, orderedIds) => reorderItems(orderedIds, categoryId)}
+          onReorder={(orderedIds) => reorderItems(orderedIds)}
           getHighlightProps={highlight.getHighlightProps}
         />
       ) : (

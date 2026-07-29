@@ -33,6 +33,12 @@ export const ja = {
     orderUpdated: "表示順を更新しました",
     orderUpdateFailed: "表示順の更新に失敗しました",
     dragToReorder: "ドラッグして並び替え",
+    reorder: "並び替え",
+    reorderTitle: "表示順の変更",
+    reorderHint: "ドラッグ＆ドロップで順序を変更し、「順序を保存」を押してください。",
+    reorderSelectCategory: "カテゴリーを選択してください",
+    reorderEmpty: "並び替えできる項目がありません",
+    saveOrder: "順序を保存",
   },
   sidebar: {
     dashboard: "ダッシュボード",

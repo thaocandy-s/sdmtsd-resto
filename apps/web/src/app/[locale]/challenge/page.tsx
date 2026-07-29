@@ -28,7 +28,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ loca
         discountAwarded: true,
         completedAt: true,
       },
-      orderBy: { completedAt: "desc" },
+      orderBy: { sortOrder: "asc" },
       take: 20,
     }),
     prisma.setting.findUnique({ where: { key: "katanuki_image" } }),

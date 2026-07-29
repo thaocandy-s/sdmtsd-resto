@@ -46,7 +46,8 @@ export const ORDERABLE_MODELS: Record<OrderableModule, OrderableConfig> = {
     permissionModule: "tourist",
   },
   "tour-category": { delegate: "tourCategory", permissionModule: "tourist" },
-  faq: { delegate: "faq", scopeField: "categoryId", softDelete: true, permissionModule: "faq" },
+  // FAQ questions are ordered globally across all categories by design.
+  faq: { delegate: "faq", softDelete: true, permissionModule: "faq" },
   "faq-category": { delegate: "faqCategory", permissionModule: "faq" },
 };
 

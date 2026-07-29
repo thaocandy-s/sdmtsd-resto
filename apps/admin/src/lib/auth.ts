@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/rate-limit";
+import { triggerWebRevalidation } from "@/lib/revalidate-web";
 
 export interface AuthUser {
   userId: string;
@@ -78,6 +79,15 @@ function recordAudit(
     });
 }
 
+// Successful content mutations invalidate the public website's ISR cache so
+// the site reflects admin changes (ordering included) without waiting for the
+// time-based revalidate window. Auth endpoints never change public content.
+function notifyWebOfMutation(request: NextRequest, response: NextResponse) {
+  if (!MUTATION_METHODS.has(request.method) || !response.ok) return;
+  if (request.nextUrl.pathname.startsWith("/api/auth")) return;
+  triggerWebRevalidation(request.nextUrl.pathname);
+}
+
 // For routes without params
 export function withAuth(
   handler: (
@@ -104,6 +114,7 @@ export function withAuth(
 
     const response = await handler(request, { user });
     recordAudit(request, user, options, response);
+    notifyWebOfMutation(request, response);
     return response;
   };
 }
@@ -135,6 +146,7 @@ export function withAuthParams(
     const params = await ctx.params;
     const response = await handler(request, { user, params });
     recordAudit(request, user, options, response, params.id);
+    notifyWebOfMutation(request, response);
     return response;
   };
 }

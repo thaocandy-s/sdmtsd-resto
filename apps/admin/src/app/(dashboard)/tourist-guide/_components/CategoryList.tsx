@@ -1,23 +1,19 @@
 import { useTranslations } from "next-intl";
-import { SortableList, OrderBadge } from "@/shared/components/sortable-list";
+import { OrderBadge } from "@/shared/components/sortable-list";
 import { Category } from "./types";
 
 interface CategoryListProps {
   categories: Category[];
   onEdit: (c: Category) => void;
   onDelete: (id: string) => void;
-  onReorder: (orderedIds: string[]) => void;
   getHighlightProps: (id: string) => { "data-highlight-id": string; className: string };
-  disabled?: boolean;
 }
 
 export function CategoryList({
   categories,
   onEdit,
   onDelete,
-  onReorder,
   getHighlightProps,
-  disabled,
 }: CategoryListProps) {
   const t = useTranslations("touristGuide");
   const tc = useTranslations("common");
@@ -31,20 +27,16 @@ export function CategoryList({
   }
 
   return (
-    <SortableList
-      items={categories}
-      onReorder={onReorder}
-      disabled={disabled}
-      className="space-y-3"
-      renderItem={(c, idx, handle) => {
+    <div className="space-y-3">
+      {categories.map((c, idx) => {
         const hp = getHighlightProps(c.id);
         return (
           <div
+            key={c.id}
             {...hp}
             className={`bg-background-secondary border border-border rounded-lg p-4 flex items-center justify-between ${hp.className}`}
           >
             <div className="flex items-center gap-3">
-              {handle}
               <OrderBadge order={idx + 1} />
               <div>
                 <h3 className="font-medium text-foreground">{c.name}</h3>
@@ -67,7 +59,7 @@ export function CategoryList({
             </div>
           </div>
         );
-      }}
-    />
+      })}
+    </div>
   );
 }

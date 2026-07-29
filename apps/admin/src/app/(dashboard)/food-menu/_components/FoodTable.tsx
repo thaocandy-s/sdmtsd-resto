@@ -4,7 +4,6 @@ import { formatPriceWithTax } from "@resto-hub/utils";
 import { StatusBadge } from "./StatusBadge";
 import { FoodBadges } from "./FoodBadges";
 import { FoodCard } from "./FoodCard";
-import { SortableList, OrderBadge } from "@/shared/components/sortable-list";
 
 interface FoodTableProps {
   foods: Food[];
@@ -16,9 +15,6 @@ interface FoodTableProps {
   totalPages: number;
   totalItems: number;
   onPageChange: (page: number) => void;
-  reorderEnabled?: boolean;
-  onReorder?: (orderedIds: string[]) => void;
-  getHighlightProps?: (id: string) => { "data-highlight-id": string; className: string };
 }
 
 export function FoodTable({
@@ -31,9 +27,6 @@ export function FoodTable({
   totalPages,
   totalItems,
   onPageChange,
-  reorderEnabled,
-  onReorder,
-  getHighlightProps,
 }: FoodTableProps) {
   const t = useTranslations("foodMenu");
   const tc = useTranslations("common");
@@ -70,64 +63,6 @@ export function FoodTable({
       <div className="bg-background-secondary border border-border rounded-xl p-12 text-center">
         <p className="text-foreground-secondary">{t("noFoods")}</p>
       </div>
-    );
-  }
-
-  // Category-scoped drag & drop mode: a single sortable list across breakpoints.
-  if (reorderEnabled && onReorder) {
-    return (
-      <SortableList
-        items={foods}
-        onReorder={onReorder}
-        className="space-y-3"
-        renderItem={(food, index, handle) => {
-          const hp = getHighlightProps?.(food.id) ?? {
-            "data-highlight-id": food.id,
-            className: "",
-          };
-          return (
-            <div
-              {...hp}
-              className={`bg-background-secondary border border-border rounded-lg p-3 flex items-center gap-3 ${hp.className}`}
-            >
-              {handle}
-              <OrderBadge order={index + 1} />
-              <div className="w-10 h-10 rounded-lg overflow-hidden bg-background-tertiary shrink-0">
-                {food.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={food.imageUrl} alt={food.name} className="w-full h-full object-cover" />
-                ) : null}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium text-foreground truncate">{food.name}</span>
-                  <FoodBadges isPopular={food.isPopular} isRecommended={food.isRecommended} />
-                </div>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-foreground-secondary">
-                    {formatPriceWithTax(food.price)}
-                  </span>
-                  <StatusBadge status={food.status} />
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => onEdit(food)}
-                  className="text-gold-400 hover:text-gold-300 text-sm font-medium transition-colors"
-                >
-                  {tc("edit")}
-                </button>
-                <button
-                  onClick={() => onDelete(food.id)}
-                  className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
-                >
-                  {tc("delete")}
-                </button>
-              </div>
-            </div>
-          );
-        }}
-      />
     );
   }
 

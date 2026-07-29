@@ -9,8 +9,8 @@ import { BeerArt, FormData, emptyForm } from "./_components/types";
 import { BeerArtList } from "./_components/BeerArtList";
 import { BeerArtFormModal } from "./_components/BeerArtFormModal";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { ReorderModal } from "@/shared/components/reorder-modal";
 import { uploadImage } from "@/shared/components/image-upload";
-import { useReorder } from "@/shared/hooks/use-reorder";
 import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 
 export default function BeerArtPage() {
@@ -31,6 +31,9 @@ export default function BeerArtPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState("");
 
+  // Reorder Mode dialog state
+  const [showReorderModal, setShowReorderModal] = useState(false);
+
   const itemsQuery = useQuery({
     queryKey: ["beer-arts", { page: currentPage }],
     queryFn: () =>
@@ -45,16 +48,7 @@ export default function BeerArtPage() {
   const totalItems = itemsQuery.data?.meta?.total ?? 0;
   const loading = itemsQuery.isPending;
 
-  const beerArtsQueryKey = ["beer-arts", { page: currentPage }];
-  const reorderEnabled = totalPages <= 1;
   const highlight = useHighlightNew();
-  const { reorder: reorderItems } = useReorder<BeerArt>({
-    module: "beer-art",
-    queryKey: beerArtsQueryKey,
-    selectItems: (data) => (data as { data: BeerArt[] }).data,
-    applyItems: (data, next) => ({ ...(data as object), data: next }),
-    getId: (item) => item.id,
-  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,18 +126,26 @@ export default function BeerArtPage() {
           <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
           <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
         </div>
-        <button
-          onClick={() => {
-            setEditingId(null);
-            setForm(emptyForm);
-            setImageFile(null);
-            setFormError("");
-            setShowModal(true);
-          }}
-          className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          + {t("addItem")}
-        </button>
+        <div className="flex flex-wrap items-stretch gap-3">
+          <button
+            onClick={() => setShowReorderModal(true)}
+            className="bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            {tc("reorder")}
+          </button>
+          <button
+            onClick={() => {
+              setEditingId(null);
+              setForm(emptyForm);
+              setImageFile(null);
+              setFormError("");
+              setShowModal(true);
+            }}
+            className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            + {t("addItem")}
+          </button>
+        </div>
       </header>
 
       <BeerArtList
@@ -151,8 +153,6 @@ export default function BeerArtPage() {
         loading={loading}
         onEdit={handleEdit}
         onDelete={(id) => setDeleteConfirmId(id)}
-        reorderEnabled={reorderEnabled}
-        onReorder={reorderItems}
         getHighlightProps={highlight.getHighlightProps}
       />
 
@@ -208,6 +208,13 @@ export default function BeerArtPage() {
           setDeleteConfirmId(null);
           setDeleteError("");
         }}
+      />
+
+      <ReorderModal
+        isOpen={showReorderModal}
+        onClose={() => setShowReorderModal(false)}
+        module="beer-art"
+        invalidateKeys={[["beer-arts"]]}
       />
     </>
   );

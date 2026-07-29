@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
-import { useReorder } from "@/shared/hooks/use-reorder";
 import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 import { Place, Category } from "./_components/types";
 import { PlaceFormModal } from "./_components/PlaceFormModal";
@@ -13,6 +12,7 @@ import { PlaceList } from "./_components/PlaceList";
 import { CategoryList } from "./_components/CategoryList";
 import { GuideHeader } from "./_components/GuideHeader";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { ReorderModal } from "@/shared/components/reorder-modal";
 
 export default function TouristGuidePage() {
   const t = useTranslations("touristGuide");
@@ -33,6 +33,9 @@ export default function TouristGuidePage() {
   const [showPlaceModal, setShowPlaceModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Reorder Mode dialog state (module follows the active tab)
+  const [showReorderModal, setShowReorderModal] = useState(false);
 
   // Full category list for the place form select
   const allCategoriesQuery = useQuery({
@@ -69,13 +72,6 @@ export default function TouristGuidePage() {
   const loading = tab === "places" ? placesQuery.isPending : categoriesQuery.isPending;
 
   const categoryHighlight = useHighlightNew();
-  const { reorder: reorderCategories } = useReorder<Category>({
-    module: "tour-category",
-    queryKey: ["tour-categories", { page: categoriesPage }],
-    selectItems: (data) => (data as { data: Category[] }).data,
-    applyItems: (data, next) => ({ ...(data as object), data: next }),
-    getId: (item) => item.id,
-  });
 
   const handleDataChange = () => {
     queryClient.invalidateQueries({ queryKey: ["tour-places"] });
@@ -117,6 +113,7 @@ export default function TouristGuidePage() {
             setShowCategoryModal(true);
           }
         }}
+        onReorder={() => setShowReorderModal(true)}
       />
 
       {loading ? (
@@ -179,9 +176,7 @@ export default function TouristGuidePage() {
               setDeleteConfirmType("categories");
               setDeleteConfirmId(id);
             }}
-            onReorder={reorderCategories}
             getHighlightProps={categoryHighlight.getHighlightProps}
-            disabled={categoriesTotalPages > 1}
           />
 
           {categoriesTotalPages > 1 && (
@@ -254,6 +249,23 @@ export default function TouristGuidePage() {
           setDeleteError("");
         }}
       />
+
+      {tab === "places" ? (
+        <ReorderModal
+          isOpen={showReorderModal}
+          onClose={() => setShowReorderModal(false)}
+          module="tour-place"
+          scopes={allCategories.map((c) => ({ value: c.id, label: c.name }))}
+          invalidateKeys={[["tour-places"]]}
+        />
+      ) : (
+        <ReorderModal
+          isOpen={showReorderModal}
+          onClose={() => setShowReorderModal(false)}
+          module="tour-category"
+          invalidateKeys={[["tour-categories"]]}
+        />
+      )}
     </>
   );
 }

@@ -6,7 +6,6 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
-import { useReorder } from "@/shared/hooks/use-reorder";
 import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 import {
   Buffet,
@@ -18,6 +17,7 @@ import {
 import { BuffetTable } from "./_components/BuffetTable";
 import { BuffetFormModal } from "./_components/BuffetFormModal";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { ReorderModal } from "@/shared/components/reorder-modal";
 import { uploadImage } from "@/shared/components/image-upload";
 
 export default function BuffetMenuPage() {
@@ -43,6 +43,9 @@ export default function BuffetMenuPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
+
+  // Reorder Mode dialog state
+  const [showReorderModal, setShowReorderModal] = useState(false);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -110,23 +113,7 @@ export default function BuffetMenuPage() {
   const menuItems = pickerOptionsQuery.data?.menuItems ?? [];
   const categories = pickerOptionsQuery.data?.categories ?? [];
 
-  // Buffet ordering is flat. Drag & drop is enabled only when the whole list
-  // fits on one page with no active filters, so the loaded list is the
-  // complete, ordered scope the reorder API expects.
-  const reorderEnabled = !debouncedSearch && !filterStatus && totalPages <= 1;
-  const buffetsQueryKey = [
-    "buffets",
-    { page: currentPage, search: debouncedSearch, status: filterStatus },
-  ];
-
   const highlight = useHighlightNew();
-  const { reorder } = useReorder<Buffet>({
-    module: "buffet",
-    queryKey: buffetsQueryKey,
-    selectItems: (data) => (data as { data: Buffet[] }).data,
-    applyItems: (data, next) => ({ ...(data as object), data: next }),
-    getId: (item) => item.id,
-  });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/api/buffet/${id}`),
@@ -228,18 +215,26 @@ export default function BuffetMenuPage() {
           <h2 className="text-xl sm:text-2xl font-bold text-foreground">{t("title")}</h2>
           <p className="text-sm sm:text-base text-foreground-secondary mt-1">{t("subtitle")}</p>
         </div>
-        <button
-          onClick={() => {
-            setEditingId(null);
-            setForm(emptyBuffetForm);
-            setImageFile(null);
-            setFormError("");
-            setShowModal(true);
-          }}
-          className="w-full sm:w-auto inline-flex items-center justify-center bg-gold-500 hover:bg-gold-600 text-background px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
-        >
-          + {t("addCourse")}
-        </button>
+        <div className="flex flex-wrap items-stretch gap-3">
+          <button
+            onClick={() => setShowReorderModal(true)}
+            className="flex-1 sm:flex-none inline-flex items-center justify-center bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
+          >
+            {tc("reorder")}
+          </button>
+          <button
+            onClick={() => {
+              setEditingId(null);
+              setForm(emptyBuffetForm);
+              setImageFile(null);
+              setFormError("");
+              setShowModal(true);
+            }}
+            className="flex-1 sm:flex-none inline-flex items-center justify-center bg-gold-500 hover:bg-gold-600 text-background px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap min-h-[44px]"
+          >
+            + {t("addCourse")}
+          </button>
+        </div>
       </header>
 
       {/* Filters Bar */}
@@ -271,9 +266,6 @@ export default function BuffetMenuPage() {
         totalPages={totalPages}
         totalItems={totalItems}
         onPageChange={setCurrentPage}
-        reorderEnabled={reorderEnabled}
-        onReorder={reorder}
-        getHighlightProps={highlight.getHighlightProps}
       />
 
       <BuffetFormModal
@@ -305,6 +297,13 @@ export default function BuffetMenuPage() {
           setDeleteConfirmId(null);
           setDeleteError("");
         }}
+      />
+
+      <ReorderModal
+        isOpen={showReorderModal}
+        onClose={() => setShowReorderModal(false)}
+        module="buffet"
+        invalidateKeys={[["buffets"]]}
       />
     </>
   );

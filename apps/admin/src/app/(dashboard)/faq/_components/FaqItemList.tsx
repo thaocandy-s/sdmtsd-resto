@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { SortableList, OrderBadge } from "@/shared/components/sortable-list";
 import { FaqItem } from "./types";
@@ -9,8 +8,8 @@ interface FaqItemListProps {
   items: FaqItem[];
   onEdit: (item: FaqItem) => void;
   onDelete: (id: string) => void;
-  // Reorder within a single category scope.
-  onReorder: (categoryId: string | null, orderedIds: string[]) => void;
+  // FAQ questions are ordered globally across all categories.
+  onReorder: (orderedIds: string[]) => void;
   getHighlightProps: (id: string) => { "data-highlight-id": string; className: string };
 }
 
@@ -23,20 +22,6 @@ export function FaqItemList({
 }: FaqItemListProps) {
   const t = useTranslations("faq");
   const tc = useTranslations("common");
-
-  // Ordering is independent per category, so drag & drop is grouped by
-  // category and only reorders items within that group.
-  const groups = useMemo(() => {
-    const map = new Map<string | null, { name: string; items: FaqItem[] }>();
-    for (const item of items) {
-      const key = item.category?.id ?? null;
-      if (!map.has(key)) {
-        map.set(key, { name: item.category?.name ?? t("uncategorized"), items: [] });
-      }
-      map.get(key)!.items.push(item);
-    }
-    return Array.from(map.entries());
-  }, [items, t]);
 
   if (items.length === 0) {
     return (
@@ -72,6 +57,9 @@ export function FaqItemList({
                 >
                   {item.isPublished ? tc("published") : tc("draft")}
                 </span>
+                <span className="text-xs px-2 py-0.5 rounded bg-background-tertiary text-foreground-secondary">
+                  {item.category?.name ?? t("uncategorized")}
+                </span>
               </div>
             </div>
           </div>
@@ -95,20 +83,11 @@ export function FaqItemList({
   };
 
   return (
-    <div className="space-y-6">
-      {groups.map(([categoryId, group]) => (
-        <div key={categoryId ?? "uncategorized"}>
-          <h4 className="text-sm font-semibold text-foreground-secondary uppercase tracking-wide mb-3">
-            {group.name}
-          </h4>
-          <SortableList
-            items={group.items}
-            onReorder={(orderedIds) => onReorder(categoryId, orderedIds)}
-            className="space-y-3"
-            renderItem={renderCard}
-          />
-        </div>
-      ))}
-    </div>
+    <SortableList
+      items={items}
+      onReorder={onReorder}
+      className="space-y-3"
+      renderItem={renderCard}
+    />
   );
 }

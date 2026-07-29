@@ -4,7 +4,6 @@ import { formatPriceWithTax } from "@resto-hub/utils";
 import { StatusBadge } from "./StatusBadge";
 import { DrinkBadges } from "./DrinkBadges";
 import { DrinkCard } from "./DrinkCard";
-import { SortableList, OrderBadge } from "@/shared/components/sortable-list";
 
 interface DrinkTableProps {
   drinks: Drink[];
@@ -16,9 +15,6 @@ interface DrinkTableProps {
   totalPages: number;
   totalItems: number;
   onPageChange: (page: number) => void;
-  reorderEnabled?: boolean;
-  onReorder?: (orderedIds: string[]) => void;
-  getHighlightProps?: (id: string) => { "data-highlight-id": string; className: string };
 }
 
 export function DrinkTable({
@@ -31,9 +27,6 @@ export function DrinkTable({
   totalPages,
   totalItems,
   onPageChange,
-  reorderEnabled,
-  onReorder,
-  getHighlightProps,
 }: DrinkTableProps) {
   const t = useTranslations("drinkMenu");
   const tc = useTranslations("common");
@@ -70,72 +63,6 @@ export function DrinkTable({
       <div className="bg-background-secondary border border-border rounded-xl p-12 text-center">
         <p className="text-foreground-secondary">{t("noDrinks")}</p>
       </div>
-    );
-  }
-
-  // Category-scoped drag & drop mode: a single sortable list across breakpoints.
-  if (reorderEnabled && onReorder) {
-    return (
-      <SortableList
-        items={drinks}
-        onReorder={onReorder}
-        className="space-y-3"
-        renderItem={(drink, index, handle) => {
-          const hp = getHighlightProps?.(drink.id) ?? {
-            "data-highlight-id": drink.id,
-            className: "",
-          };
-          return (
-            <div
-              {...hp}
-              className={`bg-background-secondary border border-border rounded-lg p-3 flex items-center gap-3 ${hp.className}`}
-            >
-              {handle}
-              <OrderBadge order={index + 1} />
-              <div className="w-10 h-10 rounded-lg overflow-hidden bg-background-tertiary shrink-0">
-                {drink.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={drink.imageUrl}
-                    alt={drink.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : null}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium text-foreground truncate">{drink.name}</span>
-                  <DrinkBadges
-                    isPopular={drink.isPopular}
-                    alcoholPercent={drink.alcoholPercent}
-                    volume={drink.volume}
-                  />
-                </div>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-foreground-secondary">
-                    {formatPriceWithTax(drink.price)}
-                  </span>
-                  <StatusBadge status={drink.status} />
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => onEdit(drink)}
-                  className="text-gold-400 hover:text-gold-300 text-sm font-medium transition-colors"
-                >
-                  {tc("edit")}
-                </button>
-                <button
-                  onClick={() => onDelete(drink.id)}
-                  className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
-                >
-                  {tc("delete")}
-                </button>
-              </div>
-            </div>
-          );
-        }}
-      />
     );
   }
 

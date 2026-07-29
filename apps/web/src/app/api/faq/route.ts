@@ -38,7 +38,8 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: { sortOrder: "asc" },
+      // Global FAQ ordering; createdAt/id break ties from legacy per-category numbering
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }],
     });
 
     return NextResponse.json({ data: faqs });

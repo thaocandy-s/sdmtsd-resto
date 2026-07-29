@@ -94,7 +94,7 @@ export default async function FoodDetailPage({
     },
     select: { id: true, name: true, slug: true, imageUrl: true, price: true },
     take: 4,
-    orderBy: { isPopular: "desc" },
+    orderBy: [{ isPopular: "desc" }, { sortOrder: "asc" }],
   });
 
   return (
