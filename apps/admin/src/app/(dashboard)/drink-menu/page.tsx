@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { useReorder } from "@/shared/hooks/use-reorder";
 import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
@@ -101,10 +101,12 @@ export default function DrinkMenuPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["drinks"] });
       setDeleteConfirmId(null);
+      showSuccessToast(toastMessages.deleted);
     },
     onError: (error) => {
       console.error("Delete drink error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
+      showApiErrorToast(error, toastMessages.deleteFailed);
     },
   });
 
@@ -209,7 +211,7 @@ export default function DrinkMenuPage() {
           setForm(emptyForm);
           queryClient.invalidateQueries({ queryKey: ["drinks"] });
           if (createdId) highlight.flash(createdId);
-          toast.success(editingId ? tc("saved") : tc("created"));
+          showSuccessToast(editingId ? tc("saved") : tc("created"));
         }}
       />
 

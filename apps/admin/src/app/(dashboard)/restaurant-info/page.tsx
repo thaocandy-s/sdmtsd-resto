@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toSlug } from "@resto-hub/utils";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast } from "@/lib/toast";
 import { Restaurant, RestaurantFormData } from "./_components/types";
 import { BasicInfoSection } from "./_components/BasicInfoSection";
 import { MapLocationSection } from "./_components/MapLocationSection";
@@ -17,10 +18,6 @@ export default function RestaurantInfoPage() {
   const queryClient = useQueryClient();
 
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
 
   const [form, setForm] = useState<RestaurantFormData>({
     name: "",
@@ -101,7 +98,6 @@ export default function RestaurantInfoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setMessage(null);
     try {
       const payload = {
         ...form,
@@ -114,17 +110,11 @@ export default function RestaurantInfoPage() {
           : [],
       };
       await api.put("/api/info", payload);
-      setMessage({
-        type: "success",
-        text: t("successMessage"),
-      });
+      showSuccessToast(t("successMessage"));
       queryClient.invalidateQueries({ queryKey: ["restaurant-info"] });
     } catch (error) {
       console.error("Save info error:", error);
-      setMessage({
-        type: "error",
-        text: t("errorMessage"),
-      });
+      showApiErrorToast(error, t("errorMessage"));
     } finally {
       setSaving(false);
     }
@@ -143,18 +133,6 @@ export default function RestaurantInfoPage() {
         <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
         <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
       </header>
-
-      {message && (
-        <div
-          className={`mb-6 p-4 rounded-lg text-sm font-medium ${
-            message.type === "success"
-              ? "bg-green-500/10 border border-green-500/20 text-green-400"
-              : "bg-red-500/10 border border-red-500/20 text-red-400"
-          }`}
-        >
-          {message.text}
-        </div>
-      )}
 
       <form
         onSubmit={handleSubmit}

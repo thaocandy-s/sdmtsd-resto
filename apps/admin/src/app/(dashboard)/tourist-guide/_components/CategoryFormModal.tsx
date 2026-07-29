@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { toSlug } from "@resto-hub/utils";
 import { FormError } from "@/shared/components/form-error";
 import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
@@ -54,11 +54,12 @@ export function CategoryFormModal({
         const created = await api.post<{ data: { id: string } }>("/api/tourist/categories", form);
         onDataChange(created.data.id);
       }
-      toast.success(editingId ? tc("saved") : tc("created"));
+      showSuccessToast(editingId ? tc("saved") : tc("created"));
       onClose();
     } catch (error) {
       console.error("Save category error:", error);
       setError(error instanceof Error ? error.message : "Save failed");
+      showApiErrorToast(error, toastMessages.saveFailed);
     }
   };
 

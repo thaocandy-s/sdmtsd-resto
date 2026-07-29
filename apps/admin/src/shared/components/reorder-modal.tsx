@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast } from "@/lib/toast";
 import type { OrderableModule } from "@/lib/ordering-types";
 import { SortableList, OrderBadge } from "@/shared/components/sortable-list";
 import { FormError } from "@/shared/components/form-error";
@@ -114,7 +114,7 @@ export function ReorderModal({
         orderedIds: ordered.map((item) => item.id),
         scopeValue: isScoped ? scope : undefined,
       });
-      toast.success(tc("orderUpdated"));
+      showSuccessToast(tc("orderUpdated"));
       for (const key of invalidateKeys) {
         queryClient.invalidateQueries({ queryKey: key });
       }
@@ -123,6 +123,7 @@ export function ReorderModal({
     } catch (error) {
       // 409 = list changed underneath us; refetch so the admin retries fresh.
       setSaveError(error instanceof Error ? error.message : tc("orderUpdateFailed"));
+      showApiErrorToast(error, tc("orderUpdateFailed"));
       itemsQuery.refetch();
     } finally {
       setIsSaving(false);

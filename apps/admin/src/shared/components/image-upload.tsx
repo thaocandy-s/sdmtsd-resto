@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { useTranslations } from "next-intl";
 import { getApiUrl } from "@/lib/api-client";
+import { showWarningToast } from "@/lib/toast";
 
 /* ------------------------------------------------------------------ */
 /*  Shared upload helper                                               */
@@ -84,6 +85,7 @@ export function ImageUpload({
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       setError(t("pleaseSelectImage"));
+      showWarningToast(t("pleaseSelectImage"));
       return;
     }
     setError("");
@@ -212,6 +214,7 @@ export function MultiImageUpload({
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       setError(t("pleaseSelectImage"));
+      showWarningToast(t("pleaseSelectImage"));
       return;
     }
     setError("");

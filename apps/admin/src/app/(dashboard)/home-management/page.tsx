@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { uploadImage } from "@/shared/components/image-upload";
 import { useTranslations } from "next-intl";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
@@ -42,21 +43,6 @@ export default function HomeManagementPage() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [faviconFile, setFaviconFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
-  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Auto-dismiss toast; clears any pending timer so it never fires after unmount
-  const showToast = useCallback((next: { type: "success" | "error"; message: string }) => {
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    setToast(next);
-    toastTimerRef.current = setTimeout(() => setToast(null), 3000);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    };
-  }, []);
 
   const bannersQuery = useQuery({
     queryKey: ["banners"],
@@ -123,14 +109,14 @@ export default function HomeManagementPage() {
         name: restaurantName,
       });
 
-      showToast({ type: "success", message: t("saveSuccess") });
+      showSuccessToast(t("saveSuccess"));
 
       setLogoFile(null);
       setFaviconFile(null);
       queryClient.invalidateQueries({ queryKey: ["restaurant-info"] });
     } catch (err: any) {
       console.error(err);
-      showToast({ type: "error", message: err.message || t("saveFailed") });
+      showApiErrorToast(err, t("saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -163,9 +149,11 @@ export default function HomeManagementPage() {
       }
       setDeleteConfirmType(null);
       setDeleteConfirmId(null);
+      showSuccessToast(toastMessages.deleted);
     } catch (error) {
       console.error(`Delete ${deleteConfirmType} error:`, error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
+      showApiErrorToast(error, toastMessages.deleteFailed);
     }
   };
 
@@ -246,18 +234,6 @@ export default function HomeManagementPage() {
         />
       ) : (
         <EventTab events={events} onDelete={deleteEvent} />
-      )}
-
-      {toast && (
-        <div
-          className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg border shadow-lg transition-all animate-in fade-in slide-in-from-bottom-4 duration-300 ${
-            toast.type === "success"
-              ? "bg-emerald-950/90 border-emerald-500/50 text-emerald-200"
-              : "bg-rose-950/90 border-rose-500/50 text-rose-200"
-          }`}
-        >
-          <span className="text-sm font-medium">{toast.message}</span>
-        </div>
       )}
 
       <ConfirmModal

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { ReorderModal } from "@/shared/components/reorder-modal";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
@@ -101,8 +101,10 @@ export default function ChallengePage() {
       });
       setSavedChallengeImage(finalUrl);
       queryClient.invalidateQueries({ queryKey: ["challenge"] });
+      showSuccessToast(toastMessages.uploaded);
     } catch (error) {
       console.error("Error saving challenge image:", error);
+      showApiErrorToast(error, toastMessages.uploadFailed);
     } finally {
       setIsSavingImage(false);
     }
@@ -118,7 +120,7 @@ export default function ChallengePage() {
         const created = await api.post<{ data: { id: string } }>("/api/challenge/rules", ruleForm);
         ruleHighlight.flash(created.data.id);
       }
-      toast.success(editingId ? tc("saved") : tc("created"));
+      showSuccessToast(editingId ? tc("saved") : tc("created"));
       setShowRuleModal(false);
       setEditingId(null);
       setRuleForm(emptyRule);
@@ -126,6 +128,7 @@ export default function ChallengePage() {
     } catch (error) {
       console.error("Save error:", error);
       setFormError(error instanceof Error ? error.message : "Save failed");
+      showApiErrorToast(error, toastMessages.saveFailed);
     }
   };
 
@@ -144,6 +147,7 @@ export default function ChallengePage() {
 
       if (editingId) await api.put(`/api/challenge/winners/${editingId}`, payload);
       else await api.post("/api/challenge/winners", payload);
+      showSuccessToast(editingId ? tc("saved") : tc("created"));
       setShowWinnerModal(false);
       setEditingId(null);
       setWinnerForm(emptyWinner);
@@ -152,6 +156,7 @@ export default function ChallengePage() {
     } catch (error) {
       console.error("Save error:", error);
       setFormError(error instanceof Error ? error.message : "Save failed");
+      showApiErrorToast(error, toastMessages.saveFailed);
     }
   };
 
@@ -193,9 +198,11 @@ export default function ChallengePage() {
       await api.delete(`/api/challenge/${deleteTarget.type}/${deleteTarget.id}`);
       setDeleteTarget(null);
       queryClient.invalidateQueries({ queryKey: ["challenge"] });
+      showSuccessToast(toastMessages.deleted);
     } catch (error) {
       console.error("Delete error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
+      showApiErrorToast(error, toastMessages.deleteFailed);
     }
   };
 

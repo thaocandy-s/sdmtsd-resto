@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { FormError } from "@/shared/components/form-error";
 
@@ -74,9 +75,11 @@ export default function SeoPage() {
       setEditingId(null);
       setForm(emptyForm);
       queryClient.invalidateQueries({ queryKey: ["seo-metas"] });
+      showSuccessToast(editingId ? toastMessages.saved : toastMessages.created);
     } catch (error) {
       console.error("Save error:", error);
       setFormError(error instanceof Error ? error.message : "Save failed");
+      showApiErrorToast(error, toastMessages.saveFailed);
     }
   };
 
@@ -112,9 +115,11 @@ export default function SeoPage() {
       await api.delete(`/api/seo/${deleteConfirmId}`);
       queryClient.invalidateQueries({ queryKey: ["seo-metas"] });
       setDeleteConfirmId(null);
+      showSuccessToast(toastMessages.deleted);
     } catch (error) {
       console.error("Delete error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
+      showApiErrorToast(error, toastMessages.deleteFailed);
     }
   };
 

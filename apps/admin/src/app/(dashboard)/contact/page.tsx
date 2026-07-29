@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { MessageTable } from "./_components/MessageTable";
 import { MessageDetailModal } from "./_components/MessageDetailModal";
@@ -62,8 +63,10 @@ export default function ContactPage() {
       await api.put(`/api/contact/${id}`, { status });
       invalidateContacts();
       setSelectedContact(null);
+      showSuccessToast(toastMessages.statusChanged);
     } catch (error) {
       console.error("Update status error:", error);
+      showApiErrorToast(error, toastMessages.statusChangeFailed);
     }
   };
 
@@ -82,9 +85,11 @@ export default function ContactPage() {
       invalidateContacts();
       setSelectedContact(null);
       setDeleteConfirmId(null);
+      showSuccessToast(toastMessages.deleted);
     } catch (error) {
       console.error("Delete error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
+      showApiErrorToast(error, toastMessages.deleteFailed);
     }
   };
 

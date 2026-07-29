@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
+import { showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
 import { FormError } from "@/shared/components/form-error";
 import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
@@ -65,6 +66,7 @@ export function FoodFormModal({
     } catch (error) {
       console.error("Save food error:", error);
       setError(error instanceof Error ? error.message : "Save failed");
+      showApiErrorToast(error, toastMessages.saveFailed);
     } finally {
       setIsSaving(false);
     }

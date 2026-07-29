@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 import {
@@ -120,10 +120,12 @@ export default function BuffetMenuPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["buffets"] });
       setDeleteConfirmId(null);
+      showSuccessToast(toastMessages.deleted);
     },
     onError: (error) => {
       console.error("Delete buffet error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
+      showApiErrorToast(error, toastMessages.deleteFailed);
     },
   });
 
@@ -160,10 +162,11 @@ export default function BuffetMenuPage() {
       setForm(emptyBuffetForm);
       setImageFile(null);
       queryClient.invalidateQueries({ queryKey: ["buffets"] });
-      toast.success(editingId ? tc("saved") : tc("created"));
+      showSuccessToast(editingId ? tc("saved") : tc("created"));
     } catch (error) {
       console.error("Save buffet error:", error);
       setFormError(error instanceof Error ? error.message : "Save failed");
+      showApiErrorToast(error, toastMessages.saveFailed);
     } finally {
       setIsSaving(false);
     }

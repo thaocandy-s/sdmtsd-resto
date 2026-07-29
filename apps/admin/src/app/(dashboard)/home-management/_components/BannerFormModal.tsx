@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
 import { FormError } from "@/shared/components/form-error";
 import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
@@ -97,11 +97,12 @@ export function BannerFormModal({
         onDataChange(created.data.id);
       }
 
-      toast.success(editingId ? tc("saved") : tc("created"));
+      showSuccessToast(editingId ? tc("saved") : tc("created"));
       onClose();
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Failed to save banner");
+      showApiErrorToast(err, toastMessages.saveFailed);
     } finally {
       setIsSaving(false);
     }

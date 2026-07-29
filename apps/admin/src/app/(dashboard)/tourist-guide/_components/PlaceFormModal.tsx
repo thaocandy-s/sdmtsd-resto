@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ImageUpload, MultiImageUpload, uploadImage } from "@/shared/components/image-upload";
 import { FormError } from "@/shared/components/form-error";
 import { toSlug } from "@resto-hub/utils";
@@ -98,9 +99,11 @@ export function PlaceFormModal({
       }
       onDataChange();
       onClose();
+      showSuccessToast(editingId ? tc("saved") : tc("created"));
     } catch (error) {
       console.error("Save place error:", error);
       setError(error instanceof Error ? error.message : "Save failed");
+      showApiErrorToast(error, toastMessages.saveFailed);
     } finally {
       setIsSaving(false);
     }

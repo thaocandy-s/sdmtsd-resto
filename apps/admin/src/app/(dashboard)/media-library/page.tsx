@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
@@ -237,8 +238,10 @@ export default function MediaLibraryPage() {
       await uploadWithProgress(formData, token, setProgress);
       closeModal();
       queryClient.invalidateQueries({ queryKey: ["media"] });
+      showSuccessToast(toastMessages.uploaded);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
+      showApiErrorToast(err, toastMessages.uploadFailed);
     } finally {
       setUploading(false);
     }
@@ -258,8 +261,10 @@ export default function MediaLibraryPage() {
       else await api.post("/api/media", payload);
       closeModal();
       queryClient.invalidateQueries({ queryKey: ["media"] });
+      showSuccessToast(editingId ? toastMessages.saved : toastMessages.created);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
+      showApiErrorToast(err, toastMessages.saveFailed);
     }
   };
 
@@ -296,9 +301,11 @@ export default function MediaLibraryPage() {
       await api.delete(`/api/media/${deleteConfirmId}`);
       queryClient.invalidateQueries({ queryKey: ["media"] });
       setDeleteConfirmId(null);
+      showSuccessToast(toastMessages.deleted);
     } catch (err) {
       console.error("Delete error:", err);
       setDeleteError(err instanceof Error ? err.message : "Delete failed");
+      showApiErrorToast(err, toastMessages.deleteFailed);
     }
   };
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
 import { Place, Category } from "./_components/types";
 import { PlaceFormModal } from "./_components/PlaceFormModal";
@@ -87,9 +88,11 @@ export default function TouristGuidePage() {
       setDeleteConfirmType(null);
       setDeleteConfirmId(null);
       handleDataChange();
+      showSuccessToast(toastMessages.deleted);
     } catch (error) {
       console.error("Delete error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
+      showApiErrorToast(error, toastMessages.deleteFailed);
     }
   };
 

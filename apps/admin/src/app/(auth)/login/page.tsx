@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { getApiUrl } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 
 function LoginForm() {
   const router = useRouter();
@@ -43,9 +44,11 @@ function LoginForm() {
       const { accessToken, user } = data.data;
 
       setAuth(user, accessToken);
+      showSuccessToast(toastMessages.loginSuccess);
       router.push(redirect);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
+      showApiErrorToast(err, toastMessages.loginFailed);
     } finally {
       setLoading(false);
     }

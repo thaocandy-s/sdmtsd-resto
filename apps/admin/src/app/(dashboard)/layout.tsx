@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, toastMessages } from "@/lib/toast";
 import { AdminSidebar } from "@/shared/components/admin-sidebar";
 import { AdminTopbar } from "@/shared/components/admin-topbar";
 import { useTranslations } from "next-intl";
@@ -25,6 +26,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     } finally {
       clearAuth();
       setShowLogoutConfirm(false);
+      showSuccessToast(toastMessages.logoutSuccess);
       router.push("/login");
       setLoggingOut(false);
     }

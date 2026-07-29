@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showWarningToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ProfileSection } from "./_components/ProfileSection";
 import { PasswordSection } from "./_components/PasswordSection";
 
@@ -16,8 +17,6 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -27,11 +26,9 @@ export default function SettingsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccess(false);
-    setError("");
 
     if (password && password !== confirmPassword) {
-      setError(t("passwordsNotMatch"));
+      showWarningToast(t("passwordsNotMatch"));
       return;
     }
 
@@ -52,12 +49,12 @@ export default function SettingsPage() {
         });
       }
 
-      setSuccess(true);
+      showSuccessToast(password ? toastMessages.passwordChanged : t("updateSuccess"));
       setPassword("");
       setConfirmPassword("");
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Failed to update profile");
+      showApiErrorToast(err, toastMessages.updateFailed);
     } finally {
       setLoading(false);
     }
@@ -69,18 +66,6 @@ export default function SettingsPage() {
         <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
         <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
       </header>
-
-      {success && (
-        <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-lg text-sm">
-          {t("updateSuccess")}
-        </div>
-      )}
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-sm">
-          {error}
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <ProfileSection

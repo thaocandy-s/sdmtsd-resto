@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showWarningToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 
 const MODULES = [
@@ -32,6 +33,7 @@ export default function BulkActionsPage() {
       .filter(Boolean);
     if (idList.length === 0) {
       setResult("Please enter at least one ID");
+      showWarningToast(toastMessages.selectItemFirst);
       return;
     }
     setPendingIdList(idList);
@@ -50,9 +52,11 @@ export default function BulkActionsPage() {
       });
       setResult(`Successfully affected ${res.data.affected} item(s)`);
       setIds("");
+      showSuccessToast(toastMessages.updated);
     } catch (error) {
       console.error("Bulk action error:", error);
       setResult("Error executing bulk action");
+      showApiErrorToast(error, toastMessages.updateFailed);
     } finally {
       setLoading(false);
       setPendingIdList([]);

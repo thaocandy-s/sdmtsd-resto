@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { FormError } from "@/shared/components/form-error";
 import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
@@ -47,9 +48,11 @@ export function CategoryManagerModal({
       setIsAddingCat(false);
       setCatForm(emptyCategoryForm);
       onDataChange();
+      showSuccessToast(editingCatId ? toastMessages.saved : toastMessages.created);
     } catch (error) {
       console.error("Save category error:", error);
       setError(error instanceof Error ? error.message : "Save failed");
+      showApiErrorToast(error, toastMessages.saveFailed);
     }
   };
 
@@ -75,9 +78,11 @@ export function CategoryManagerModal({
     try {
       await api.delete(`/api/drink/categories/${deleteConfirmId}`);
       onDataChange();
+      showSuccessToast(toastMessages.deleted);
     } catch (error) {
       console.error("Delete category error:", error);
       setError(error instanceof Error ? error.message : "Delete failed");
+      showApiErrorToast(error, toastMessages.deleteFailed);
     } finally {
       setDeleteConfirmId(null);
     }

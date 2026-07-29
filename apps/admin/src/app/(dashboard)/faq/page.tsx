@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { useReorder } from "@/shared/hooks/use-reorder";
 import { useHighlightNew } from "@/shared/hooks/use-highlight-new";
@@ -85,10 +85,11 @@ export default function FaqPage() {
       setEditingId(null);
       setFaqForm(emptyFaq);
       queryClient.invalidateQueries({ queryKey: ["faqs"] });
-      toast.success(editingId ? tc("saved") : tc("created"));
+      showSuccessToast(editingId ? tc("saved") : tc("created"));
     } catch (error) {
       console.error("Save error:", error);
       setFormError(error instanceof Error ? error.message : "Save failed");
+      showApiErrorToast(error, toastMessages.saveFailed);
     }
   };
 
@@ -107,10 +108,11 @@ export default function FaqPage() {
       setCatForm(emptyCat);
       queryClient.invalidateQueries({ queryKey: ["faq-categories"] });
       queryClient.invalidateQueries({ queryKey: ["faqs"] });
-      toast.success(editingId ? tc("saved") : tc("created"));
+      showSuccessToast(editingId ? tc("saved") : tc("created"));
     } catch (error) {
       console.error("Save error:", error);
       setFormError(error instanceof Error ? error.message : "Save failed");
+      showApiErrorToast(error, toastMessages.saveFailed);
     }
   };
 
@@ -157,9 +159,11 @@ export default function FaqPage() {
         queryClient.invalidateQueries({ queryKey: ["faqs"] });
       }
       setDeleteTarget(null);
+      showSuccessToast(toastMessages.deleted);
     } catch (error) {
       console.error("Delete error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
+      showApiErrorToast(error, toastMessages.deleteFailed);
     }
   };
 

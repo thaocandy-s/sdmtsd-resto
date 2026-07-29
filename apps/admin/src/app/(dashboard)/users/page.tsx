@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
@@ -124,9 +125,11 @@ export default function UsersPage() {
       await api.delete(`/api/users/${deleteConfirmUser.id}`);
       queryClient.invalidateQueries({ queryKey: ["users"] });
       setDeleteConfirmUser(null);
+      showSuccessToast(toastMessages.deleted);
     } catch (error) {
       console.error("Failed to delete user:", error);
       setDeleteError(error instanceof Error ? error.message : "Failed to delete user");
+      showApiErrorToast(error, toastMessages.deleteFailed);
     }
   };
 
@@ -152,9 +155,11 @@ export default function UsersPage() {
       }
       setShowModal(false);
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      showSuccessToast(editingUser ? toastMessages.saved : toastMessages.created);
     } catch (error) {
       console.error("Failed to save user:", error);
       setFormError(error instanceof Error ? error.message : "Failed to save user");
+      showApiErrorToast(error, toastMessages.saveFailed);
     }
   };
 

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showWarningToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { BeerArt, FormData, emptyForm } from "./_components/types";
 import { BeerArtList } from "./_components/BeerArtList";
 import { BeerArtFormModal } from "./_components/BeerArtFormModal";
@@ -54,6 +54,7 @@ export default function BeerArtPage() {
     e.preventDefault();
     if (!form.imageUrl && !imageFile) {
       setFormError(tc("imageRequired"));
+      showWarningToast(tc("imageRequired"));
       return;
     }
     setIsSaving(true);
@@ -75,7 +76,7 @@ export default function BeerArtPage() {
         const created = await api.post<{ data: { id: string } }>("/api/beer-art", payload);
         highlight.flash(created.data.id);
       }
-      toast.success(editingId ? tc("saved") : tc("created"));
+      showSuccessToast(editingId ? tc("saved") : tc("created"));
       setShowModal(false);
       setEditingId(null);
       setForm(emptyForm);
@@ -84,6 +85,7 @@ export default function BeerArtPage() {
     } catch (error) {
       console.error("Save error:", error);
       setFormError(error instanceof Error ? error.message : "Save failed");
+      showApiErrorToast(error, toastMessages.saveFailed);
     } finally {
       setIsSaving(false);
     }
@@ -113,9 +115,11 @@ export default function BeerArtPage() {
       await api.delete(`/api/beer-art/${deleteConfirmId}`);
       setDeleteConfirmId(null);
       queryClient.invalidateQueries({ queryKey: ["beer-arts"] });
+      showSuccessToast(toastMessages.deleted);
     } catch (error) {
       console.error("Delete error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
+      showApiErrorToast(error, toastMessages.deleteFailed);
     }
   };
 

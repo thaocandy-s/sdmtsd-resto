@@ -9,11 +9,13 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryProvider>
       <AuthProvider>{children}</AuthProvider>
+      {/* Single global toast outlet — all feedback goes through lib/toast.ts helpers */}
       <Toaster
         position="bottom-right"
         theme="dark"
         richColors
         closeButton
+        duration={4000}
         toastOptions={{
           style: {
             background: "var(--color-background-secondary, #1a1a1a)",

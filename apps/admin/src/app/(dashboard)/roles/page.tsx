@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { showSuccessToast, showWarningToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { FormError } from "@/shared/components/form-error";
@@ -79,7 +80,7 @@ export default function RolesPage() {
 
   const handleEdit = (role: Role) => {
     if (role.name === "ADMIN") {
-      alert("Cannot modify ADMIN role");
+      showWarningToast("ADMINロールは変更できません");
       return;
     }
     setEditingRole(role);
@@ -101,7 +102,7 @@ export default function RolesPage() {
 
   const handleDelete = (role: Role) => {
     if (role.name === "ADMIN") {
-      alert("Cannot delete ADMIN role");
+      showWarningToast("ADMINロールは削除できません");
       return;
     }
     setDeleteConfirmRole(role);
@@ -114,9 +115,11 @@ export default function RolesPage() {
       await api.delete(`/api/roles/${deleteConfirmRole.id}`);
       queryClient.invalidateQueries({ queryKey: ["roles"] });
       setDeleteConfirmRole(null);
+      showSuccessToast(toastMessages.deleted);
     } catch (error) {
       console.error("Failed to delete role:", error);
       setDeleteError(error instanceof Error ? error.message : "Failed to delete role");
+      showApiErrorToast(error, toastMessages.deleteFailed);
     }
   };
 
@@ -154,9 +157,11 @@ export default function RolesPage() {
       }
       setShowModal(false);
       queryClient.invalidateQueries({ queryKey: ["roles"] });
+      showSuccessToast(editingRole ? toastMessages.saved : toastMessages.created);
     } catch (error) {
       console.error("Failed to save role:", error);
       setFormError(error instanceof Error ? error.message : "Failed to save role");
+      showApiErrorToast(error, toastMessages.saveFailed);
     }
   };
 
