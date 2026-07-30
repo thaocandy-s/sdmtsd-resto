@@ -342,12 +342,36 @@ export interface AuditLog {
   createdAt: string;
 }
 
-export interface PageView {
+export type AnalyticsEventName = "page_view" | "view_category" | "view_dish";
+
+export type AnalyticsEntityType = "menu" | "drink" | "buffet";
+
+export interface AnalyticsEvent {
   id: string;
-  path: string;
-  locale?: string | null;
-  userAgent?: string | null;
-  referrer?: string | null;
+  event: AnalyticsEventName;
+  path?: string | null;
+  entityType?: AnalyticsEntityType | null;
+  slug?: string | null;
   country?: string | null;
+  isNewVisitor: boolean;
   createdAt: string;
+}
+
+// Entry of a topCategories/topDishes/topCountries JSON list
+export interface AnalyticsTopItem {
+  key: string; // "menu:yakiniku" for entities, ISO code for countries
+  name: string;
+  count: number;
+}
+
+export interface AnalyticsDaily {
+  id: string;
+  date: string;
+  visitors: number;
+  pageViews: number;
+  topCategories: AnalyticsTopItem[];
+  topDishes: AnalyticsTopItem[];
+  topCountries: AnalyticsTopItem[];
+  createdAt: string;
+  updatedAt: string;
 }

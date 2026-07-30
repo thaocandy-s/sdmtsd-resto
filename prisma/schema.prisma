@@ -450,41 +450,41 @@ model AuditLog {
 
 // ===== ANALYTICS =====
 
-// Aggregated daily statistics — one row per day, UPSERT pattern
-// Provides ~300x storage reduction vs raw PageView rows
-model DailyStatistic {
-  id                String   @id @default(uuid())
-  date              DateTime @unique @db.Date
-  pageViews         Int      @default(0)
-  uniqueVisitors    Int      @default(0)
-  homeViews         Int      @default(0)
-  menuViews         Int      @default(0)
-  drinkViews        Int      @default(0)
-  buffetViews       Int      @default(0)
-  beerArtViews      Int      @default(0)
-  challengeViews    Int      @default(0)
-  touristViews      Int      @default(0)
-  infoViews         Int      @default(0)
-  faqViews          Int      @default(0)
-  contactViews      Int      @default(0)
-  reservationViews  Int      @default(0)
-  reservationClicks Int      @default(0)
-  contactClicks     Int      @default(0)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+// Aggregated daily analytics — one row per UTC day.
+// visitors/pageViews are incremented in real time (atomic UPSERT from the
+// track endpoint); topCategories/topDishes/topCountries are JSON top-10
+// lists ([{ key, name, count }]) recomputed from raw events by the rollup
+// job. Dashboard queries read this table primarily.
+model AnalyticsDaily {
+  id            String   @id @default(uuid())
+  date          DateTime @unique @db.Date
+  visitors      Int      @default(0)
+  pageViews     Int      @default(0)
+  topCategories Json     @default("[]")
+  topDishes     Json     @default("[]")
+  topCountries  Json     @default("[]")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("analytics_daily")
 }
 
-// Raw visit logs — short retention for debugging (auto-cleaned after 90 days)
-model PageView {
-  id        String   @id @default(uuid())
-  path      String
-  locale    String?
-  userAgent String?
-  referrer  String?
-  country   String?
-  createdAt DateTime @default(now())
+// Raw tracking events (page_view | view_category | view_dish).
+// Source for daily rollup aggregation; retained for 90 days only
+// (cleaned by the rollup cron) to stay within Supabase Free limits.
+model AnalyticsEvent {
+  id           String   @id @default(uuid())
+  event        String // page_view | view_category | view_dish
+  path         String?
+  entityType   String? // menu | drink | buffet
+  slug         String?
+  country      String? // ISO code from Vercel geo header
+  isNewVisitor Boolean  @default(false)
+  createdAt    DateTime @default(now())
 
   @@index([createdAt])
+  @@index([event, createdAt])
+  @@map("analytics_events")
 }
 
 // ===== ENUMS =====

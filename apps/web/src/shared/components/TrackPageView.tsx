@@ -2,38 +2,39 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { track, TrackPayload } from "@/lib/track";
+
+// Detail pages under these sections count as dish views
+const DISH_SECTIONS = new Set(["menu", "drink", "buffet"]);
 
 /**
- * Maps URL pathname segments to analytics event types.
- * Extracts the section from paths like /en/menu, /ja/drink, etc.
+ * Derives the tracking event from the pathname.
+ * `/en/menu/wagyu-steak` → view_dish (menu, wagyu-steak); anything else → page_view.
  */
-function getEventType(pathname: string): string {
-  // Remove locale prefix (/en, /ja) to get the section
-  const section = pathname.replace(/^\/(en|ja)/, "").split("/")[1] || "";
+function buildEvent(pathname: string): Pick<TrackPayload, "event" | "entityType" | "slug"> {
+  const segments = pathname
+    .replace(/^\/(en|ja)(?=\/|$)/, "")
+    .split("/")
+    .filter(Boolean);
 
-  const sectionMap: Record<string, string> = {
-    "": "home_view",
-    menu: "menu_view",
-    drink: "drink_view",
-    buffet: "buffet_view",
-    "beer-art": "beer_art_view",
-    challenge: "challenge_view",
-    tourist: "tourist_view",
-    info: "info_view",
-    faq: "faq_view",
-    contact: "contact_view",
-    reservation: "reservation_view",
-  };
+  if (segments.length === 2 && DISH_SECTIONS.has(segments[0])) {
+    return {
+      event: "view_dish",
+      entityType: segments[0] as TrackPayload["entityType"],
+      slug: segments[1],
+    };
+  }
 
-  return sectionMap[section] || "page_view";
+  return { event: "page_view" };
 }
 
 /**
  * TrackPageView — Invisible client component that fires analytics events.
  *
- * Sends a single tracking beacon on each page navigation.
- * Uses sessionStorage to detect new visitors for uniqueVisitors counting.
- * Fire-and-forget: never blocks rendering or affects UX.
+ * Sends a single tracking beacon on each page navigation (page_view, or
+ * view_dish on menu/drink/buffet detail pages — the server counts those as
+ * page views too). Uses sessionStorage to flag new visitors for the daily
+ * visitors count. Fire-and-forget: never blocks rendering or affects UX.
  */
 export function TrackPageView() {
   const pathname = usePathname();
@@ -44,7 +45,7 @@ export function TrackPageView() {
     if (pathname === lastTrackedPath.current) return;
     lastTrackedPath.current = pathname;
 
-    // Determine if this is a new visitor session (for uniqueVisitors approximation)
+    // Determine if this is a new visitor session (for the visitors count)
     let isNewVisitor = false;
     try {
       if (!sessionStorage.getItem("resto_visited")) {
@@ -56,36 +57,12 @@ export function TrackPageView() {
       isNewVisitor = true;
     }
 
-    const event = getEventType(pathname);
-    const payload = JSON.stringify({
-      event,
+    track({
+      ...buildEvent(pathname),
       path: pathname,
-      locale: pathname.match(/^\/(en|ja)/)?.[1] || null,
-      referrer: document.referrer || null,
+      locale: pathname.match(/^\/(en|ja)(?=\/|$)/)?.[1] || null,
       isNewVisitor,
     });
-
-    // Use sendBeacon for non-blocking delivery (survives page unload)
-    // Falls back to fetch with keepalive if sendBeacon is unavailable
-    try {
-      const sent = navigator.sendBeacon?.(
-        "/api/analytics/track",
-        new Blob([payload], { type: "application/json" })
-      );
-
-      if (!sent) {
-        fetch("/api/analytics/track", {
-          method: "POST",
-          body: payload,
-          headers: { "Content-Type": "application/json" },
-          keepalive: true,
-        }).catch(() => {
-          // Silently ignore tracking failures — non-critical
-        });
-      }
-    } catch {
-      // Silently ignore tracking failures — non-critical
-    }
   }, [pathname]);
 
   // This component renders nothing — purely side-effect
