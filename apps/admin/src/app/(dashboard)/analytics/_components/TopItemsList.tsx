@@ -1,26 +1,12 @@
 import { useTranslations } from "next-intl";
 import { AnalyticsTopItem } from "./types";
+import { countryFlag, countryName } from "./country";
 
 interface Props {
   title: string;
   items?: AnalyticsTopItem[];
   // Country lists carry ISO codes — render flag + localized region name
   isCountryList?: boolean;
-}
-
-// Localized country name from an ISO code, falling back to the code itself
-function countryName(code: string): string {
-  try {
-    return new Intl.DisplayNames(["ja"], { type: "region" }).of(code) || code;
-  } catch {
-    return code;
-  }
-}
-
-// Flag emoji from a 2-letter ISO country code (regional indicator symbols)
-function countryFlag(code: string): string {
-  if (!/^[A-Z]{2}$/.test(code)) return "";
-  return String.fromCodePoint(...[...code].map((c) => 0x1f1a5 + c.charCodeAt(0)));
 }
 
 // Ranked bar list shared by top categories / dishes / countries
