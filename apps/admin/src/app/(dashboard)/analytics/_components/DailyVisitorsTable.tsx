@@ -1,8 +1,8 @@
 import { useTranslations } from "next-intl";
-import { DailyStat } from "./types";
+import { DailyPoint } from "./types";
 
 interface Props {
-  dailyData?: DailyStat[];
+  dailyData?: DailyPoint[];
 }
 
 export function DailyVisitorsTable({ dailyData }: Props) {
@@ -43,7 +43,7 @@ export function DailyVisitorsTable({ dailyData }: Props) {
                     {day.pageViews.toLocaleString()}
                   </td>
                   <td className="py-2 text-right text-foreground-secondary">
-                    {day.uniqueVisitors.toLocaleString()}
+                    {day.visitors.toLocaleString()}
                   </td>
                 </tr>
               ))}

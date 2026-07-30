@@ -22,9 +22,10 @@ export const reservationSchema = z.object({
 });
 
 export const trackEventSchema = z.object({
-  event: z.string().min(1).max(50),
+  event: z.enum(["page_view", "view_category", "view_dish"]),
   path: z.string().max(500).nullish(),
   locale: z.string().max(10).nullish(),
-  referrer: z.string().max(1000).nullish(),
+  entityType: z.enum(["menu", "drink", "buffet"]).nullish(),
+  slug: z.string().max(200).nullish(),
   isNewVisitor: z.boolean().nullish(),
 });

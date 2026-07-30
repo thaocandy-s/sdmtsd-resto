@@ -1,38 +1,17 @@
-export interface DailyStat {
-  date: string;
+import type { AnalyticsTopItem } from "@resto-hub/types";
+
+export type { AnalyticsTopItem };
+
+export interface AnalyticsOverview {
+  visitors: number;
   pageViews: number;
-  uniqueVisitors: number;
-  homeViews: number;
-  menuViews: number;
-  drinkViews: number;
-  buffetViews: number;
-  beerArtViews: number;
-  challengeViews: number;
-  touristViews: number;
-  infoViews: number;
-  faqViews: number;
-  contactViews: number;
-  reservationViews: number;
-  reservationClicks: number;
-  contactClicks: number;
-}
-
-export interface SectionBreakdown {
-  section: string;
-  views: number;
-}
-
-export interface AnalyticsSummary {
-  totalPageViews: number;
-  uniqueVisitors: number;
-  reservationClicks: number;
-  contactClicks: number;
-  changePercent: number;
+  prevVisitors: number;
   prevPageViews: number;
+  changePercent: number;
 }
 
-export interface AnalyticsData {
-  summary: AnalyticsSummary;
-  sectionBreakdown: SectionBreakdown[];
-  dailyData: DailyStat[];
+export interface DailyPoint {
+  date: string;
+  visitors: number;
+  pageViews: number;
 }

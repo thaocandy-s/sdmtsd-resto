@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { formatPriceWithTax } from "@resto-hub/utils";
+import { track } from "@/lib/track";
 import { Category, Food, GroupedCategory } from "./types";
 import { CategoryFilter } from "./CategoryFilter";
 import { CategorySliceSection } from "./CategorySliceSection";
@@ -16,6 +17,14 @@ interface MenuContentProps {
 export function MenuContent({ foods, categories, taxRate }: MenuContentProps) {
   const t = useTranslations("menu");
   const [selectedCategory, setSelectedCategory] = useState("");
+
+  // Track category interest when a filter pill is selected (not on "all")
+  const handleSelectCategory = useCallback((slug: string) => {
+    setSelectedCategory(slug);
+    if (slug) {
+      track({ event: "view_category", entityType: "menu", slug });
+    }
+  }, []);
 
   const formatPrice = (price: number) => formatPriceWithTax(price, taxRate);
 
@@ -91,7 +100,7 @@ export function MenuContent({ foods, categories, taxRate }: MenuContentProps) {
       <CategoryFilter
         categories={categories}
         selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
+        onSelectCategory={handleSelectCategory}
       />
 
       {/* Category Slices / Food Menu Carousel */}

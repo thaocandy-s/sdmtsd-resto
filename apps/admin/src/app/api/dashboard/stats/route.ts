@@ -35,20 +35,20 @@ export const GET = withAuth(async () => {
       prisma.contact.count({ where: { isRead: false } }),
 
       // Today's page views — single row lookup (O(1))
-      prisma.dailyStatistic.findUnique({
+      prisma.analyticsDaily.findUnique({
         where: { date: today },
-        select: { pageViews: true, uniqueVisitors: true },
+        select: { pageViews: true, visitors: true },
       }),
 
       // This week's page views — aggregate up to 7 rows
-      prisma.dailyStatistic.aggregate({
+      prisma.analyticsDaily.aggregate({
         where: { date: { gte: startOfWeek } },
-        _sum: { pageViews: true, uniqueVisitors: true },
+        _sum: { pageViews: true, visitors: true },
       }),
 
       // Total page views — aggregate all rows (~365/year)
-      prisma.dailyStatistic.aggregate({
-        _sum: { pageViews: true, uniqueVisitors: true },
+      prisma.analyticsDaily.aggregate({
+        _sum: { pageViews: true, visitors: true },
       }),
 
       prisma.contact.findMany({
@@ -88,10 +88,10 @@ export const GET = withAuth(async () => {
           totalContacts,
           unreadContacts,
           todayPageViews: todayStats?.pageViews ?? 0,
-          todayUniqueVisitors: todayStats?.uniqueVisitors ?? 0,
+          todayUniqueVisitors: todayStats?.visitors ?? 0,
           weekPageViews: weekStats._sum.pageViews ?? 0,
           totalPageViews: totalStats._sum.pageViews ?? 0,
-          totalUniqueVisitors: totalStats._sum.uniqueVisitors ?? 0,
+          totalUniqueVisitors: totalStats._sum.visitors ?? 0,
         },
         recentContacts,
         popularFoods,

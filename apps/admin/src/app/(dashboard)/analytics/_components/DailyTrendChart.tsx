@@ -9,12 +9,12 @@ import {
   type ChartData,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-import { DailyStat } from "./types";
+import { DailyPoint } from "./types";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
 interface Props {
-  dailyData?: DailyStat[];
+  dailyData?: DailyPoint[];
 }
 
 export function DailyTrendChart({ dailyData }: Props) {

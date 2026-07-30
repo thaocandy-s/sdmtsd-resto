@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { formatPriceWithTax } from "@resto-hub/utils";
+import { track } from "@/lib/track";
 import { Category, Drink, GroupedCategory } from "./types";
 import { CategoryFilter } from "./CategoryFilter";
 import { CategorySliceSection } from "./CategorySliceSection";
@@ -16,6 +17,14 @@ interface DrinkContentProps {
 export function DrinkContent({ drinks, categories, taxRate }: DrinkContentProps) {
   const t = useTranslations("drink");
   const [selectedCategory, setSelectedCategory] = useState("");
+
+  // Track category interest when a filter pill is selected (not on "all")
+  const handleSelectCategory = useCallback((slug: string) => {
+    setSelectedCategory(slug);
+    if (slug) {
+      track({ event: "view_category", entityType: "drink", slug });
+    }
+  }, []);
 
   const formatPrice = (price: number) => formatPriceWithTax(price, taxRate);
 
@@ -73,7 +82,7 @@ export function DrinkContent({ drinks, categories, taxRate }: DrinkContentProps)
       <CategoryFilter
         categories={categories}
         selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
+        onSelectCategory={handleSelectCategory}
       />
 
       {/* Category Slices / Drink Menu Carousel */}

@@ -4,26 +4,35 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
-import { AnalyticsData } from "./_components/types";
+import { AnalyticsOverview, AnalyticsTopItem, DailyPoint } from "./_components/types";
 import { AnalyticsSummaryCards } from "./_components/AnalyticsSummaryCards";
 import { DailyTrendChart } from "./_components/DailyTrendChart";
-import { SectionBreakdownList } from "./_components/SectionBreakdownList";
+import { TopItemsList } from "./_components/TopItemsList";
 import { DailyVisitorsTable } from "./_components/DailyVisitorsTable";
+
+// One query per widget — each endpoint stays small and independently cacheable
+function useAnalyticsQuery<T>(section: string, days: number) {
+  return useQuery({
+    queryKey: ["analytics", section, { days }],
+    queryFn: () => api.get<{ data: T }>(`/api/analytics/${section}?days=${days}`),
+    placeholderData: keepPreviousData,
+  });
+}
 
 export default function AnalyticsPage() {
   const t = useTranslations("analytics");
   const [days, setDays] = useState(30);
 
-  const analyticsQuery = useQuery({
-    queryKey: ["analytics", { days }],
-    queryFn: () => api.get<{ data: AnalyticsData }>(`/api/analytics?days=${days}`),
-    placeholderData: keepPreviousData,
-  });
+  const overviewQuery = useAnalyticsQuery<AnalyticsOverview>("overview", days);
+  const dailyQuery = useAnalyticsQuery<{ daily: DailyPoint[] }>("daily", days);
+  const topCategoriesQuery = useAnalyticsQuery<{ items: AnalyticsTopItem[] }>(
+    "top-categories",
+    days
+  );
+  const topDishesQuery = useAnalyticsQuery<{ items: AnalyticsTopItem[] }>("top-dishes", days);
+  const topCountriesQuery = useAnalyticsQuery<{ items: AnalyticsTopItem[] }>("top-countries", days);
 
-  const data = analyticsQuery.data?.data ?? null;
-  const loading = analyticsQuery.isPending;
-
-  if (loading) {
+  if (overviewQuery.isPending) {
     return (
       <div className="space-y-6">
         {[1, 2, 3].map((i) => (
@@ -54,17 +63,27 @@ export default function AnalyticsPage() {
       </header>
 
       {/* SUMMARY CARDS */}
-      <AnalyticsSummaryCards summary={data?.summary} />
+      <AnalyticsSummaryCards overview={overviewQuery.data?.data} />
 
       {/* DAILY TREND CHART */}
-      <DailyTrendChart dailyData={data?.dailyData} />
+      <DailyTrendChart dailyData={dailyQuery.data?.data.daily} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* SECTION BREAKDOWN */}
-        <SectionBreakdownList sectionBreakdown={data?.sectionBreakdown} />
+        {/* TOP VIEWED CATEGORIES */}
+        <TopItemsList title={t("topCategories")} items={topCategoriesQuery.data?.data.items} />
+
+        {/* TOP VIEWED DISHES */}
+        <TopItemsList title={t("topDishes")} items={topDishesQuery.data?.data.items} />
+
+        {/* VISITORS BY COUNTRY */}
+        <TopItemsList
+          title={t("topCountries")}
+          items={topCountriesQuery.data?.data.items}
+          isCountryList
+        />
 
         {/* DAILY VISITORS TABLE */}
-        <DailyVisitorsTable dailyData={data?.dailyData} />
+        <DailyVisitorsTable dailyData={dailyQuery.data?.data.daily} />
       </div>
     </>
   );

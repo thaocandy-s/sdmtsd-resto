@@ -7,26 +7,9 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 const TRACK_LIMIT = 60;
 const TRACK_WINDOW_MS = 60 * 1000;
 
-// Valid tracking event types mapped to DailyStatistic columns
-const EVENT_COLUMN_MAP: Record<string, string> = {
-  page_view: "pageViews",
-  home_view: "homeViews",
-  menu_view: "menuViews",
-  drink_view: "drinkViews",
-  buffet_view: "buffetViews",
-  beer_art_view: "beerArtViews",
-  challenge_view: "challengeViews",
-  tourist_view: "touristViews",
-  info_view: "infoViews",
-  faq_view: "faqViews",
-  contact_view: "contactViews",
-  reservation_view: "reservationViews",
-  reservation_click: "reservationClicks",
-  contact_click: "contactClicks",
-};
-
 // POST /api/analytics/track - Record a tracking event
-// Public endpoint (no auth) — fire-and-forget from client
+// Public endpoint (no auth) — fire-and-forget from client.
+// Supported events: page_view | view_category | view_dish.
 export async function POST(request: NextRequest) {
   try {
     const ip = getClientIp(request);
@@ -39,57 +22,52 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ message: "Invalid input" }, { status: 400 });
     }
-    const { event, path, locale, referrer, isNewVisitor } = parsed.data;
+    const { event, path, entityType, slug, isNewVisitor } = parsed.data;
 
-    // Validate event type
-    if (!event || !EVENT_COLUMN_MAP[event]) {
-      return NextResponse.json({ message: "Invalid event type" }, { status: 400 });
+    // view_category/view_dish must carry an entity reference to be useful
+    if (event !== "page_view" && (!entityType || !slug)) {
+      return NextResponse.json({ message: "Invalid input" }, { status: 400 });
     }
 
-    // Get today's date at midnight UTC for the UPSERT key
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
+    // Country from Vercel's geo header (edge-provided, no client fingerprinting)
+    const country = request.headers.get("x-vercel-ip-country");
 
-    // Build the increment object for the specific event column
-    const incrementData: Record<string, number> = {
-      [EVENT_COLUMN_MAP[event]]: 1,
-    };
+    // page_view and view_dish are navigations — keep today's counters live.
+    // view_category is an in-page interaction, so it never counts as a page view.
+    const isNavigation = event !== "view_category";
+    const newVisitor = isNavigation && !!isNewVisitor;
 
-    // Always increment pageViews for any *_view event (not for click events)
-    if (event.endsWith("_view") && event !== "page_view") {
-      incrementData.pageViews = 1;
-    }
+    if (isNavigation) {
+      // Today's date at midnight UTC for the UPSERT key
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
 
-    // Increment uniqueVisitors if this is a new visitor session
-    if (isNewVisitor) {
-      incrementData.uniqueVisitors = 1;
-    }
-
-    // Atomic UPSERT: create today's row if missing, otherwise increment counters
-    await prisma.dailyStatistic.upsert({
-      where: { date: today },
-      create: {
-        date: today,
-        ...Object.fromEntries(Object.entries(incrementData).map(([key, val]) => [key, val])),
-      },
-      update: {
-        ...Object.fromEntries(
-          Object.entries(incrementData).map(([key, val]) => [key, { increment: val }])
-        ),
-      },
-    });
-
-    // Also write a raw PageView for short-term debugging (kept for 90 days)
-    if (path && event.endsWith("_view")) {
-      await prisma.pageView.create({
-        data: {
-          path: path || "/",
-          locale: locale || null,
-          referrer: referrer || null,
-          userAgent: request.headers.get("user-agent") || null,
+      // Atomic UPSERT: create today's row if missing, otherwise increment counters
+      await prisma.analyticsDaily.upsert({
+        where: { date: today },
+        create: {
+          date: today,
+          pageViews: 1,
+          visitors: newVisitor ? 1 : 0,
+        },
+        update: {
+          pageViews: { increment: 1 },
+          ...(newVisitor ? { visitors: { increment: 1 } } : {}),
         },
       });
     }
+
+    // Raw event — source for the daily top-lists rollup, retained 90 days
+    await prisma.analyticsEvent.create({
+      data: {
+        event,
+        path: path || null,
+        entityType: entityType || null,
+        slug: slug || null,
+        country: country || null,
+        isNewVisitor: newVisitor,
+      },
+    });
 
     // Return 204 No Content — minimal response for fire-and-forget
     return new NextResponse(null, { status: 204 });
