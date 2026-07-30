@@ -447,7 +447,6 @@ export const ja = {
     last7Days: "過去7日間",
     last30Days: "過去30日間",
     last90Days: "過去90日間",
-    last365Days: "過去365日間",
     pageViews: "ページビュー",
     visitors: "訪問者数",
     vsPreviousPeriod: "前期比",
@@ -455,9 +454,6 @@ export const ja = {
     topCategories: "人気カテゴリ",
     topDishes: "人気メニュー",
     topCountries: "国別訪問者",
-    recentDays: "日別内訳",
-    date: "日付",
-    views: "閲覧数",
     noData: "この期間のデータはありません",
   },
 };

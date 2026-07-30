@@ -29,6 +29,7 @@ export function TopItemsList({ title, items, isCountryList }: Props) {
 
   const activeItems = (items || []).filter((item) => item.count > 0);
   const maxCount = activeItems[0]?.count ?? 1;
+  const totalCount = activeItems.reduce((sum, item) => sum + item.count, 0);
 
   return (
     <div className="bg-background-secondary border border-border rounded-lg p-6">
@@ -45,13 +46,16 @@ export function TopItemsList({ title, items, isCountryList }: Props) {
                     ? `${countryFlag(item.key)} ${countryName(item.key)}`.trim()
                     : item.name}
                 </span>
-                <span className="text-sm font-medium text-gold-400">
-                  {item.count.toLocaleString()}
+                <span className="text-sm text-foreground-secondary shrink-0">
+                  {isCountryList && totalCount > 0 && (
+                    <span className="mr-2">{Math.round((item.count / totalCount) * 100)}%</span>
+                  )}
+                  <span className="font-medium text-gold-400">{item.count.toLocaleString()}</span>
                 </span>
               </div>
               <div className="w-full bg-background-tertiary rounded-full h-2">
                 <div
-                  className="bg-gold-500/80 h-2 rounded-full transition-all duration-500"
+                  className="bg-gold-500/80 h-2 rounded-full"
                   style={{
                     width: `${Math.max((item.count / maxCount) * 100, 1)}%`,
                   }}

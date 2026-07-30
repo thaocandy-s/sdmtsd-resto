@@ -8,7 +8,9 @@ import { AnalyticsOverview, AnalyticsTopItem, DailyPoint } from "./_components/t
 import { AnalyticsSummaryCards } from "./_components/AnalyticsSummaryCards";
 import { DailyTrendChart } from "./_components/DailyTrendChart";
 import { TopItemsList } from "./_components/TopItemsList";
-import { DailyVisitorsTable } from "./_components/DailyVisitorsTable";
+
+// Period options — kept short and non-technical for restaurant owners
+const PERIODS = [7, 30, 90] as const;
 
 // One query per widget — each endpoint stays small and independently cacheable
 function useAnalyticsQuery<T>(section: string, days: number) {
@@ -21,7 +23,7 @@ function useAnalyticsQuery<T>(section: string, days: number) {
 
 export default function AnalyticsPage() {
   const t = useTranslations("analytics");
-  const [days, setDays] = useState(30);
+  const [days, setDays] = useState<number>(30);
 
   const overviewQuery = useAnalyticsQuery<AnalyticsOverview>("overview", days);
   const dailyQuery = useAnalyticsQuery<{ daily: DailyPoint[] }>("daily", days);
@@ -31,6 +33,8 @@ export default function AnalyticsPage() {
   );
   const topDishesQuery = useAnalyticsQuery<{ items: AnalyticsTopItem[] }>("top-dishes", days);
   const topCountriesQuery = useAnalyticsQuery<{ items: AnalyticsTopItem[] }>("top-countries", days);
+
+  const periodLabel = (d: number) => t(`last${d}Days`);
 
   if (overviewQuery.isPending) {
     return (
@@ -45,45 +49,48 @@ export default function AnalyticsPage() {
   return (
     <>
       {/* HEADER WITH PERIOD SELECTOR */}
-      <header className="flex items-center justify-between mb-8">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
           <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
           <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
         </div>
-        <select
-          value={days}
-          onChange={(e) => setDays(parseInt(e.target.value))}
-          className="bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-        >
-          <option value={7}>{t("last7Days")}</option>
-          <option value={30}>{t("last30Days")}</option>
-          <option value={90}>{t("last90Days")}</option>
-          <option value={365}>{t("last365Days")}</option>
-        </select>
+        <div className="inline-flex rounded-lg border border-border bg-background-secondary p-1 self-start">
+          {PERIODS.map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => setDays(d)}
+              className={`px-3 py-1.5 text-sm rounded-md ${
+                days === d
+                  ? "bg-gold-500 text-background font-medium"
+                  : "text-foreground-secondary hover:text-foreground"
+              }`}
+            >
+              {periodLabel(d)}
+            </button>
+          ))}
+        </div>
       </header>
 
-      {/* SUMMARY CARDS */}
+      {/* SECTION 1 — OVERVIEW CARDS */}
       <AnalyticsSummaryCards overview={overviewQuery.data?.data} />
 
-      {/* DAILY TREND CHART */}
+      {/* SECTION 2 — TRAFFIC TREND (single line chart, daily visitors) */}
       <DailyTrendChart dailyData={dailyQuery.data?.data.daily} />
 
+      {/* SECTIONS 3 & 4 — TOP CATEGORIES / TOP DISHES */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* TOP VIEWED CATEGORIES */}
         <TopItemsList title={t("topCategories")} items={topCategoriesQuery.data?.data.items} />
-
-        {/* TOP VIEWED DISHES */}
         <TopItemsList title={t("topDishes")} items={topDishesQuery.data?.data.items} />
+      </div>
 
-        {/* VISITORS BY COUNTRY */}
+      {/* SECTION 5 — VISITORS BY COUNTRY */}
+      <div className="mb-8">
         <TopItemsList
           title={t("topCountries")}
           items={topCountriesQuery.data?.data.items}
           isCountryList
         />
-
-        {/* DAILY VISITORS TABLE */}
-        <DailyVisitorsTable dailyData={dailyQuery.data?.data.daily} />
       </div>
     </>
   );
