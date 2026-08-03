@@ -264,7 +264,6 @@ export default function TouristGuidePage() {
           isOpen={showReorderModal}
           onClose={() => setShowReorderModal(false)}
           module="tour-place"
-          scopes={allCategories.map((c) => ({ value: c.id, label: c.name }))}
           invalidateKeys={[["tour-places"]]}
         />
       ) : (

@@ -69,7 +69,7 @@ export const POST = withAuth(
         return NextResponse.json({ message: "スポット名が既に存在します" }, { status: 400 });
 
       const position = positionValue.parse(body.position ?? body.sortOrder);
-      const place = await createOrdered("tour-place", categoryId, position, (tx, sortOrder) =>
+      const place = await createOrdered("tour-place", undefined, position, (tx, sortOrder) =>
         tx.tourPlace.create({
           data: {
             name,

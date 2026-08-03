@@ -51,7 +51,7 @@ export const PUT = withAuthParams(
       const place = await updateOrdered(
         "tour-place",
         params.id,
-        { previousScope: existing.categoryId, nextScope: nextCategoryId, position },
+        { position },
         (tx, resolvedSortOrder) =>
           tx.tourPlace.update({
             where: { id: params.id },
@@ -101,7 +101,7 @@ export const DELETE = withAuthParams(
       }
 
       await prisma.tourPlace.delete({ where: { id: params.id } });
-      await normalizeScope("tour-place", existing.categoryId);
+      await normalizeScope("tour-place");
       return NextResponse.json({ message: "Place deleted" });
     } catch (error) {
       console.error("Delete tourist place error:", error);
