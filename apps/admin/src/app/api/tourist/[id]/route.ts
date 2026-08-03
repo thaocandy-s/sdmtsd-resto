@@ -100,7 +100,7 @@ export const DELETE = withAuthParams(
         }
       }
 
-      await prisma.tourPlace.update({ where: { id: params.id }, data: { deletedAt: new Date() } });
+      await prisma.tourPlace.delete({ where: { id: params.id } });
       await normalizeScope("tour-place", existing.categoryId);
       return NextResponse.json({ message: "Place deleted" });
     } catch (error) {

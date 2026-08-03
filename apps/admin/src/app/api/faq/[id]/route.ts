@@ -41,9 +41,8 @@ export const PUT = withAuthParams(
 export const DELETE = withAuthParams(
   async (_request, { params }) => {
     try {
-      await prisma.faq.update({
+      await prisma.faq.delete({
         where: { id: params.id },
-        data: { deletedAt: new Date() },
       });
       await normalizeScope("faq", undefined);
       return NextResponse.json({ message: "FAQ deleted" });

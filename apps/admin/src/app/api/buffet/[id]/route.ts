@@ -55,10 +55,9 @@ export const DELETE = withAuthParams(
     try {
       const existing = await prisma.buffetCourse.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Buffet not found" }, { status: 404 });
-      // Soft delete first, then clean up storage
-      await prisma.buffetCourse.update({
+      // Hard delete from database
+      await prisma.buffetCourse.delete({
         where: { id: params.id },
-        data: { deletedAt: new Date() },
       });
       await normalizeScope("buffet");
       if (existing.imageUrl) {

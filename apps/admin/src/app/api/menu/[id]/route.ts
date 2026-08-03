@@ -127,10 +127,9 @@ export const DELETE = withAuthParams(
         return NextResponse.json({ message: "Food not found" }, { status: 404 });
       }
 
-      // Soft delete first, then clean up storage
-      await prisma.food.update({
+      // Hard delete from database
+      await prisma.food.delete({
         where: { id: params.id },
-        data: { deletedAt: new Date() },
       });
       await normalizeScope("food", existing.categoryId);
 

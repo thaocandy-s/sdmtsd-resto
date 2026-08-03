@@ -81,8 +81,8 @@ export const DELETE = withAuthParams(
     try {
       const existing = await prisma.drink.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Drink not found" }, { status: 404 });
-      // Soft delete first, then clean up storage
-      await prisma.drink.update({ where: { id: params.id }, data: { deletedAt: new Date() } });
+      // Hard delete from database
+      await prisma.drink.delete({ where: { id: params.id } });
       await normalizeScope("drink", existing.categoryId);
       if (existing.imageUrl) {
         await deleteMediaByUrl(existing.imageUrl);
