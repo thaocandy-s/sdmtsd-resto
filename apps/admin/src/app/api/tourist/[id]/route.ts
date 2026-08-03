@@ -66,7 +66,7 @@ export const PUT = withAuthParams(
               longitude: longitude ? parseFloat(longitude as any) : null,
               websiteUrl,
               googleMapUrl,
-              phone,
+              ...(phone !== undefined ? { phone } : {}),
               imageUrl,
               images: images || [],
               openingHours,
