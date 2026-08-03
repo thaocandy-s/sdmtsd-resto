@@ -28,7 +28,7 @@ export function DrinkBadges({
       )}
       {alcoholPercent !== null && alcoholPercent !== undefined && (
         <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 border border-purple-500/30 font-medium rounded-md whitespace-nowrap">
-          {alcoholPercent}% ABV
+          {alcoholPercent}%
         </span>
       )}
       {volume && (
