@@ -11,7 +11,7 @@ export function Providers({ children }: { children: ReactNode }) {
       <AuthProvider>{children}</AuthProvider>
       {/* Single global toast outlet — all feedback goes through lib/toast.ts helpers */}
       <Toaster
-        position="bottom-right"
+        position="top-right"
         theme="dark"
         richColors
         closeButton
