@@ -32,6 +32,7 @@ export function CategoryManagerModal({
   const [catForm, setCatForm] = useState<CategoryFormData>(emptyCategoryForm);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   if (!isOpen) return null;
 
@@ -67,8 +68,6 @@ export function CategoryManagerModal({
     });
     setIsAddingCat(true);
   };
-
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleCatDelete = (id: string) => {
     setDeleteConfirmId(id);
