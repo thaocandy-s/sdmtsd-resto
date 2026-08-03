@@ -42,7 +42,6 @@ export function PlaceFormModal({
           name: initialData.name,
           slug: initialData.slug,
           description: initialData.description || "",
-          shortDescription: "",
           imageUrl: initialData.imageUrl || "",
           images: initialData.images || [],
           categoryId: initialData.category?.id || "",
@@ -143,17 +142,7 @@ export function PlaceFormModal({
               className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
             />
           </div>
-          <div>
-            <label className="block text-sm text-foreground-secondary mb-1">
-              {t("shortDescLabel")}
-            </label>
-            <input
-              type="text"
-              value={form.shortDescription}
-              onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
-              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-            />
-          </div>
+
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
               {t("descriptionLabel")}

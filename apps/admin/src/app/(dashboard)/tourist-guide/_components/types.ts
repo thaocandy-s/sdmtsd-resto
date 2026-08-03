@@ -21,7 +21,6 @@ export type PlaceForm = {
   name: string;
   slug: string;
   description: string;
-  shortDescription: string;
   imageUrl: string;
   images: string[];
   categoryId: string;
@@ -41,7 +40,6 @@ export const emptyPlace: PlaceForm = {
   name: "",
   slug: "",
   description: "",
-  shortDescription: "",
   imageUrl: "",
   images: [],
   categoryId: "",

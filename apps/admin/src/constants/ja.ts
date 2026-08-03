@@ -218,7 +218,6 @@ export const ja = {
     noPlaces: "観光地が登録されていません",
     noCategories: "カテゴリーが登録されていません",
     nameLabel: "名称",
-    shortDescLabel: "短い説明",
     descriptionLabel: "説明",
     additionalImages: "追加の画像",
     categoryLabel: "カテゴリー",
