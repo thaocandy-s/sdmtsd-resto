@@ -60,7 +60,7 @@ export const PUT = withAuthParams(
               name,
               slug,
               description,
-              categoryId: nextCategoryId,
+              category: nextCategoryId ? { connect: { id: nextCategoryId } } : undefined,
               address,
               latitude: latitude ? parseFloat(latitude as any) : null,
               longitude: longitude ? parseFloat(longitude as any) : null,

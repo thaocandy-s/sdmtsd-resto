@@ -76,7 +76,7 @@ export const POST = withAuth(
             name,
             slug,
             description,
-            categoryId,
+            category: { connect: { id: categoryId } },
             address,
             latitude: latitude ? parseFloat(latitude) : null,
             longitude: longitude ? parseFloat(longitude) : null,
