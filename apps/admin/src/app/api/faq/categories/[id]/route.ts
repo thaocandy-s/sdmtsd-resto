@@ -8,17 +8,41 @@ export const PUT = withAuthParams(
   async (request, { params }) => {
     try {
       const body = await request.json();
+      const { name, slug, description, isActive } = body;
       const position = positionValue.parse(body.position);
-      delete body.position;
-      delete body.sortOrder;
+
+      const existing = await prisma.faqCategory.findUnique({
+        where: { id: params.id },
+      });
+      if (!existing) {
+        return NextResponse.json({ message: "Category not found" }, { status: 404 });
+      }
+
+      if (slug && slug !== existing.slug) {
+        const slugExists = await prisma.faqCategory.findUnique({
+          where: { slug },
+        });
+        if (slugExists) {
+          return NextResponse.json({ message: "カテゴリー名が既に存在します" }, { status: 400 });
+        }
+      }
 
       const category = await updateOrdered("faq-category", params.id, { position }, (tx) =>
-        tx.faqCategory.update({ where: { id: params.id }, data: body })
+        tx.faqCategory.update({
+          where: { id: params.id },
+          data: {
+            ...(name !== undefined ? { name } : {}),
+            ...(slug !== undefined ? { slug } : {}),
+            ...(description !== undefined ? { description } : {}),
+            ...(isActive !== undefined ? { isActive: Boolean(isActive) } : {}),
+          },
+        })
       );
       return NextResponse.json({ data: category });
     } catch (error) {
       console.error("Update FAQ category error:", error);
-      return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+      const message = error instanceof Error ? error.message : "Internal server error";
+      return NextResponse.json({ message }, { status: 500 });
     }
   },
   { module: "faq", action: "update" }

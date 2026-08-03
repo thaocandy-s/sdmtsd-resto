@@ -91,7 +91,7 @@ export function CategoryFormModal({
                 setForm({
                   ...form,
                   name,
-                  slug: editingId ? form.slug : toSlug(name),
+                  slug: toSlug(name),
                 });
               }}
               required
