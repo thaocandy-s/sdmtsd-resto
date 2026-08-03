@@ -167,6 +167,7 @@ export default function BulkActionsPage() {
         isOpen={showConfirm}
         title="Confirm Bulk Action"
         message={`Apply "${action}" to ${pendingIdList.length} item(s) in "${selectedModule?.label}"?`}
+        isLoading={loading}
         onConfirm={handleConfirmAction}
         onCancel={() => {
           setShowConfirm(false);

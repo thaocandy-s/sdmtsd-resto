@@ -93,9 +93,12 @@ export default function FaqPage() {
     }
   };
 
+  const [isSavingCat, setIsSavingCat] = useState(false);
+
   const handleCatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
+    setIsSavingCat(true);
     try {
       if (editingId) {
         await api.put(`/api/faq/categories/${editingId}`, catForm);
@@ -113,6 +116,8 @@ export default function FaqPage() {
       console.error("Save error:", error);
       setFormError(error instanceof Error ? error.message : "Save failed");
       showApiErrorToast(error, toastMessages.saveFailed);
+    } finally {
+      setIsSavingCat(false);
     }
   };
 
@@ -146,9 +151,12 @@ export default function FaqPage() {
     setDeleteTarget({ type, id });
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleteError("");
+    setIsDeleting(true);
     try {
       if (deleteTarget.type === "items") {
         await api.delete(`/api/faq/${deleteTarget.id}`);
@@ -164,6 +172,8 @@ export default function FaqPage() {
       console.error("Delete error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
       showApiErrorToast(error, toastMessages.deleteFailed);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -259,6 +269,7 @@ export default function FaqPage() {
         editingId={editingId}
         form={catForm}
         error={formError}
+        isSaving={isSavingCat}
         setForm={setCatForm}
         onClose={() => {
           setShowCatModal(false);
@@ -273,6 +284,7 @@ export default function FaqPage() {
         title={tc("delete")}
         message={t("deleteConfirm")}
         error={deleteError}
+        isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />

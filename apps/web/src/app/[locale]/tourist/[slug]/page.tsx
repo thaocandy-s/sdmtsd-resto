@@ -29,6 +29,7 @@ const getPlace = cache((slug: string) =>
       latitude: true,
       longitude: true,
       websiteUrl: true,
+      googleMapUrl: true,
       phone: true,
       imageUrl: true,
       images: true,

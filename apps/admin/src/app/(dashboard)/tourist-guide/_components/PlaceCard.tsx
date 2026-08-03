@@ -20,7 +20,6 @@ export function PlaceCard({ place, onEdit, onDelete }: PlaceCardProps) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-medium text-foreground truncate">{place.name}</p>
-          <p className="text-xs text-foreground-secondary truncate">{place.slug}</p>
           {place.category?.name && (
             <span className="inline-block text-xs bg-background-tertiary text-foreground-secondary px-2 py-0.5 rounded mt-1">
               {place.category.name}

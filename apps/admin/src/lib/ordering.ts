@@ -39,9 +39,9 @@ export const ORDERABLE_MODELS: Record<OrderableModule, OrderableConfig> = {
   "beer-art": { delegate: "beerArt", softDelete: true, permissionModule: "beerArt" },
   "katanuki-rule": { delegate: "katanukiRule", permissionModule: "challenge" },
   "katanuki-winner": { delegate: "katanukiWinner", permissionModule: "challenge" },
+  // Tourist places are ordered globally across all categories by design.
   "tour-place": {
     delegate: "tourPlace",
-    scopeField: "categoryId",
     softDelete: true,
     permissionModule: "tourist",
   },

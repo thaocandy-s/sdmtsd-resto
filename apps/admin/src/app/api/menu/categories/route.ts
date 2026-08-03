@@ -32,7 +32,7 @@ export const POST = withAuth(
 
       const existing = await prisma.foodCategory.findUnique({ where: { slug } });
       if (existing) {
-        return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
+        return NextResponse.json({ message: "カテゴリー名が既に存在します" }, { status: 400 });
       }
 
       const position = positionValue.parse(body.position);

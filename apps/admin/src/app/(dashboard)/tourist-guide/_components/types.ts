@@ -3,6 +3,13 @@ export interface Place {
   name: string;
   slug: string;
   description: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  websiteUrl?: string | null;
+  googleMapUrl?: string | null;
+  phone?: string | null;
+  openingHours?: string | null;
   imageUrl: string | null;
   images: string[];
   category: { id: string; name: string } | null;
@@ -21,20 +28,22 @@ export type PlaceForm = {
   name: string;
   slug: string;
   description: string;
-  shortDescription: string;
   imageUrl: string;
   images: string[];
   categoryId: string;
   address: string;
   latitude: string;
   longitude: string;
+  websiteUrl: string;
+  googleMapUrl: string;
+  openingHoursStart: string;
+  openingHoursEnd: string;
   isPublished: boolean;
 };
 
 export type CatForm = {
   name: string;
   slug: string;
-  description: string;
   position: string;
 };
 
@@ -42,19 +51,21 @@ export const emptyPlace: PlaceForm = {
   name: "",
   slug: "",
   description: "",
-  shortDescription: "",
   imageUrl: "",
   images: [],
   categoryId: "",
   address: "",
   latitude: "",
   longitude: "",
+  websiteUrl: "",
+  googleMapUrl: "",
+  openingHoursStart: "",
+  openingHoursEnd: "",
   isPublished: false,
 };
 
 export const emptyCat: CatForm = {
   name: "",
   slug: "",
-  description: "",
   position: "",
 };

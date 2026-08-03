@@ -66,7 +66,7 @@ export const PUT = withAuthParams(
       if (slug && slug !== existing.slug) {
         const slugExists = await prisma.food.findUnique({ where: { slug } });
         if (slugExists) {
-          return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
+          return NextResponse.json({ message: "メニュー名が既に存在します" }, { status: 400 });
         }
       }
 
@@ -127,10 +127,9 @@ export const DELETE = withAuthParams(
         return NextResponse.json({ message: "Food not found" }, { status: 404 });
       }
 
-      // Soft delete first, then clean up storage
-      await prisma.food.update({
+      // Hard delete from database
+      await prisma.food.delete({
         where: { id: params.id },
-        data: { deletedAt: new Date() },
       });
       await normalizeScope("food", existing.categoryId);
 

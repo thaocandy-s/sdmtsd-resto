@@ -147,7 +147,8 @@
     "about": "スポットについて",
     "info": "詳細情報",
     "phone": "電話番号",
-    "visitWebsite": "ウェブサイトを見る"
+    "visitWebsite": "ウェブサイトを見る",
+    "googleMap": "Google マップ"
   },
   "faq": {
     "title": "よくある質問",

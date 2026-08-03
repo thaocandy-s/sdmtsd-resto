@@ -21,7 +21,6 @@ export function PlaceRow({ place, onEdit, onDelete }: PlaceRowProps) {
           </div>
           <div>
             <p className="font-medium text-foreground">{place.name}</p>
-            <p className="text-xs text-foreground-secondary">{place.slug}</p>
           </div>
         </div>
       </td>

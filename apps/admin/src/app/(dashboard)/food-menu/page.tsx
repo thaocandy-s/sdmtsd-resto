@@ -230,6 +230,7 @@ export default function FoodMenuPage() {
         title={tCommon("delete")}
         message={tFood("deleteConfirm")}
         error={deleteError}
+        isLoading={deleteMutation.isPending}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setDeleteConfirmId(null);

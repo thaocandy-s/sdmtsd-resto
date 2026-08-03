@@ -26,7 +26,7 @@ export const PUT = withAuthParams(
       if (body.slug && body.slug !== existing.slug) {
         const slugExists = await prisma.tourPlace.findUnique({ where: { slug: body.slug } });
         if (slugExists)
-          return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
+          return NextResponse.json({ message: "スポット名が既に存在します" }, { status: 400 });
       }
 
       const {
@@ -38,6 +38,7 @@ export const PUT = withAuthParams(
         latitude,
         longitude,
         websiteUrl,
+        googleMapUrl,
         phone,
         imageUrl,
         images,
@@ -51,7 +52,7 @@ export const PUT = withAuthParams(
       const place = await updateOrdered(
         "tour-place",
         params.id,
-        { previousScope: existing.categoryId, nextScope: nextCategoryId, position },
+        { position },
         (tx, resolvedSortOrder) =>
           tx.tourPlace.update({
             where: { id: params.id },
@@ -59,12 +60,13 @@ export const PUT = withAuthParams(
               name,
               slug,
               description,
-              categoryId: nextCategoryId,
+              category: nextCategoryId ? { connect: { id: nextCategoryId } } : undefined,
               address,
               latitude: latitude ? parseFloat(latitude as any) : null,
               longitude: longitude ? parseFloat(longitude as any) : null,
               websiteUrl,
-              phone,
+              googleMapUrl,
+              ...(phone !== undefined ? { phone } : {}),
               imageUrl,
               images: images || [],
               openingHours,
@@ -100,8 +102,8 @@ export const DELETE = withAuthParams(
         }
       }
 
-      await prisma.tourPlace.update({ where: { id: params.id }, data: { deletedAt: new Date() } });
-      await normalizeScope("tour-place", existing.categoryId);
+      await prisma.tourPlace.delete({ where: { id: params.id } });
+      await normalizeScope("tour-place");
       return NextResponse.json({ message: "Place deleted" });
     } catch (error) {
       console.error("Delete tourist place error:", error);

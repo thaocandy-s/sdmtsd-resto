@@ -108,9 +108,12 @@ export default function RolesPage() {
     setDeleteConfirmRole(role);
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleConfirmDelete = async () => {
     if (!deleteConfirmRole) return;
     setDeleteError("");
+    setIsDeleting(true);
     try {
       await api.delete(`/api/roles/${deleteConfirmRole.id}`);
       queryClient.invalidateQueries({ queryKey: ["roles"] });
@@ -120,6 +123,8 @@ export default function RolesPage() {
       console.error("Failed to delete role:", error);
       setDeleteError(error instanceof Error ? error.message : "Failed to delete role");
       showApiErrorToast(error, toastMessages.deleteFailed);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -360,6 +365,7 @@ export default function RolesPage() {
         title="Delete Role"
         message={`Are you sure you want to delete the role "${deleteConfirmRole?.label}"?`}
         error={deleteError}
+        isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setDeleteConfirmRole(null);

@@ -191,9 +191,12 @@ export default function ChallengePage() {
     setDeleteTarget({ type, id });
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleteError("");
+    setIsDeleting(true);
     try {
       await api.delete(`/api/challenge/${deleteTarget.type}/${deleteTarget.id}`);
       setDeleteTarget(null);
@@ -203,6 +206,8 @@ export default function ChallengePage() {
       console.error("Delete error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
       showApiErrorToast(error, toastMessages.deleteFailed);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -366,6 +371,7 @@ export default function ChallengePage() {
         title={tc("delete")}
         message={t("deleteConfirm")}
         error={deleteError}
+        isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setDeleteTarget(null);

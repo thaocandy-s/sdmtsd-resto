@@ -26,7 +26,8 @@ export const POST = withAuth(
         return NextResponse.json({ message: "Name and slug are required" }, { status: 400 });
 
       const existing = await prisma.drinkCategory.findUnique({ where: { slug } });
-      if (existing) return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
+      if (existing)
+        return NextResponse.json({ message: "カテゴリー名が既に存在します" }, { status: 400 });
 
       const position = positionValue.parse(body.position);
       const category = await createOrdered("drink-category", undefined, position, (tx, sortOrder) =>

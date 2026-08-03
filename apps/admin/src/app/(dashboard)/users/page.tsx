@@ -118,9 +118,12 @@ export default function UsersPage() {
     setDeleteConfirmUser(user);
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleConfirmDelete = async () => {
     if (!deleteConfirmUser) return;
     setDeleteError("");
+    setIsDeleting(true);
     try {
       await api.delete(`/api/users/${deleteConfirmUser.id}`);
       queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -130,6 +133,8 @@ export default function UsersPage() {
       console.error("Failed to delete user:", error);
       setDeleteError(error instanceof Error ? error.message : "Failed to delete user");
       showApiErrorToast(error, toastMessages.deleteFailed);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -415,6 +420,7 @@ export default function UsersPage() {
         title="Delete User"
         message={`Are you sure you want to delete ${deleteConfirmUser?.firstName} ${deleteConfirmUser?.lastName}?`}
         error={deleteError}
+        isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setDeleteConfirmUser(null);

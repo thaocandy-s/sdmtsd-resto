@@ -25,7 +25,7 @@ export const PUT = withAuthParams(
       if (data.slug && data.slug !== existing.slug) {
         const slugExists = await prisma.buffetCourse.findUnique({ where: { slug: data.slug } });
         if (slugExists)
-          return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
+          return NextResponse.json({ message: "メニュー名が既に存在します" }, { status: 400 });
       }
 
       const buffet = await updateOrdered("buffet", params.id, { position }, (tx) =>
@@ -55,10 +55,9 @@ export const DELETE = withAuthParams(
     try {
       const existing = await prisma.buffetCourse.findUnique({ where: { id: params.id } });
       if (!existing) return NextResponse.json({ message: "Buffet not found" }, { status: 404 });
-      // Soft delete first, then clean up storage
-      await prisma.buffetCourse.update({
+      // Hard delete from database
+      await prisma.buffetCourse.delete({
         where: { id: params.id },
-        data: { deletedAt: new Date() },
       });
       await normalizeScope("buffet");
       if (existing.imageUrl) {

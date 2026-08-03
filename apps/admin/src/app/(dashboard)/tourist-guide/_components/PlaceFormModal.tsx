@@ -36,19 +36,29 @@ export function PlaceFormModal({
     if (isOpen) {
       setImageFile(null);
       setGalleryFiles([]);
-      setError("");
       if (editingId && initialData) {
+        const rawHours = initialData.openingHours || "";
+        const parts = rawHours.split(/\s*[-~～—]\s*/);
         setForm({
           name: initialData.name,
           slug: initialData.slug,
           description: initialData.description || "",
-          shortDescription: "",
           imageUrl: initialData.imageUrl || "",
           images: initialData.images || [],
           categoryId: initialData.category?.id || "",
-          address: "",
-          latitude: "",
-          longitude: "",
+          address: initialData.address || "",
+          websiteUrl: initialData.websiteUrl || "",
+          googleMapUrl: initialData.googleMapUrl || "",
+          openingHoursStart: parts[0] || "",
+          openingHoursEnd: parts[1] || "",
+          latitude:
+            initialData.latitude !== null && initialData.latitude !== undefined
+              ? String(initialData.latitude)
+              : "",
+          longitude:
+            initialData.longitude !== null && initialData.longitude !== undefined
+              ? String(initialData.longitude)
+              : "",
           isPublished: initialData.isPublished,
         });
       } else {
@@ -84,8 +94,16 @@ export function PlaceFormModal({
         }
       }
 
+      const openingHours =
+        form.openingHoursStart || form.openingHoursEnd
+          ? `${form.openingHoursStart || ""}${form.openingHoursStart && form.openingHoursEnd ? " - " : ""}${form.openingHoursEnd || ""}`
+          : "";
+
       const payload = {
         ...form,
+        openingHours: openingHours || null,
+        websiteUrl: form.websiteUrl || null,
+        googleMapUrl: form.googleMapUrl || null,
         imageUrl: finalImageUrl,
         images: finalImages,
         latitude: form.latitude ? parseFloat(form.latitude) : null,
@@ -136,24 +154,14 @@ export function PlaceFormModal({
                 setForm({
                   ...form,
                   name,
-                  slug: editingId ? form.slug : toSlug(name),
+                  slug: toSlug(name),
                 });
               }}
               required
               className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
             />
           </div>
-          <div>
-            <label className="block text-sm text-foreground-secondary mb-1">
-              {t("shortDescLabel")}
-            </label>
-            <input
-              type="text"
-              value={form.shortDescription}
-              onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
-              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-            />
-          </div>
+
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
               {t("descriptionLabel")}
@@ -209,6 +217,53 @@ export function PlaceFormModal({
               type="text"
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
+              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-foreground-secondary mb-1">
+              {t("openingHoursLabel")}
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="time"
+                value={form.openingHoursStart}
+                onChange={(e) => setForm({ ...form, openingHoursStart: e.target.value })}
+                className="flex-1 bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+              />
+              <span className="text-foreground-secondary">〜</span>
+              <input
+                type="time"
+                value={form.openingHoursEnd}
+                onChange={(e) => setForm({ ...form, openingHoursEnd: e.target.value })}
+                className="flex-1 bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-foreground-secondary mb-1">
+              {t("websiteUrlLabel")}
+            </label>
+            <input
+              type="url"
+              placeholder="https://example.com"
+              value={form.websiteUrl}
+              onChange={(e) => setForm({ ...form, websiteUrl: e.target.value })}
+              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-foreground-secondary mb-1">
+              {t("googleMapUrlLabel")}
+            </label>
+            <input
+              type="url"
+              placeholder="https://maps.google.com/..."
+              value={form.googleMapUrl}
+              onChange={(e) => setForm({ ...form, googleMapUrl: e.target.value })}
               className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
             />
           </div>

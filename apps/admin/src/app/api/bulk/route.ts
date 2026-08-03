@@ -61,14 +61,13 @@ export const POST = withAuth(
               { status: 400 }
             );
           break;
-        case "delete":
-          if (config.hasDeletedAt) data = { deletedAt: new Date() };
-          else
-            return NextResponse.json(
-              { message: "Soft delete not supported for this module" },
-              { status: 400 }
-            );
-          break;
+        case "delete": {
+          const deleteModel = config.model as {
+            deleteMany: (args: unknown) => Promise<{ count: number }>;
+          };
+          const result = await deleteModel.deleteMany({ where: { id: { in: ids } } });
+          return NextResponse.json({ data: { affected: result.count } });
+        }
         default:
           return NextResponse.json({ message: `Unknown action: ${action}` }, { status: 400 });
       }

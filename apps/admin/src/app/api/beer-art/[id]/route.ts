@@ -44,7 +44,7 @@ export const DELETE = withAuthParams(
       if (existing.imageUrl) {
         await deleteMediaByUrl(existing.imageUrl);
       }
-      await prisma.beerArt.update({ where: { id: params.id }, data: { deletedAt: new Date() } });
+      await prisma.beerArt.delete({ where: { id: params.id } });
       await normalizeScope("beer-art");
       return NextResponse.json({ message: "Item deleted successfully" });
     } catch (error) {

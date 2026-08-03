@@ -136,9 +136,12 @@ export default function HomeManagementPage() {
     setDeleteConfirmId(id);
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleConfirmDelete = async () => {
     if (!deleteConfirmType || !deleteConfirmId) return;
     setDeleteError("");
+    setIsDeleting(true);
     try {
       if (deleteConfirmType === "banner") {
         await api.delete(`/api/banners/${deleteConfirmId}`);
@@ -154,6 +157,8 @@ export default function HomeManagementPage() {
       console.error(`Delete ${deleteConfirmType} error:`, error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
       showApiErrorToast(error, toastMessages.deleteFailed);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -242,6 +247,7 @@ export default function HomeManagementPage() {
         message={
           deleteConfirmType === "banner" ? t("deleteBannerConfirm") : t("deleteEventConfirm")
         }
+        isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         error={deleteError}
         onCancel={() => {
