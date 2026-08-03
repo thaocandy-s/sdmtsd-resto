@@ -34,7 +34,6 @@ export type PlaceForm = {
 export type CatForm = {
   name: string;
   slug: string;
-  description: string;
   position: string;
 };
 
@@ -55,6 +54,5 @@ export const emptyPlace: PlaceForm = {
 export const emptyCat: CatForm = {
   name: "",
   slug: "",
-  description: "",
   position: "",
 };

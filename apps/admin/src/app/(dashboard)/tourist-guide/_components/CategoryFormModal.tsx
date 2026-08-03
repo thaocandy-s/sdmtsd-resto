@@ -33,7 +33,6 @@ export function CategoryFormModal({
       setForm({
         name: initialData.name,
         slug: initialData.slug,
-        description: initialData.description || "",
         position: "",
       });
     } else {

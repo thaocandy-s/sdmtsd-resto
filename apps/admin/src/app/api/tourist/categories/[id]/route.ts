@@ -33,7 +33,6 @@ export const PUT = withAuthParams(
           data: {
             ...(name !== undefined ? { name } : {}),
             ...(slug !== undefined ? { slug } : {}),
-            ...(description !== undefined ? { description } : {}),
             ...(isActive !== undefined ? { isActive: Boolean(isActive) } : {}),
           },
         })
