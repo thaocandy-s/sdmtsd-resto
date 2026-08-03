@@ -41,11 +41,13 @@ export function PositionField({
   onChange,
   label,
   hint,
+  disabled,
 }: {
   value: string;
   onChange: (value: string) => void;
   label: string;
   hint: string;
+  disabled?: boolean;
 }) {
   return (
     <div>
@@ -55,8 +57,9 @@ export function PositionField({
         min={1}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
         placeholder="—"
-        className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+        className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500 disabled:opacity-50"
       />
       <p className="mt-1 text-xs text-foreground-secondary">{hint}</p>
     </div>

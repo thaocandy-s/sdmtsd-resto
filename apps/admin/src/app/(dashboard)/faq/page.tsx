@@ -93,9 +93,12 @@ export default function FaqPage() {
     }
   };
 
+  const [isSavingCat, setIsSavingCat] = useState(false);
+
   const handleCatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
+    setIsSavingCat(true);
     try {
       if (editingId) {
         await api.put(`/api/faq/categories/${editingId}`, catForm);
@@ -113,6 +116,8 @@ export default function FaqPage() {
       console.error("Save error:", error);
       setFormError(error instanceof Error ? error.message : "Save failed");
       showApiErrorToast(error, toastMessages.saveFailed);
+    } finally {
+      setIsSavingCat(false);
     }
   };
 
@@ -264,6 +269,7 @@ export default function FaqPage() {
         editingId={editingId}
         form={catForm}
         error={formError}
+        isSaving={isSavingCat}
         setForm={setCatForm}
         onClose={() => {
           setShowCatModal(false);
