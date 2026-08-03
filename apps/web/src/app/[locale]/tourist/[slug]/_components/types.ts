@@ -7,6 +7,7 @@ export interface TourPlace {
   latitude: number | null;
   longitude: number | null;
   websiteUrl: string | null;
+  googleMapUrl: string | null;
   phone: string | null;
   imageUrl: string | null;
   images: string[];

@@ -307,6 +307,7 @@ model TourPlace {
   imageUrl     String?
   images       String[]
   openingHours String?
+  googleMapUrl String?
   isPublished  Boolean      @default(false)
   sortOrder    Int          @default(0)
   createdAt    DateTime     @default(now())

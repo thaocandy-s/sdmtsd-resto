@@ -7,6 +7,7 @@ export interface Place {
   latitude: number | null;
   longitude: number | null;
   websiteUrl?: string | null;
+  googleMapUrl?: string | null;
   phone?: string | null;
   openingHours?: string | null;
   imageUrl: string | null;
@@ -33,6 +34,10 @@ export type PlaceForm = {
   address: string;
   latitude: string;
   longitude: string;
+  websiteUrl: string;
+  googleMapUrl: string;
+  openingHoursStart: string;
+  openingHoursEnd: string;
   isPublished: boolean;
 };
 
@@ -52,6 +57,10 @@ export const emptyPlace: PlaceForm = {
   address: "",
   latitude: "",
   longitude: "",
+  websiteUrl: "",
+  googleMapUrl: "",
+  openingHoursStart: "",
+  openingHoursEnd: "",
   isPublished: false,
 };
 
