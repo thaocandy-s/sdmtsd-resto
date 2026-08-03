@@ -45,9 +45,15 @@ export function PlaceFormModal({
           imageUrl: initialData.imageUrl || "",
           images: initialData.images || [],
           categoryId: initialData.category?.id || "",
-          address: "",
-          latitude: "",
-          longitude: "",
+          address: initialData.address || "",
+          latitude:
+            initialData.latitude !== null && initialData.latitude !== undefined
+              ? String(initialData.latitude)
+              : "",
+          longitude:
+            initialData.longitude !== null && initialData.longitude !== undefined
+              ? String(initialData.longitude)
+              : "",
           isPublished: initialData.isPublished,
         });
       } else {

@@ -3,6 +3,12 @@ export interface Place {
   name: string;
   slug: string;
   description: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  websiteUrl?: string | null;
+  phone?: string | null;
+  openingHours?: string | null;
   imageUrl: string | null;
   images: string[];
   category: { id: string; name: string } | null;
