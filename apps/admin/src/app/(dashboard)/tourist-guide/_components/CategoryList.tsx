@@ -40,7 +40,6 @@ export function CategoryList({
               <OrderBadge order={idx + 1} />
               <div>
                 <h3 className="font-medium text-foreground">{c.name}</h3>
-                <p className="text-sm text-foreground-secondary">{c.slug}</p>
               </div>
             </div>
             <div className="flex gap-3">

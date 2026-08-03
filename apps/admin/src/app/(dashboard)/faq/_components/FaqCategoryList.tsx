@@ -47,7 +47,6 @@ export function FaqCategoryList({
               <OrderBadge order={index + 1} />
               <div className="min-w-0">
                 <h3 className="font-medium text-foreground truncate">{c.name}</h3>
-                <p className="text-sm text-foreground-secondary truncate">{c.slug}</p>
               </div>
             </div>
             <div className="flex gap-3 shrink-0">

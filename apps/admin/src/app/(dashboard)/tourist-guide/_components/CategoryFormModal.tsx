@@ -98,17 +98,7 @@ export function CategoryFormModal({
               className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
             />
           </div>
-          <div>
-            <label className="block text-sm text-foreground-secondary mb-1">
-              {t("descriptionLabel")}
-            </label>
-            <textarea
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              rows={2}
-              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-            />
-          </div>
+
           <AdvancedSection title={tc("advancedOptions")}>
             <PositionField
               value={form.position}

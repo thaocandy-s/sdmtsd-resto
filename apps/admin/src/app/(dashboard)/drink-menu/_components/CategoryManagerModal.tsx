@@ -141,18 +141,7 @@ export function CategoryManagerModal({
                   className="w-full bg-background-secondary border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-gold-500"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-foreground-secondary mb-1">
-                  {t("descWithDisplay")}
-                </label>
-                <textarea
-                  value={catForm.description}
-                  onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
-                  rows={2}
-                  placeholder={t("descPlaceholder")}
-                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-gold-500"
-                />
-              </div>
+
               <AdvancedSection title={tc("advancedOptions")}>
                 <PositionField
                   value={catForm.position}
@@ -216,10 +205,6 @@ export function CategoryManagerModal({
                   <OrderBadge order={index + 1} />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-foreground truncate">{cat.name}</div>
-                    <div className="text-xs text-foreground-tertiary truncate">
-                      {cat.slug}
-                      {cat.description ? ` · ${cat.description}` : ""}
-                    </div>
                   </div>
                   <div className="text-xs bg-background-tertiary px-2 py-0.5 rounded text-foreground-secondary whitespace-nowrap shrink-0">
                     {cat._count?.drinks ?? 0} {t("itemsCount")}
