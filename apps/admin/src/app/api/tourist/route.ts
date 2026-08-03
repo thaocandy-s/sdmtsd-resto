@@ -65,7 +65,8 @@ export const POST = withAuth(
         );
 
       const existing = await prisma.tourPlace.findUnique({ where: { slug } });
-      if (existing) return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
+      if (existing)
+        return NextResponse.json({ message: "スポット名が既に存在します" }, { status: 400 });
 
       const position = positionValue.parse(body.position ?? body.sortOrder);
       const place = await createOrdered("tour-place", categoryId, position, (tx, sortOrder) =>

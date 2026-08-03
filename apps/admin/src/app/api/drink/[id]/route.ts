@@ -39,7 +39,7 @@ export const PUT = withAuthParams(
       if (data.slug && data.slug !== existing.slug) {
         const slugExists = await prisma.drink.findUnique({ where: { slug: data.slug } });
         if (slugExists)
-          return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
+          return NextResponse.json({ message: "メニュー名が既に存在します" }, { status: 400 });
       }
 
       const drink = await updateOrdered(

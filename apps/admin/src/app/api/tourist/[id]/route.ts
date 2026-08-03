@@ -26,7 +26,7 @@ export const PUT = withAuthParams(
       if (body.slug && body.slug !== existing.slug) {
         const slugExists = await prisma.tourPlace.findUnique({ where: { slug: body.slug } });
         if (slugExists)
-          return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
+          return NextResponse.json({ message: "スポット名が既に存在します" }, { status: 400 });
       }
 
       const {

@@ -24,7 +24,7 @@ export const PUT = withAuthParams(
           where: { slug },
         });
         if (slugExists) {
-          return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
+          return NextResponse.json({ message: "カテゴリー名が既に存在します" }, { status: 400 });
         }
       }
 

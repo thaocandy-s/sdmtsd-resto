@@ -81,7 +81,8 @@ export const POST = withAuth(
       } = parsed.data;
 
       const existing = await prisma.buffetCourse.findUnique({ where: { slug } });
-      if (existing) return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
+      if (existing)
+        return NextResponse.json({ message: "メニュー名が既に存在します" }, { status: 400 });
 
       const buffet = await createOrdered("buffet", undefined, position, (tx, sortOrder) =>
         tx.buffetCourse.create({
