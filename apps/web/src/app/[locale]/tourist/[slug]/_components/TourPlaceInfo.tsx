@@ -63,7 +63,7 @@ export function TourPlaceInfo({ place }: TourPlaceInfoProps) {
           )}
           {place.googleMapUrl && (
             <div className="flex gap-3">
-              <dt className="text-foreground-secondary w-24 flex-shrink-0">Google Map</dt>
+              <dt className="text-foreground-secondary w-24 flex-shrink-0">{t("googleMap")}</dt>
               <dd className="text-foreground">
                 <a
                   href={place.googleMapUrl}

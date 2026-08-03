@@ -223,7 +223,7 @@ export function PlaceFormModal({
 
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              営業時間 (Opening Hours)
+              {t("openingHoursLabel")}
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -244,7 +244,7 @@ export function PlaceFormModal({
 
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              ウェブサイト (Website Link)
+              {t("websiteUrlLabel")}
             </label>
             <input
               type="url"
@@ -257,7 +257,7 @@ export function PlaceFormModal({
 
           <div>
             <label className="block text-sm text-foreground-secondary mb-1">
-              Google Map リンク (Google Maps Link)
+              {t("googleMapUrlLabel")}
             </label>
             <input
               type="url"

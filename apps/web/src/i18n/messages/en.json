@@ -147,7 +147,8 @@
     "about": "About",
     "info": "Information",
     "phone": "Phone",
-    "visitWebsite": "Visit Website"
+    "visitWebsite": "Visit Website",
+    "googleMap": "Google Maps"
   },
   "faq": {
     "title": "Frequently Asked Questions",
