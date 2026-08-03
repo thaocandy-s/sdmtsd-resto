@@ -68,6 +68,8 @@ export function CategoryManagerModal({
     setIsAddingCat(true);
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleCatDelete = (id: string) => {
     setDeleteConfirmId(id);
   };
@@ -75,16 +77,18 @@ export function CategoryManagerModal({
   const handleConfirmDelete = async () => {
     if (!deleteConfirmId) return;
     setError("");
+    setIsDeleting(true);
     try {
       await api.delete(`/api/drink/categories/${deleteConfirmId}`);
       onDataChange();
       showSuccessToast(toastMessages.deleted);
+      setDeleteConfirmId(null);
     } catch (error) {
       console.error("Delete category error:", error);
       setError(error instanceof Error ? error.message : "Delete failed");
       showApiErrorToast(error, toastMessages.deleteFailed);
     } finally {
-      setDeleteConfirmId(null);
+      setIsDeleting(false);
     }
   };
 
@@ -244,6 +248,7 @@ export function CategoryManagerModal({
         isOpen={deleteConfirmId !== null}
         title={tc("delete")}
         message={t("deleteCategoryConfirm")}
+        isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteConfirmId(null)}
       />

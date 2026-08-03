@@ -295,6 +295,7 @@ export default function BuffetMenuPage() {
         title={tc("delete")}
         message={t("deleteConfirm")}
         error={deleteError}
+        isLoading={deleteMutation.isPending}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setDeleteConfirmId(null);

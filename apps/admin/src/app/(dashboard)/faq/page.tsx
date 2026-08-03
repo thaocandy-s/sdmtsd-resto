@@ -146,9 +146,12 @@ export default function FaqPage() {
     setDeleteTarget({ type, id });
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleteError("");
+    setIsDeleting(true);
     try {
       if (deleteTarget.type === "items") {
         await api.delete(`/api/faq/${deleteTarget.id}`);
@@ -164,6 +167,8 @@ export default function FaqPage() {
       console.error("Delete error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
       showApiErrorToast(error, toastMessages.deleteFailed);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -273,6 +278,7 @@ export default function FaqPage() {
         title={tc("delete")}
         message={t("deleteConfirm")}
         error={deleteError}
+        isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />

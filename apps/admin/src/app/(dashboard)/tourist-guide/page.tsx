@@ -79,9 +79,12 @@ export default function TouristGuidePage() {
     queryClient.invalidateQueries({ queryKey: ["tour-categories"] });
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleConfirmDelete = async () => {
     if (!deleteConfirmType || !deleteConfirmId) return;
     setDeleteError("");
+    setIsDeleting(true);
     try {
       if (deleteConfirmType === "places") await api.delete(`/api/tourist/${deleteConfirmId}`);
       else await api.delete(`/api/tourist/categories/${deleteConfirmId}`);
@@ -93,6 +96,8 @@ export default function TouristGuidePage() {
       console.error("Delete error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
       showApiErrorToast(error, toastMessages.deleteFailed);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -245,6 +250,7 @@ export default function TouristGuidePage() {
         title={tc("delete")}
         message={t("deleteConfirm")}
         error={deleteError}
+        isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setDeleteConfirmType(null);

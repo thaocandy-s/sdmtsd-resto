@@ -108,9 +108,12 @@ export default function SeoPage() {
     setDeleteConfirmId(id);
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleConfirmDelete = async () => {
     if (!deleteConfirmId) return;
     setDeleteError("");
+    setIsDeleting(true);
     try {
       await api.delete(`/api/seo/${deleteConfirmId}`);
       queryClient.invalidateQueries({ queryKey: ["seo-metas"] });
@@ -120,6 +123,8 @@ export default function SeoPage() {
       console.error("Delete error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
       showApiErrorToast(error, toastMessages.deleteFailed);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -357,6 +362,7 @@ export default function SeoPage() {
         title="Delete SEO Meta"
         message="Are you sure you want to delete this SEO meta?"
         error={deleteError}
+        isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setDeleteConfirmId(null);

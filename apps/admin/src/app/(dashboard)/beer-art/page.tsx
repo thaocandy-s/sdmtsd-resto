@@ -108,9 +108,12 @@ export default function BeerArtPage() {
     setShowModal(true);
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleConfirmDelete = async () => {
     if (!deleteConfirmId) return;
     setDeleteError("");
+    setIsDeleting(true);
     try {
       await api.delete(`/api/beer-art/${deleteConfirmId}`);
       setDeleteConfirmId(null);
@@ -120,6 +123,8 @@ export default function BeerArtPage() {
       console.error("Delete error:", error);
       setDeleteError(error instanceof Error ? error.message : "Delete failed");
       showApiErrorToast(error, toastMessages.deleteFailed);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -207,6 +212,7 @@ export default function BeerArtPage() {
         title={tc("delete")}
         message={t("deleteConfirm")}
         error={deleteError}
+        isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setDeleteConfirmId(null);
