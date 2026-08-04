@@ -159,7 +159,7 @@ export function BannerFormModal({
       onClose();
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Failed to save banner");
+      setError(err.message || "保存に失敗しました");
       showApiErrorToast(err, toastMessages.saveFailed);
     } finally {
       setIsSaving(false);
@@ -299,7 +299,7 @@ export function BannerFormModal({
               disabled={isSaving}
               className="px-4 py-2 bg-gold-500 text-background font-semibold rounded-lg hover:bg-gold-600 transition-colors disabled:opacity-50"
             >
-              {isSaving ? tc("loading") : tc("save")}
+              {isSaving ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>

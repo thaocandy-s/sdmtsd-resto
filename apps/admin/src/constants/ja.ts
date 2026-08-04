@@ -48,6 +48,7 @@ export const ja = {
     loggingOut: "ログアウト中...",
     language: "言語",
     saving: "保存中...",
+    loading: "読み込み中...",
     imageRequired: "画像は必須です",
     previous: "前へ",
     next: "次へ",
