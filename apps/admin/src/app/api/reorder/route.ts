@@ -24,6 +24,8 @@ const DISPLAY_FIELDS: Record<OrderableModule, { label: string; image?: string }>
   "drink-category": { label: "name" },
   buffet: { label: "name", image: "imageUrl" },
   "beer-art": { label: "title", image: "imageUrl" },
+  "media-coverage": { label: "title", image: "imageUrl" },
+  "media-outlet": { label: "name", image: "logoUrl" },
   "katanuki-rule": { label: "title" },
   "katanuki-winner": { label: "participantName", image: "imageUrl" },
   "tour-place": { label: "name", image: "imageUrl" },

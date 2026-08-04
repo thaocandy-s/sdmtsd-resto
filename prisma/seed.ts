@@ -1,4 +1,4 @@
-import { PrismaClient, ContentStatus } from "@prisma/client";
+import { PrismaClient, ContentStatus, MediaCoverageCategory } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -54,6 +54,8 @@ async function main() {
     "drink",
     "buffet",
     "beer_art",
+    "media_coverage",
+    "media_outlet",
     "challenge",
     "tourist",
     "faq",
@@ -111,6 +113,8 @@ async function main() {
     "drink",
     "buffet",
     "beer_art",
+    "media_coverage",
+    "media_outlet",
     "challenge",
     "tourist",
     "faq",
@@ -567,6 +571,142 @@ async function main() {
       where: { id: art.id },
       update: art,
       create: art,
+    });
+  }
+
+  // =====================================
+  // 5. MEDIA COVERAGE
+  // =====================================
+  const mediaOutletData = [
+    {
+      id: "outlet-nhk",
+      name: "NHK",
+      logoUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/NHK_logo.svg/320px-NHK_logo.svg.png",
+      websiteUrl: "https://www.nhk.or.jp",
+      isActive: true,
+      sortOrder: 1,
+    },
+    {
+      id: "outlet-forbes",
+      name: "Forbes",
+      logoUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Forbes_logo.svg/320px-Forbes_logo.svg.png",
+      websiteUrl: "https://www.forbes.com",
+      isActive: true,
+      sortOrder: 2,
+    },
+    {
+      id: "outlet-michelin",
+      name: "MICHELIN",
+      logoUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Michelin_logo.svg/320px-Michelin_logo.svg.png",
+      websiteUrl: "https://guide.michelin.com",
+      isActive: true,
+      sortOrder: 3,
+    },
+    {
+      id: "outlet-timeout",
+      name: "Time Out",
+      logoUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Time_Out_logo.svg/320px-Time_Out_logo.svg.png",
+      websiteUrl: "https://www.timeout.com",
+      isActive: true,
+      sortOrder: 4,
+    },
+  ];
+
+  for (const outlet of mediaOutletData) {
+    await prisma.mediaOutlet.upsert({
+      where: { id: outlet.id },
+      update: outlet,
+      create: outlet,
+    });
+  }
+
+  const mediaCoverageData = [
+    {
+      id: "media-coverage-1",
+      publishedAt: new Date("2025-11-15"),
+      mediaName: "NHK",
+      title: "浅草の名店「三代目土信田商店」特集",
+      description:
+        "伝統的なもんじゃ焼きの技と、職人による泡アートビールが話題。浅草を代表する鉄板料理店として紹介されました。",
+      imageUrl:
+        "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop",
+      externalUrl: "https://www.nhk.or.jp",
+      category: MediaCoverageCategory.TV,
+      isFeatured: true,
+      isPublished: true,
+      sortOrder: 1,
+    },
+    {
+      id: "media-coverage-2",
+      publishedAt: new Date("2025-09-20"),
+      mediaName: "Forbes Japan",
+      title: "東京の隠れた名店10選に選出",
+      description:
+        "本格もんじゃと居酒屋メニューのバランスが評価され、Forbes Japanの注目店舗として掲載されました。",
+      imageUrl:
+        "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&auto=format&fit=crop",
+      externalUrl: "https://www.forbes.com",
+      category: MediaCoverageCategory.MAGAZINE,
+      isFeatured: false,
+      isPublished: true,
+      sortOrder: 2,
+    },
+    {
+      id: "media-coverage-3",
+      publishedAt: new Date("2025-08-05"),
+      mediaName: "Time Out Tokyo",
+      title: "浅草エリアのベストもんじゃ店",
+      description:
+        "観光客にも地元の常連にも愛される、飯田橋・浅草エリアのおすすめもんじゃ焼き店として紹介。",
+      imageUrl:
+        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop",
+      externalUrl: "https://www.timeout.com",
+      category: MediaCoverageCategory.WEB,
+      isFeatured: false,
+      isPublished: true,
+      sortOrder: 3,
+    },
+    {
+      id: "media-coverage-4",
+      publishedAt: new Date("2025-07-12"),
+      mediaName: "YouTube / 東京グルメチャンネル",
+      title: "【もんじゃ】プロが教える正しい焼き方",
+      description:
+        "人気グルメYouTuberによる店内取材。もんじゃ焼きの焼き方からビアアートまで密着レポート。",
+      imageUrl:
+        "https://images.unsplash.com/photo-1571613316887-6f8d5cbf7ef7?w=800&auto=format&fit=crop",
+      externalUrl: "https://www.youtube.com",
+      category: MediaCoverageCategory.YOUTUBE,
+      isFeatured: false,
+      isPublished: true,
+      sortOrder: 4,
+    },
+    {
+      id: "media-coverage-5",
+      publishedAt: new Date("2025-06-01"),
+      mediaName: "Instagram @tokyo_foodie",
+      title: "泡アートビールが可愛すぎる…",
+      description:
+        "フォロワー10万人超のグルメインフルエンサーがビアアートともんじゃの組み合わせを絶賛。",
+      imageUrl:
+        "https://images.unsplash.com/photo-1538488881523-2305c011e331?w=800&auto=format&fit=crop",
+      externalUrl: "https://www.instagram.com",
+      category: MediaCoverageCategory.INFLUENCER,
+      isFeatured: false,
+      isPublished: true,
+      sortOrder: 5,
+    },
+  ];
+
+  for (const article of mediaCoverageData) {
+    await prisma.mediaCoverage.upsert({
+      where: { id: article.id },
+      update: article,
+      create: article,
     });
   }
 

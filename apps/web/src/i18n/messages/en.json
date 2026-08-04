@@ -6,6 +6,7 @@
     "drink": "Drinks",
     "buffet": "Buffet",
     "beerArt": "Beer Art",
+    "mediaCoverage": "Media Coverage",
     "challenge": "Katanuki Challenge",
     "tourist": "Tourist Guide",
     "faq": "FAQ",
@@ -119,6 +120,26 @@
     "artist": "Artist",
     "customer": "Customer",
     "noItems": "No beer art gallery items yet"
+  },
+  "mediaCoverage": {
+    "title": "Media Coverage",
+    "eyebrow": "MEDIA COVERAGE",
+    "description": "Discover articles and features about our restaurant from TV, magazines, web media, and more.",
+    "featuredIn": "Featured In",
+    "featuredArticle": "Featured Story",
+    "publishedDate": "Published",
+    "mediaName": "Media",
+    "readArticle": "Read Article",
+    "noArticles": "No media coverage yet",
+    "all": "All",
+    "noImage": "No image",
+    "category": {
+      "TV": "TV",
+      "MAGAZINE": "Magazine",
+      "WEB": "Web",
+      "YOUTUBE": "YouTube",
+      "INFLUENCER": "Influencer"
+    }
   },
   "challenge": {
     "title": "Katanuki Challenge",

@@ -229,6 +229,41 @@ model BuffetCourse {
   @@index([deletedAt, status, sortOrder])
 }
 
+// ===== MEDIA COVERAGE =====
+
+model MediaCoverage {
+  id           String                @id @default(uuid())
+  publishedAt  DateTime
+  mediaName    String
+  title        String
+  description  String?
+  imageUrl     String
+  externalUrl  String
+  category     MediaCoverageCategory
+  isFeatured   Boolean               @default(false)
+  isPublished  Boolean               @default(false)
+  sortOrder    Int                   @default(0)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  deletedAt    DateTime?
+
+  @@index([isPublished, sortOrder])
+  @@index([category, isPublished])
+}
+
+model MediaOutlet {
+  id         String   @id @default(uuid())
+  name       String
+  logoUrl    String
+  websiteUrl String?
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
 // ===== BEER ART =====
 
 model BeerArt {
@@ -508,4 +543,12 @@ enum ContactStatus {
   IN_PROGRESS
   RESOLVED
   CLOSED
+}
+
+enum MediaCoverageCategory {
+  TV
+  MAGAZINE
+  WEB
+  YOUTUBE
+  INFLUENCER
 }

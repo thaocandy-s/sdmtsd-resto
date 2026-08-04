@@ -63,11 +63,19 @@ export function Header({ initialInfo }: HeaderProps) {
     { href: "/drink", label: t("drink") },
     { href: "/buffet", label: t("buffet") },
     { href: "/beer-art", label: t("beerArt") },
+    { href: "/media-coverage", label: t("mediaCoverage") },
     { href: "/challenge", label: t("challenge") },
     { href: "/tourist", label: t("tourist") },
     { href: "/faq", label: t("faq") },
     { href: "/info", label: t("info") },
   ];
+
+  const isNavActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/" || pathname === "";
+    }
+    return pathname.endsWith(href) || pathname.includes(`${href}/`);
+  };
 
   return (
     <header
@@ -111,7 +119,11 @@ export function Header({ initialInfo }: HeaderProps) {
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm text-foreground-secondary hover:text-gold-400 transition-colors"
+              className={`text-sm transition-colors ${
+                isNavActive(item.href)
+                  ? "text-gold-400 font-medium"
+                  : "text-foreground-secondary hover:text-gold-400"
+              }`}
             >
               {item.label}
             </Link>
@@ -163,7 +175,11 @@ export function Header({ initialInfo }: HeaderProps) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className="block py-2 text-foreground-secondary hover:text-gold-400 transition-colors"
+                className={`block py-2 transition-colors ${
+                  isNavActive(item.href)
+                    ? "text-gold-400 font-medium"
+                    : "text-foreground-secondary hover:text-gold-400"
+                }`}
               >
                 {item.label}
               </Link>
