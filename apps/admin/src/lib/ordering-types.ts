@@ -11,6 +11,8 @@ export type OrderableModule =
   | "drink-category"
   | "buffet"
   | "beer-art"
+  | "media-coverage"
+  | "media-outlet"
   | "katanuki-rule"
   | "katanuki-winner"
   | "tour-place"

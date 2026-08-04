@@ -20,6 +20,8 @@ interface Banner {
   imageUrl: string;
   isActive: boolean;
   sortOrder: number;
+  ctaLabel?: string | null;
+  ctaUrl?: string | null;
 }
 interface Event {
   id: string;

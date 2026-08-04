@@ -13,6 +13,8 @@ interface Banner {
   imageUrl: string;
   isActive: boolean;
   sortOrder: number;
+  ctaLabel?: string | null;
+  ctaUrl?: string | null;
 }
 
 interface BannerFormModalProps {
@@ -22,6 +24,20 @@ interface BannerFormModalProps {
   onClose: () => void;
   onDataChange: (createdId?: string) => void;
 }
+
+const PAGE_OPTIONS = [
+  { label: "トップページ", value: "/" },
+  { label: "お料理メニュー", value: "/menu" },
+  { label: "ドリンクメニュー", value: "/drink" },
+  { label: "食べ放題ビュッフェ", value: "/buffet" },
+  { label: "泡アートビール", value: "/beer-art" },
+  { label: "メディア掲載一覧", value: "/media-coverage" },
+  { label: "型抜きチャレンジ", value: "/challenge" },
+  { label: "観光ガイド", value: "/tourist" },
+  { label: "よくある質問", value: "/faq" },
+  { label: "店舗情報", value: "/info" },
+  { label: "カスタムURLを入力", value: "custom" },
+];
 
 export function BannerFormModal({
   isOpen,
@@ -37,6 +53,10 @@ export function BannerFormModal({
   const [subtitle, setSubtitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [ctaLabel, setCtaLabel] = useState("");
+  const [ctaUrl, setCtaUrl] = useState("");
+  const [ctaUrlPreset, setCtaUrlPreset] = useState("");
+  const [customCtaUrl, setCustomCtaUrl] = useState("");
   const [position, setPosition] = useState("");
   const [isActive, setIsActive] = useState(true);
 
@@ -51,12 +71,36 @@ export function BannerFormModal({
         setTitle(initialData.title);
         setSubtitle(initialData.subtitle || "");
         setImageUrl(initialData.imageUrl);
+        setCtaLabel(initialData.ctaLabel || "");
+
+        const currentUrl = initialData.ctaUrl || "";
+        setCtaUrl(currentUrl);
+
+        const isPreset = PAGE_OPTIONS.some(
+          (opt) => opt.value === currentUrl && opt.value !== "custom"
+        );
+
+        if (isPreset) {
+          setCtaUrlPreset(currentUrl);
+          setCustomCtaUrl("");
+        } else if (currentUrl) {
+          setCtaUrlPreset("custom");
+          setCustomCtaUrl(currentUrl);
+        } else {
+          setCtaUrlPreset("");
+          setCustomCtaUrl("");
+        }
+
         setPosition("");
         setIsActive(initialData.isActive);
       } else {
         setTitle("");
         setSubtitle("");
         setImageUrl("");
+        setCtaLabel("");
+        setCtaUrl("");
+        setCtaUrlPreset("");
+        setCustomCtaUrl("");
         setPosition("");
         setIsActive(true);
       }
@@ -64,6 +108,20 @@ export function BannerFormModal({
   }, [editingId, initialData, isOpen]);
 
   if (!isOpen) return null;
+
+  const handlePresetChange = (value: string) => {
+    setCtaUrlPreset(value);
+    if (value === "custom") {
+      setCtaUrl(customCtaUrl);
+    } else {
+      setCtaUrl(value);
+    }
+  };
+
+  const handleCustomUrlChange = (value: string) => {
+    setCustomCtaUrl(value);
+    setCtaUrl(value);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,8 +143,8 @@ export function BannerFormModal({
         imageUrl: finalImageUrl,
         position,
         isActive,
-        ctaLabel: null,
-        ctaUrl: null,
+        ctaLabel: ctaLabel.trim() || null,
+        ctaUrl: ctaUrl.trim() || null,
       };
 
       if (editingId) {
@@ -101,7 +159,7 @@ export function BannerFormModal({
       onClose();
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Failed to save banner");
+      setError(err.message || "保存に失敗しました");
       showApiErrorToast(err, toastMessages.saveFailed);
     } finally {
       setIsSaving(false);
@@ -158,6 +216,54 @@ export function BannerFormModal({
             folder="banners"
           />
 
+          {/* CTA Button Settings for this Banner */}
+          <div className="border-t border-border/60 pt-3 space-y-3">
+            <h4 className="text-xs font-semibold text-gold-400 font-jp uppercase tracking-wider">
+              CTAボタン設定（任意）
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1">
+                  ボタンテキスト (Button Text)
+                </label>
+                <input
+                  type="text"
+                  value={ctaLabel}
+                  onChange={(e) => setCtaLabel(e.target.value)}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                  placeholder="例: ネット予約はこちら"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1">
+                  ボタンリンク (Button URL)
+                </label>
+                <select
+                  value={ctaUrlPreset}
+                  onChange={(e) => handlePresetChange(e.target.value)}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                >
+                  <option value="">-- 選択しない（空欄） --</option>
+                  {PAGE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                {ctaUrlPreset === "custom" && (
+                  <input
+                    type="text"
+                    value={customCtaUrl}
+                    onChange={(e) => handleCustomUrlChange(e.target.value)}
+                    className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-gold-500 mt-2"
+                    placeholder="https://www.google.com/"
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -193,7 +299,7 @@ export function BannerFormModal({
               disabled={isSaving}
               className="px-4 py-2 bg-gold-500 text-background font-semibold rounded-lg hover:bg-gold-600 transition-colors disabled:opacity-50"
             >
-              {isSaving ? tc("loading") : tc("save")}
+              {isSaving ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>

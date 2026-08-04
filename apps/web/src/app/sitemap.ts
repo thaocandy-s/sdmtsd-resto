@@ -9,6 +9,7 @@ const staticPages = [
   "/drink",
   "/buffet",
   "/beer-art",
+  "/media-coverage",
   "/challenge",
   "/tourist",
   "/faq",

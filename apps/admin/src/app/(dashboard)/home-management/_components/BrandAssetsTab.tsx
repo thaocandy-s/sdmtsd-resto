@@ -51,7 +51,7 @@ export function BrandAssetsTab({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Logo Subtitle (Mobile Header Subtitle)
+            Logo Subtitle (Header Subtitle)
           </label>
           <input
             type="text"

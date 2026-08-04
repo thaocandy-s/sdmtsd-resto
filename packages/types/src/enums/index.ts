@@ -38,6 +38,8 @@ export enum PermissionModule {
   DRINK = "drink",
   BUFFET = "buffet",
   BEER_ART = "beer_art",
+  MEDIA_COVERAGE = "media_coverage",
+  MEDIA_OUTLET = "media_outlet",
   CHALLENGE = "challenge",
   TOURIST = "tourist",
   FAQ = "faq",

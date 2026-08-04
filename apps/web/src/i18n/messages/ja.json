@@ -6,6 +6,7 @@
     "drink": "ドリンク",
     "buffet": "ビュッフェ",
     "beerArt": "ビアアート",
+    "mediaCoverage": "メディア露出",
     "challenge": "型抜きチャレンジ",
     "tourist": "観光ガイド",
     "faq": "よくある質問",
@@ -119,6 +120,26 @@
     "artist": "アーティスト",
     "customer": "お客様",
     "noItems": "ビアアートギャラリーのアイテムがまだありません"
+  },
+  "mediaCoverage": {
+    "title": "メディア露出",
+    "eyebrow": "MEDIA COVERAGE",
+    "description": "テレビ、雑誌、Webメディアなど、国内外のメディアに当店が取り上げられた記事・番組をご紹介します。",
+    "featuredIn": "メディア掲載",
+    "featuredArticle": "注目の記事",
+    "publishedDate": "掲載日",
+    "mediaName": "メディア名",
+    "readArticle": "記事を読む",
+    "noArticles": "掲載情報はまだありません",
+    "all": "すべて",
+    "noImage": "画像なし",
+    "category": {
+      "TV": "TV",
+      "MAGAZINE": "雑誌",
+      "WEB": "Web",
+      "YOUTUBE": "YouTube",
+      "INFLUENCER": "インフルエンサー"
+    }
   },
   "challenge": {
     "title": "型抜きチャレンジ",

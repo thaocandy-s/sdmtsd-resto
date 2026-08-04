@@ -9,13 +9,13 @@ interface OpeningHoursSectionProps {
 }
 
 const DAYS = [
-  { key: "monday", label: "Monday (Thứ 2)" },
-  { key: "tuesday", label: "Tuesday (Thứ 3)" },
-  { key: "wednesday", label: "Wednesday (Thứ 4)" },
-  { key: "thursday", label: "Thursday (Thứ 5)" },
-  { key: "friday", label: "Friday (Thứ 6)" },
-  { key: "saturday", label: "Saturday (Thứ 7)" },
-  { key: "sunday", label: "Sunday (Chủ nhật)" },
+  { key: "monday", label: "月曜日 (Monday)" },
+  { key: "tuesday", label: "火曜日 (Tuesday)" },
+  { key: "wednesday", label: "水曜日 (Wednesday)" },
+  { key: "thursday", label: "木曜日 (Thursday)" },
+  { key: "friday", label: "金曜日 (Friday)" },
+  { key: "saturday", label: "土曜日 (Saturday)" },
+  { key: "sunday", label: "日曜日 (Sunday)" },
 ];
 
 // Tạo danh sách giờ từ 00:00 đến 23:30 (mỗi nấc 30 phút)

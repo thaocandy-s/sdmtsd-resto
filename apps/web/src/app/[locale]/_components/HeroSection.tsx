@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import Image from "next/image";
 
@@ -10,6 +10,8 @@ interface Banner {
   title: string;
   subtitle: string | null;
   imageUrl: string;
+  ctaLabel?: string | null;
+  ctaUrl?: string | null;
   showLogo?: boolean;
 }
 
@@ -273,6 +275,20 @@ export function HeroSection({ initialBanners }: HeroSectionProps) {
                 <p className="text-lg md:text-xl text-foreground-secondary max-w-2xl mx-auto drop-shadow-md leading-relaxed font-medium">
                   {banner.subtitle}
                 </p>
+
+                {banner.ctaLabel && banner.ctaUrl && (
+                  <div className="mt-8 animate-fade-in pointer-events-auto">
+                    <a
+                      href={banner.ctaUrl}
+                      className="group relative inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full text-base font-bold font-jp text-gold-300 bg-background/85 hover:bg-gold-500 hover:text-background border-2 border-gold-400 hover:border-gold-500 shadow-[0_4px_25px_rgba(201,169,110,0.35)] hover:shadow-[0_6px_30px_rgba(201,169,110,0.6)] transform hover:-translate-y-0.5 hover:scale-[1.03] active:translate-y-0 transition-all duration-300 backdrop-blur-md cursor-pointer tracking-wider"
+                    >
+                      <span className="font-bold text-gold-300 group-hover:text-background transition-colors drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                        {banner.ctaLabel}
+                      </span>
+                      <ArrowRight className="w-4.5 h-4.5 text-gold-300 group-hover:text-background group-hover:translate-x-1 transition-all duration-200 stroke-[2.5]" />
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           );

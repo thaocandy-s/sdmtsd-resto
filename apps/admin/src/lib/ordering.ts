@@ -37,6 +37,12 @@ export const ORDERABLE_MODELS: Record<OrderableModule, OrderableConfig> = {
   "drink-category": { delegate: "drinkCategory", permissionModule: "drink" },
   buffet: { delegate: "buffetCourse", softDelete: true, permissionModule: "buffet" },
   "beer-art": { delegate: "beerArt", softDelete: true, permissionModule: "beerArt" },
+  "media-coverage": {
+    delegate: "mediaCoverage",
+    softDelete: true,
+    permissionModule: "mediaCoverage",
+  },
+  "media-outlet": { delegate: "mediaOutlet", permissionModule: "mediaOutlet" },
   "katanuki-rule": { delegate: "katanukiRule", permissionModule: "challenge" },
   "katanuki-winner": { delegate: "katanukiWinner", permissionModule: "challenge" },
   // Tourist places are ordered globally across all categories by design.
