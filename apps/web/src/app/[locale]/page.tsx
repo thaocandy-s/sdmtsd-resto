@@ -43,6 +43,8 @@ export default async function HomePage() {
     title: b.title,
     subtitle: b.subtitle,
     imageUrl: b.imageUrl,
+    ctaLabel: b.ctaLabel,
+    ctaUrl: b.ctaUrl,
   }));
 
   const serializedPopularFoods = popularFoods.map((f) => ({

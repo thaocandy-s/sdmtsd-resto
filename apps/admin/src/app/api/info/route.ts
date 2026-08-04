@@ -33,6 +33,8 @@ export const PUT = withAuth(
         logoUrl,
         faviconUrl,
         logoSubtitle,
+        heroButtonText,
+        heroButtonUrl,
         isActive,
       } = body;
 
@@ -58,6 +60,8 @@ export const PUT = withAuth(
             logoUrl,
             faviconUrl,
             logoSubtitle,
+            heroButtonText,
+            heroButtonUrl,
             isActive,
           },
         });
@@ -80,6 +84,8 @@ export const PUT = withAuth(
             logoUrl,
             faviconUrl,
             logoSubtitle,
+            heroButtonText,
+            heroButtonUrl,
             isActive: isActive !== false,
           },
         });
