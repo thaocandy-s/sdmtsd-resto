@@ -7,6 +7,7 @@ import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast"
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
+import { FormModal } from "@/shared/components/form-modal";
 
 interface Media {
   id: string;
@@ -445,325 +446,323 @@ export default function MediaLibraryPage() {
       )}
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-background-secondary border border-border rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-foreground">
-                {editingId ? "Edit Media" : "Add Media"}
-              </h3>
-              <button
-                onClick={closeModal}
-                className="text-foreground-secondary hover:text-foreground text-2xl"
-              >
-                &times;
-              </button>
-            </div>
-
-            {!editingId && (
-              <div className="flex gap-1 mb-6 bg-background rounded-lg p-1">
+        <FormModal
+          isOpen={showModal}
+          title={editingId ? "Edit Media" : "Add Media"}
+          onClose={closeModal}
+          showFooter={false}
+          overlayClassName="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          contentClassName="bg-background-secondary border border-border rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto"
+          footer={
+            modalTab === "upload" && !editingId ? (
+              <div className="shrink-0 flex gap-3 pt-4 mt-4 border-t border-border">
                 <button
                   type="button"
-                  onClick={() => setModalTab("upload")}
-                  className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
-                    modalTab === "upload"
-                      ? "bg-gold-500 text-background"
-                      : "text-foreground-secondary hover:text-foreground"
-                  }`}
+                  onClick={handleUpload}
+                  disabled={uploading || selected.length === 0}
+                  className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
-                  Upload File
+                  {uploading ? "Uploading…" : `Upload ${selected.length || ""}`.trim()}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setModalTab("url")}
-                  className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
-                    modalTab === "url"
-                      ? "bg-gold-500 text-background"
-                      : "text-foreground-secondary hover:text-foreground"
-                  }`}
+                  onClick={closeModal}
+                  disabled={uploading}
+                  className="flex-1 bg-background-tertiary hover:bg-background text-foreground py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
-                  From URL
+                  Cancel
                 </button>
-              </div>
-            )}
-
-            {error && (
-              <div className="mb-4 bg-red-500/10 border border-red-500/40 text-red-400 text-sm rounded-lg px-4 py-2">
-                {error}
-              </div>
-            )}
-
-            {modalTab === "upload" && !editingId ? (
-              <div className="space-y-4">
-                <div
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setDragActive(true);
-                  }}
-                  onDragLeave={() => setDragActive(false)}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                    dragActive
-                      ? "border-gold-500 bg-gold-500/10"
-                      : "border-border hover:border-gold-500/60"
-                  }`}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    accept="image/*,video/*,application/pdf"
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files?.length) addFiles(e.target.files);
-                      e.target.value = "";
-                    }}
-                  />
-                  <p className="text-foreground font-medium">
-                    Drag &amp; drop files here, or click to browse
-                  </p>
-                  <p className="text-foreground-secondary text-xs mt-1">
-                    Images, videos or PDF · up to 10MB each
-                  </p>
-                </div>
-
-                {selected.length > 0 && (
-                  <div className="grid grid-cols-3 gap-3">
-                    {selected.map((s, i) => (
-                      <div
-                        key={i}
-                        className="relative bg-background border border-border rounded-lg overflow-hidden"
-                      >
-                        <div className="aspect-square bg-background-tertiary flex items-center justify-center">
-                          {s.file.type.startsWith("image/") ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={s.previewUrl}
-                              alt={s.file.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-foreground-secondary text-[10px] text-center p-1 break-all">
-                              {s.file.name}
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeSelected(i)}
-                          disabled={uploading}
-                          className="absolute top-1 right-1 bg-black/70 hover:bg-red-500 text-white w-6 h-6 rounded-full text-sm leading-none"
-                        >
-                          &times;
-                        </button>
-                        <p className="text-[10px] text-foreground-secondary truncate px-1 py-0.5">
-                          {formatSize(s.file.size)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-foreground-secondary mb-1">Folder</label>
-                    <input
-                      type="text"
-                      value={uploadFolder}
-                      onChange={(e) => setUploadFolder(e.target.value)}
-                      className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-foreground-secondary mb-1">Alt Text</label>
-                    <input
-                      type="text"
-                      value={uploadAlt}
-                      onChange={(e) => setUploadAlt(e.target.value)}
-                      className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm text-foreground-secondary mb-1">
-                    Tags (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={uploadTags}
-                    onChange={(e) => setUploadTags(e.target.value)}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                  />
-                </div>
-
-                {uploading && (
-                  <div>
-                    <div className="h-2 bg-background rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gold-500 transition-all"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-foreground-secondary mt-1 text-center">
-                      Uploading… {progress}%
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={handleUpload}
-                    disabled={uploading || selected.length === 0}
-                    className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
-                  >
-                    {uploading ? "Uploading…" : `Upload ${selected.length || ""}`.trim()}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    disabled={uploading}
-                    className="flex-1 bg-background-tertiary hover:bg-background text-foreground py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                </div>
               </div>
             ) : (
-              <form onSubmit={handleUrlSubmit} className="space-y-4">
+              <div className="shrink-0 flex gap-3 pt-4 mt-4 border-t border-border">
+                <button
+                  type="submit"
+                  form="media-url-form"
+                  className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors"
+                >
+                  {editingId ? "Update" : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 bg-background-tertiary hover:bg-background text-foreground py-2 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            )
+          }
+        >
+          {!editingId && (
+            <div className="flex gap-1 mb-6 bg-background rounded-lg p-1">
+              <button
+                type="button"
+                onClick={() => setModalTab("upload")}
+                className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
+                  modalTab === "upload"
+                    ? "bg-gold-500 text-background"
+                    : "text-foreground-secondary hover:text-foreground"
+                }`}
+              >
+                Upload File
+              </button>
+              <button
+                type="button"
+                onClick={() => setModalTab("url")}
+                className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
+                  modalTab === "url"
+                    ? "bg-gold-500 text-background"
+                    : "text-foreground-secondary hover:text-foreground"
+                }`}
+              >
+                From URL
+              </button>
+            </div>
+          )}
+
+          {error && (
+            <div className="mb-4 bg-red-500/10 border border-red-500/40 text-red-400 text-sm rounded-lg px-4 py-2">
+              {error}
+            </div>
+          )}
+
+          {modalTab === "upload" && !editingId ? (
+            <div className="space-y-4">
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragActive(true);
+                }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+                  dragActive
+                    ? "border-gold-500 bg-gold-500/10"
+                    : "border-border hover:border-gold-500/60"
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*,video/*,application/pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files?.length) addFiles(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+                <p className="text-foreground font-medium">
+                  Drag &amp; drop files here, or click to browse
+                </p>
+                <p className="text-foreground-secondary text-xs mt-1">
+                  Images, videos or PDF · up to 10MB each
+                </p>
+              </div>
+
+              {selected.length > 0 && (
+                <div className="grid grid-cols-3 gap-3">
+                  {selected.map((s, i) => (
+                    <div
+                      key={i}
+                      className="relative bg-background border border-border rounded-lg overflow-hidden"
+                    >
+                      <div className="aspect-square bg-background-tertiary flex items-center justify-center">
+                        {s.file.type.startsWith("image/") ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={s.previewUrl}
+                            alt={s.file.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-foreground-secondary text-[10px] text-center p-1 break-all">
+                            {s.file.name}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSelected(i)}
+                        disabled={uploading}
+                        className="absolute top-1 right-1 bg-black/70 hover:bg-red-500 text-white w-6 h-6 rounded-full text-sm leading-none"
+                      >
+                        &times;
+                      </button>
+                      <p className="text-[10px] text-foreground-secondary truncate px-1 py-0.5">
+                        {formatSize(s.file.size)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-foreground-secondary mb-1">
-                    File Name <span className="text-red-400">*</span>
-                  </label>
+                  <label className="block text-sm text-foreground-secondary mb-1">Folder</label>
                   <input
                     type="text"
-                    value={urlForm.fileName}
-                    onChange={(e) => setUrlForm({ ...urlForm, fileName: e.target.value })}
-                    required
+                    value={uploadFolder}
+                    onChange={(e) => setUploadFolder(e.target.value)}
                     className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm text-foreground-secondary mb-1">
-                    URL <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={urlForm.url}
-                    onChange={(e) => setUrlForm({ ...urlForm, url: e.target.value })}
-                    required
-                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                  />
-                </div>
-                {!editingId && (
-                  <div>
-                    <label className="block text-sm text-foreground-secondary mb-1">
-                      Storage Path <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={urlForm.storagePath}
-                      onChange={(e) => setUrlForm({ ...urlForm, storagePath: e.target.value })}
-                      required
-                      className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                    />
-                  </div>
-                )}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-foreground-secondary mb-1">
-                      MIME Type <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={urlForm.mimeType}
-                      onChange={(e) => setUrlForm({ ...urlForm, mimeType: e.target.value })}
-                      required
-                      className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-foreground-secondary mb-1">
-                      Size (bytes)
-                    </label>
-                    <input
-                      type="number"
-                      value={urlForm.size}
-                      onChange={(e) =>
-                        setUrlForm({ ...urlForm, size: parseInt(e.target.value) || 0 })
-                      }
-                      className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-foreground-secondary mb-1">Width</label>
-                    <input
-                      type="text"
-                      value={urlForm.width}
-                      onChange={(e) => setUrlForm({ ...urlForm, width: e.target.value })}
-                      className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-foreground-secondary mb-1">Height</label>
-                    <input
-                      type="text"
-                      value={urlForm.height}
-                      onChange={(e) => setUrlForm({ ...urlForm, height: e.target.value })}
-                      className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                    />
-                  </div>
                 </div>
                 <div>
                   <label className="block text-sm text-foreground-secondary mb-1">Alt Text</label>
                   <input
                     type="text"
-                    value={urlForm.alt}
-                    onChange={(e) => setUrlForm({ ...urlForm, alt: e.target.value })}
+                    value={uploadAlt}
+                    onChange={(e) => setUploadAlt(e.target.value)}
                     className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
                   />
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1">
+                  Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={uploadTags}
+                  onChange={(e) => setUploadTags(e.target.value)}
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+                />
+              </div>
+
+              {uploading && (
                 <div>
-                  <label className="block text-sm text-foreground-secondary mb-1">Folder</label>
+                  <div className="h-2 bg-background rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gold-500 transition-all"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-foreground-secondary mt-1 text-center">
+                    Uploading… {progress}%
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <form id="media-url-form" onSubmit={handleUrlSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1">
+                  File Name <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={urlForm.fileName}
+                  onChange={(e) => setUrlForm({ ...urlForm, fileName: e.target.value })}
+                  required
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1">
+                  URL <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={urlForm.url}
+                  onChange={(e) => setUrlForm({ ...urlForm, url: e.target.value })}
+                  required
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+                />
+              </div>
+              {!editingId && (
+                <div>
+                  <label className="block text-sm text-foreground-secondary mb-1">
+                    Storage Path <span className="text-red-400">*</span>
+                  </label>
                   <input
                     type="text"
-                    value={urlForm.folder}
-                    onChange={(e) => setUrlForm({ ...urlForm, folder: e.target.value })}
+                    value={urlForm.storagePath}
+                    onChange={(e) => setUrlForm({ ...urlForm, storagePath: e.target.value })}
+                    required
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+                  />
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-foreground-secondary mb-1">
+                    MIME Type <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={urlForm.mimeType}
+                    onChange={(e) => setUrlForm({ ...urlForm, mimeType: e.target.value })}
+                    required
                     className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
                   />
                 </div>
                 <div>
                   <label className="block text-sm text-foreground-secondary mb-1">
-                    Tags (comma-separated)
+                    Size (bytes)
                   </label>
                   <input
-                    type="text"
-                    value={urlForm.tags}
-                    onChange={(e) => setUrlForm({ ...urlForm, tags: e.target.value })}
+                    type="number"
+                    value={urlForm.size}
+                    onChange={(e) =>
+                      setUrlForm({ ...urlForm, size: parseInt(e.target.value) || 0 })
+                    }
                     className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
                   />
                 </div>
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors"
-                  >
-                    {editingId ? "Update" : "Save"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="flex-1 bg-background-tertiary hover:bg-background text-foreground py-2 rounded-lg font-medium transition-colors"
-                  >
-                    Cancel
-                  </button>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-foreground-secondary mb-1">Width</label>
+                  <input
+                    type="text"
+                    value={urlForm.width}
+                    onChange={(e) => setUrlForm({ ...urlForm, width: e.target.value })}
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+                  />
                 </div>
-              </form>
-            )}
-          </div>
-        </div>
+                <div>
+                  <label className="block text-sm text-foreground-secondary mb-1">Height</label>
+                  <input
+                    type="text"
+                    value={urlForm.height}
+                    onChange={(e) => setUrlForm({ ...urlForm, height: e.target.value })}
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1">Alt Text</label>
+                <input
+                  type="text"
+                  value={urlForm.alt}
+                  onChange={(e) => setUrlForm({ ...urlForm, alt: e.target.value })}
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1">Folder</label>
+                <input
+                  type="text"
+                  value={urlForm.folder}
+                  onChange={(e) => setUrlForm({ ...urlForm, folder: e.target.value })}
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1">
+                  Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={urlForm.tags}
+                  onChange={(e) => setUrlForm({ ...urlForm, tags: e.target.value })}
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+                />
+              </div>
+            </form>
+          )}
+        </FormModal>
       )}
       <ConfirmModal
         isOpen={deleteConfirmId !== null}

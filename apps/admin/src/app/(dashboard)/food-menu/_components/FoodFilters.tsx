@@ -30,30 +30,32 @@ export function FoodFilters({
         placeholder={tFood("searchPlaceholder")}
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground placeholder-foreground-tertiary focus:outline-none focus:border-gold-500"
+        className="w-full bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground placeholder-foreground-tertiary focus:outline-none focus:border-gold-500 sm:w-auto"
       />
-      <select
-        value={filterCategory}
-        onChange={(e) => onCategoryChange(e.target.value)}
-        className="bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-      >
-        <option value="">{tFood("categoryFilter")}</option>
-        {categories.map((cat) => (
-          <option key={cat.id} value={cat.slug}>
-            {cat.name}
-          </option>
-        ))}
-      </select>
-      <select
-        value={filterStatus}
-        onChange={(e) => onStatusChange(e.target.value)}
-        className="bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-      >
-        <option value="">{tFood("statusFilter")}</option>
-        <option value="DRAFT">{tCommon("draft")}</option>
-        <option value="PUBLISHED">{tCommon("published")}</option>
-        <option value="ARCHIVED">{tCommon("archived")}</option>
-      </select>
+      <div className="flex w-full gap-4 sm:contents">
+        <select
+          value={filterCategory}
+          onChange={(e) => onCategoryChange(e.target.value)}
+          className="flex-1 min-w-0 bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500 sm:flex-none sm:w-auto"
+        >
+          <option value="">{tFood("categoryFilter")}</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.slug}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+        <select
+          value={filterStatus}
+          onChange={(e) => onStatusChange(e.target.value)}
+          className="flex-1 min-w-0 bg-background-secondary border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500 sm:flex-none sm:w-auto"
+        >
+          <option value="">{tFood("statusFilter")}</option>
+          <option value="DRAFT">{tCommon("draft")}</option>
+          <option value="PUBLISHED">{tCommon("published")}</option>
+          <option value="ARCHIVED">{tCommon("archived")}</option>
+        </select>
+      </div>
     </div>
   );
 }

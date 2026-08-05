@@ -250,12 +250,44 @@ export default function MediaCoveragePage() {
 
   return (
     <>
-      <header className="mb-8">
-        <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
-        <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
+      <header className="mb-8 md:mb-5">
+        <div className="md:flex md:items-start md:justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
+            <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
+          </div>
+          {activeTab === "articles" && (
+            <button
+              onClick={() => {
+                setEditingArticleId(null);
+                setArticleForm(emptyArticleForm);
+                setArticleImageFile(null);
+                setArticleFormError("");
+                setShowArticleModal(true);
+              }}
+              className="hidden min-h-[44px] w-auto bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors md:inline-flex md:min-h-0"
+            >
+              + {t("addArticle")}
+            </button>
+          )}
+          {activeTab === "outlets" && (
+            <button
+              onClick={() => {
+                setEditingOutletId(null);
+                setOutletForm(emptyOutletForm);
+                setOutletLogoFile(null);
+                setOutletFormError("");
+                setShowOutletModal(true);
+              }}
+              className="hidden min-h-[44px] w-auto bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors md:inline-flex md:min-h-0"
+            >
+              + {t("addOutlet")}
+            </button>
+          )}
+        </div>
       </header>
 
-      <div className="flex gap-2 mb-6 border-b border-border">
+      <div className="flex gap-2 mb-5 md:mb-6 border-b border-border">
         <button
           onClick={() => setActiveTab("articles")}
           className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
@@ -280,8 +312,8 @@ export default function MediaCoveragePage() {
 
       {activeTab === "articles" && (
         <>
-          <div className="flex flex-wrap items-stretch justify-between gap-3 mb-6">
-            <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-stretch justify-between gap-3 mb-4 md:hidden">
+            <div className="hidden flex-wrap gap-3 md:flex">
               <button
                 onClick={() => setShowArticleReorder(true)}
                 className="bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors"
@@ -297,7 +329,7 @@ export default function MediaCoveragePage() {
                 setArticleFormError("");
                 setShowArticleModal(true);
               }}
-              className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
+              className="w-full min-h-[44px] bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors md:w-auto md:min-h-0"
             >
               + {t("addArticle")}
             </button>
@@ -319,6 +351,7 @@ export default function MediaCoveragePage() {
               setFilterStatus(v);
               setArticlePage(1);
             }}
+            onReorder={() => setShowArticleReorder(true)}
           />
 
           <MediaCoverageList
@@ -361,10 +394,10 @@ export default function MediaCoveragePage() {
 
       {activeTab === "outlets" && (
         <>
-          <div className="flex flex-wrap items-stretch justify-end gap-3 mb-6">
+          <div className="flex flex-col items-stretch gap-3 mb-6 md:flex-row md:flex-wrap md:justify-start">
             <button
               onClick={() => setShowOutletReorder(true)}
-              className="bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+              className="order-2 self-start bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors md:order-1"
             >
               {tc("reorder")}
             </button>
@@ -376,7 +409,7 @@ export default function MediaCoveragePage() {
                 setOutletFormError("");
                 setShowOutletModal(true);
               }}
-              className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
+              className="order-1 w-full min-h-[44px] bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors md:hidden md:order-2 md:w-auto md:min-h-0"
             >
               + {t("addOutlet")}
             </button>

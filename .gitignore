@@ -11,3 +11,5 @@ dist/
 .env*
 docs/
 backups/
+.DS_Store
+**/.DS_Store

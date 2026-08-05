@@ -130,15 +130,15 @@ export default function BeerArtPage() {
 
   return (
     <>
-      <header className="flex items-center justify-between mb-8">
-        <div>
+      <header className="flex flex-col gap-5 mb-6 md:flex-row md:items-center md:justify-between md:gap-0 md:mb-8">
+        <div className="w-full md:w-auto">
           <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
-          <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
+          <p className="text-foreground-secondary mt-2 md:mt-1">{t("subtitle")}</p>
         </div>
-        <div className="flex flex-wrap items-stretch gap-3">
+        <div className="flex w-full flex-col items-stretch gap-3 md:w-auto md:flex-row md:flex-wrap">
           <button
             onClick={() => setShowReorderModal(true)}
-            className="bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+            className="order-2 self-start bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors min-h-[44px] md:order-none md:min-h-0"
           >
             {tc("reorder")}
           </button>
@@ -150,7 +150,7 @@ export default function BeerArtPage() {
               setFormError("");
               setShowModal(true);
             }}
-            className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
+            className="order-1 w-full bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors min-h-[44px] md:order-none md:w-auto md:min-h-0"
           >
             + {t("addItem")}
           </button>

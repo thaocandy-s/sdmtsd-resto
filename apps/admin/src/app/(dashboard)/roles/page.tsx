@@ -6,7 +6,7 @@ import { api } from "@/lib/api-client";
 import { showSuccessToast, showWarningToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
-import { FormError } from "@/shared/components/form-error";
+import { FormModal } from "@/shared/components/form-modal";
 
 interface Permission {
   id: string;
@@ -261,104 +261,95 @@ export default function RolesPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto">
-          <div className="bg-background-secondary border border-border rounded-lg p-6 w-full max-w-2xl my-8 mx-4">
-            <h2 className="text-xl font-bold mb-4">{editingRole ? "Edit Role" : "Add Role"}</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {formError && <FormError message={formError} />}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Name</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value.toUpperCase() })
-                    }
-                    required
-                    disabled={!!editingRole}
-                    placeholder="MANAGER"
-                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500 disabled:opacity-50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Label</label>
-                  <input
-                    type="text"
-                    value={formData.label}
-                    onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                    required
-                    placeholder="Manager"
-                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500"
-                  />
-                </div>
-              </div>
+        <FormModal
+          isOpen={showModal}
+          title={editingRole ? "Edit Role" : "Add Role"}
+          onSubmit={handleSubmit}
+          error={formError}
+          submitLabel={editingRole ? "Update" : "Create"}
+          cancelLabel="Cancel"
+          onClose={() => {
+            setShowModal(false);
+            setEditingRole(null);
+          }}
+          overlayClassName="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto"
+          contentClassName="bg-background-secondary border border-border rounded-lg p-6 w-full max-w-2xl my-8 mx-4"
+        >
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={2}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500"
+                <label className="block text-sm font-medium mb-1">Name</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value.toUpperCase() })}
+                  required
+                  disabled={!!editingRole}
+                  placeholder="MANAGER"
+                  className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500 disabled:opacity-50"
                 />
               </div>
-
-              {/* Permissions Matrix */}
               <div>
-                <label className="block text-sm font-medium mb-2">Permissions</label>
-                <div className="border border-border rounded-lg overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-background">
-                      <tr>
-                        <th className="text-left px-3 py-2 font-medium">Module</th>
+                <label className="block text-sm font-medium mb-1">Label</label>
+                <input
+                  type="text"
+                  value={formData.label}
+                  onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                  required
+                  placeholder="Manager"
+                  className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={2}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500"
+              />
+            </div>
+
+            {/* Permissions Matrix */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Permissions</label>
+              <div className="border border-border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-background">
+                    <tr>
+                      <th className="text-left px-3 py-2 font-medium">Module</th>
+                      {ACTIONS.map((action) => (
+                        <th key={action} className="text-center px-2 py-2 font-medium">
+                          {action}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {MODULES.map((module) => (
+                      <tr key={module}>
+                        <td className="px-3 py-2 text-foreground-secondary">{module}</td>
                         {ACTIONS.map((action) => (
-                          <th key={action} className="text-center px-2 py-2 font-medium">
-                            {action}
-                          </th>
+                          <td key={action} className="text-center px-2 py-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.permissions.some(
+                                (p) => p.module === module && p.action === action
+                              )}
+                              onChange={() => togglePermission(module, action)}
+                              className="rounded border-border"
+                            />
+                          </td>
                         ))}
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {MODULES.map((module) => (
-                        <tr key={module}>
-                          <td className="px-3 py-2 text-foreground-secondary">{module}</td>
-                          {ACTIONS.map((action) => (
-                            <td key={action} className="text-center px-2 py-2">
-                              <input
-                                type="checkbox"
-                                checked={formData.permissions.some(
-                                  (p) => p.module === module && p.action === action
-                                )}
-                                onChange={() => togglePermission(module, action)}
-                                className="rounded border-border"
-                              />
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 h-10 rounded-md border border-border text-sm hover:bg-background-tertiary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 h-10 rounded-md bg-gold-500 hover:bg-gold-600 text-background font-semibold text-sm"
-                >
-                  {editingRole ? "Update" : "Create"}
-                </button>
-              </div>
-            </form>
+            </div>
           </div>
-        </div>
+        </FormModal>
       )}
       <ConfirmModal
         isOpen={deleteConfirmRole !== null}

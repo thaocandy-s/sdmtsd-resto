@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { api } from "@/lib/api-client";
 import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ImageUpload, uploadImage } from "@/shared/components/image-upload";
-import { FormError } from "@/shared/components/form-error";
+import { FormModal } from "@/shared/components/form-modal";
 import { AdvancedSection, PositionField } from "@/shared/components/advanced-section";
 
 interface Banner {
@@ -107,8 +107,6 @@ export function BannerFormModal({
     }
   }, [editingId, initialData, isOpen]);
 
-  if (!isOpen) return null;
-
   const handlePresetChange = (value: string) => {
     setCtaUrlPreset(value);
     if (value === "custom") {
@@ -167,143 +165,142 @@ export function BannerFormModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-background-secondary border border-border w-full max-w-lg rounded-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-        <div className="p-6 border-b border-border flex items-center justify-between">
-          <h3 className="text-xl font-bold text-foreground">
-            {editingId ? t("editBanner") : t("addBanner")}
-          </h3>
-          <button onClick={onClose} className="text-foreground-secondary hover:text-foreground">
-            ✕
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
-          {error && <FormError message={error} />}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              {t("bannerTitle")} <span className="text-red-400">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-gold-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              {t("bannerSubtitle")}
-            </label>
-            <input
-              type="text"
-              value={subtitle}
-              onChange={(e) => setSubtitle(e.target.value)}
-              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-gold-500"
-            />
-          </div>
-
-          <ImageUpload
-            label={t("bannerImage")}
-            required
-            value={imageUrl}
-            onChange={(url, file) => {
-              setImageUrl(url);
-              setImageFile(file || null);
-            }}
-            folder="banners"
-          />
-
-          {/* CTA Button Settings for this Banner */}
-          <div className="border-t border-border/60 pt-3 space-y-3">
-            <h4 className="text-xs font-semibold text-gold-400 font-jp uppercase tracking-wider">
-              CTAボタン設定（任意）
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-foreground mb-1">
-                  ボタンテキスト (Button Text)
-                </label>
-                <input
-                  type="text"
-                  value={ctaLabel}
-                  onChange={(e) => setCtaLabel(e.target.value)}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-gold-500"
-                  placeholder="例: ネット予約はこちら"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-foreground mb-1">
-                  ボタンリンク (Button URL)
-                </label>
-                <select
-                  value={ctaUrlPreset}
-                  onChange={(e) => handlePresetChange(e.target.value)}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-gold-500"
-                >
-                  <option value="">-- 選択しない（空欄） --</option>
-                  {PAGE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-                {ctaUrlPreset === "custom" && (
-                  <input
-                    type="text"
-                    value={customCtaUrl}
-                    onChange={(e) => handleCustomUrlChange(e.target.value)}
-                    className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-gold-500 mt-2"
-                    placeholder="https://www.google.com/"
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isActive}
-                onChange={(e) => setIsActive(e.target.checked)}
-                className="rounded border-border text-gold-500 focus:ring-gold-500 bg-background"
-              />
-              <span className="text-sm font-medium text-foreground">{t("bannerStatus")}</span>
-            </label>
-          </div>
-
-          <AdvancedSection title={tc("advancedOptions")}>
-            <PositionField
-              value={position}
-              onChange={setPosition}
-              label={tc("positionLabel")}
-              hint={tc("positionHint")}
-            />
-          </AdvancedSection>
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSaving}
-              className="px-4 py-2 border border-border text-foreground rounded-lg hover:bg-background-tertiary transition-colors"
-            >
-              {tc("cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="px-4 py-2 bg-gold-500 text-background font-semibold rounded-lg hover:bg-gold-600 transition-colors disabled:opacity-50"
-            >
-              {isSaving ? tc("saving") : tc("save")}
-            </button>
-          </div>
-        </form>
+    <FormModal
+      isOpen={isOpen}
+      title={editingId ? t("editBanner") : t("addBanner")}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      error={error}
+      isSaving={isSaving}
+      showFooter={false}
+      overlayClassName="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      contentClassName="bg-background-secondary border border-border w-full max-w-lg rounded-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+      formClassName="p-6 space-y-4 overflow-y-auto flex-1"
+      headerClassName="p-6 border-b border-border flex items-center justify-between"
+      closeButtonClassName="text-foreground-secondary hover:text-foreground"
+    >
+      <div>
+        <label className="block text-sm font-medium text-foreground mb-1">
+          {t("bannerTitle")} <span className="text-red-400">*</span>
+        </label>
+        <input
+          type="text"
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-gold-500"
+        />
       </div>
-    </div>
+
+      <div>
+        <label className="block text-sm font-medium text-foreground mb-1">
+          {t("bannerSubtitle")}
+        </label>
+        <input
+          type="text"
+          value={subtitle}
+          onChange={(e) => setSubtitle(e.target.value)}
+          className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-gold-500"
+        />
+      </div>
+
+      <ImageUpload
+        label={t("bannerImage")}
+        required
+        value={imageUrl}
+        onChange={(url, file) => {
+          setImageUrl(url);
+          setImageFile(file || null);
+        }}
+        folder="banners"
+      />
+
+      {/* CTA Button Settings for this Banner */}
+      <div className="border-t border-border/60 pt-3 space-y-3">
+        <h4 className="text-xs font-semibold text-gold-400 font-jp uppercase tracking-wider">
+          CTAボタン設定（任意）
+        </h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-1">
+              ボタンテキスト (Button Text)
+            </label>
+            <input
+              type="text"
+              value={ctaLabel}
+              onChange={(e) => setCtaLabel(e.target.value)}
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-gold-500"
+              placeholder="例: ネット予約はこちら"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-1">
+              ボタンリンク (Button URL)
+            </label>
+            <select
+              value={ctaUrlPreset}
+              onChange={(e) => handlePresetChange(e.target.value)}
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-gold-500"
+            >
+              <option value="">-- 選択しない（空欄） --</option>
+              {PAGE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            {ctaUrlPreset === "custom" && (
+              <input
+                type="text"
+                value={customCtaUrl}
+                onChange={(e) => handleCustomUrlChange(e.target.value)}
+                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-gold-500 mt-2"
+                placeholder="https://www.google.com/"
+              />
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isActive}
+            onChange={(e) => setIsActive(e.target.checked)}
+            className="rounded border-border text-gold-500 focus:ring-gold-500 bg-background"
+          />
+          <span className="text-sm font-medium text-foreground">{t("bannerStatus")}</span>
+        </label>
+      </div>
+
+      <AdvancedSection title={tc("advancedOptions")}>
+        <PositionField
+          value={position}
+          onChange={setPosition}
+          label={tc("positionLabel")}
+          hint={tc("positionHint")}
+        />
+      </AdvancedSection>
+
+      <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={isSaving}
+          className="px-4 py-2 border border-border text-foreground rounded-lg hover:bg-background-tertiary transition-colors"
+        >
+          {tc("cancel")}
+        </button>
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="px-4 py-2 bg-gold-500 text-background font-semibold rounded-lg hover:bg-gold-600 transition-colors disabled:opacity-50"
+        >
+          {isSaving ? tc("saving") : tc("save")}
+        </button>
+      </div>
+    </FormModal>
   );
 }

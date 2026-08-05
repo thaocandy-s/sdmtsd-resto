@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
-import { FormError } from "@/shared/components/form-error";
+import { FormModal } from "@/shared/components/form-modal";
 
 interface SeoMeta {
   id: string;
@@ -213,149 +213,123 @@ export default function SeoPage() {
       )}
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-background-secondary border border-border rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-foreground">
-                {editingId ? "Edit" : "Add"} SEO
-              </h3>
-              <button
-                onClick={() => {
-                  setShowModal(false);
-                  setEditingId(null);
-                }}
-                className="text-foreground-secondary hover:text-foreground text-2xl"
-              >
-                &times;
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {formError && <FormError message={formError} />}
-              <div>
-                <label className="block text-sm text-foreground-secondary mb-1">
-                  Page Path <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.pagePath}
-                  onChange={(e) => setForm({ ...form, pagePath: e.target.value })}
-                  required
-                  disabled={!!editingId}
-                  placeholder="/en/about"
-                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500 disabled:opacity-50"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-foreground-secondary mb-1">Title</label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-foreground-secondary mb-1">Description</label>
-                <textarea
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  rows={2}
-                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-foreground-secondary mb-1">
-                  Keywords (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  value={form.keywords}
-                  onChange={(e) => setForm({ ...form, keywords: e.target.value })}
-                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-foreground-secondary mb-1">OG Title</label>
-                  <input
-                    type="text"
-                    value={form.ogTitle}
-                    onChange={(e) => setForm({ ...form, ogTitle: e.target.value })}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-foreground-secondary mb-1">OG Image</label>
-                  <input
-                    type="text"
-                    value={form.ogImage}
-                    onChange={(e) => setForm({ ...form, ogImage: e.target.value })}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm text-foreground-secondary mb-1">
-                  OG Description
-                </label>
-                <textarea
-                  value={form.ogDescription}
-                  onChange={(e) => setForm({ ...form, ogDescription: e.target.value })}
-                  rows={2}
-                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-foreground-secondary mb-1">
-                  Canonical URL
-                </label>
-                <input
-                  type="text"
-                  value={form.canonicalUrl}
-                  onChange={(e) => setForm({ ...form, canonicalUrl: e.target.value })}
-                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-foreground-secondary mb-1">JSON-LD</label>
-                <textarea
-                  value={form.jsonLd}
-                  onChange={(e) => setForm({ ...form, jsonLd: e.target.value })}
-                  rows={3}
-                  placeholder='{"@context": "https://schema.org", ...}'
-                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500 font-mono text-sm"
-                />
-              </div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.noIndex}
-                  onChange={(e) => setForm({ ...form, noIndex: e.target.checked })}
-                  className="rounded border-border"
-                />
-                <span className="text-sm text-foreground">NoIndex (hide from search engines)</span>
+        <FormModal
+          isOpen={showModal}
+          title={`${editingId ? "Edit" : "Add"} SEO`}
+          onSubmit={handleSubmit}
+          error={formError}
+          submitLabel={editingId ? "Update" : "Create"}
+          cancelLabel="Cancel"
+          onClose={() => {
+            setShowModal(false);
+            setEditingId(null);
+          }}
+          overlayClassName="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          contentClassName="bg-background-secondary border border-border rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-foreground-secondary mb-1">
+                Page Path <span className="text-red-400">*</span>
               </label>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors"
-                >
-                  {editingId ? "Update" : "Create"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    setEditingId(null);
-                  }}
-                  className="flex-1 bg-background-tertiary hover:bg-background text-foreground py-2 rounded-lg font-medium transition-colors"
-                >
-                  Cancel
-                </button>
+              <input
+                type="text"
+                value={form.pagePath}
+                onChange={(e) => setForm({ ...form, pagePath: e.target.value })}
+                required
+                disabled={!!editingId}
+                placeholder="/en/about"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500 disabled:opacity-50"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-foreground-secondary mb-1">Title</label>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-foreground-secondary mb-1">Description</label>
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                rows={2}
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-foreground-secondary mb-1">
+                Keywords (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={form.keywords}
+                onChange={(e) => setForm({ ...form, keywords: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1">OG Title</label>
+                <input
+                  type="text"
+                  value={form.ogTitle}
+                  onChange={(e) => setForm({ ...form, ogTitle: e.target.value })}
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+                />
               </div>
-            </form>
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1">OG Image</label>
+                <input
+                  type="text"
+                  value={form.ogImage}
+                  onChange={(e) => setForm({ ...form, ogImage: e.target.value })}
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm text-foreground-secondary mb-1">OG Description</label>
+              <textarea
+                value={form.ogDescription}
+                onChange={(e) => setForm({ ...form, ogDescription: e.target.value })}
+                rows={2}
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-foreground-secondary mb-1">Canonical URL</label>
+              <input
+                type="text"
+                value={form.canonicalUrl}
+                onChange={(e) => setForm({ ...form, canonicalUrl: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-foreground-secondary mb-1">JSON-LD</label>
+              <textarea
+                value={form.jsonLd}
+                onChange={(e) => setForm({ ...form, jsonLd: e.target.value })}
+                rows={3}
+                placeholder='{"@context": "https://schema.org", ...}'
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500 font-mono text-sm"
+              />
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.noIndex}
+                onChange={(e) => setForm({ ...form, noIndex: e.target.checked })}
+                className="rounded border-border"
+              />
+              <span className="text-sm text-foreground">NoIndex (hide from search engines)</span>
+            </label>
           </div>
-        </div>
+        </FormModal>
       )}
       <ConfirmModal
         isOpen={deleteConfirmId !== null}
