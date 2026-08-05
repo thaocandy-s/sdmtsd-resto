@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
-import { showSuccessToast, showApiErrorToast } from "@/lib/toast";
+import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import type { OrderableModule } from "@/lib/ordering-types";
 
 // Shared drag & drop reorder hook. Handles optimistic cache updates against
@@ -33,8 +33,8 @@ export function useReorder<T>({
   applyItems,
   getId,
   scopeValue,
-  successMessage = "Order updated",
-  errorMessage = "Failed to update order",
+  successMessage = toastMessages.updated,
+  errorMessage = toastMessages.updateFailed,
 }: UseReorderOptions<T>) {
   const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
