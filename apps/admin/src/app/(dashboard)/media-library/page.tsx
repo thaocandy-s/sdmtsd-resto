@@ -453,6 +453,45 @@ export default function MediaLibraryPage() {
           showFooter={false}
           overlayClassName="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
           contentClassName="bg-background-secondary border border-border rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto"
+          footer={
+            modalTab === "upload" && !editingId ? (
+              <div className="shrink-0 flex gap-3 pt-4 mt-4 border-t border-border">
+                <button
+                  type="button"
+                  onClick={handleUpload}
+                  disabled={uploading || selected.length === 0}
+                  className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+                >
+                  {uploading ? "Uploading…" : `Upload ${selected.length || ""}`.trim()}
+                </button>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  disabled={uploading}
+                  className="flex-1 bg-background-tertiary hover:bg-background text-foreground py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="shrink-0 flex gap-3 pt-4 mt-4 border-t border-border">
+                <button
+                  type="submit"
+                  form="media-url-form"
+                  className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors"
+                >
+                  {editingId ? "Update" : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 bg-background-tertiary hover:bg-background text-foreground py-2 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            )
+          }
         >
           {!editingId && (
             <div className="flex gap-1 mb-6 bg-background rounded-lg p-1">
@@ -604,28 +643,9 @@ export default function MediaLibraryPage() {
                   </p>
                 </div>
               )}
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleUpload}
-                  disabled={uploading || selected.length === 0}
-                  className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
-                >
-                  {uploading ? "Uploading…" : `Upload ${selected.length || ""}`.trim()}
-                </button>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  disabled={uploading}
-                  className="flex-1 bg-background-tertiary hover:bg-background text-foreground py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-              </div>
             </div>
           ) : (
-            <form onSubmit={handleUrlSubmit} className="space-y-4">
+            <form id="media-url-form" onSubmit={handleUrlSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm text-foreground-secondary mb-1">
                   File Name <span className="text-red-400">*</span>
@@ -739,21 +759,6 @@ export default function MediaLibraryPage() {
                   onChange={(e) => setUrlForm({ ...urlForm, tags: e.target.value })}
                   className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-gold-500"
                 />
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors"
-                >
-                  {editingId ? "Update" : "Save"}
-                </button>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="flex-1 bg-background-tertiary hover:bg-background text-foreground py-2 rounded-lg font-medium transition-colors"
-                >
-                  Cancel
-                </button>
               </div>
             </form>
           )}

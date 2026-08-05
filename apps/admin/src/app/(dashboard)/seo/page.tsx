@@ -6,7 +6,6 @@ import { api } from "@/lib/api-client";
 import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { FormModal } from "@/shared/components/form-modal";
-import { FormError } from "@/shared/components/form-error";
 
 interface SeoMeta {
   id: string;
@@ -217,16 +216,18 @@ export default function SeoPage() {
         <FormModal
           isOpen={showModal}
           title={`${editingId ? "Edit" : "Add"} SEO`}
+          onSubmit={handleSubmit}
+          error={formError}
+          submitLabel={editingId ? "Update" : "Create"}
+          cancelLabel="Cancel"
           onClose={() => {
             setShowModal(false);
             setEditingId(null);
           }}
-          showFooter={false}
           overlayClassName="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
           contentClassName="bg-background-secondary border border-border rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {formError && <FormError message={formError} />}
+          <div className="space-y-4">
             <div>
               <label className="block text-sm text-foreground-secondary mb-1">
                 Page Path <span className="text-red-400">*</span>
@@ -327,25 +328,7 @@ export default function SeoPage() {
               />
               <span className="text-sm text-foreground">NoIndex (hide from search engines)</span>
             </label>
-            <div className="flex gap-3 pt-4">
-              <button
-                type="submit"
-                className="flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors"
-              >
-                {editingId ? "Update" : "Create"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowModal(false);
-                  setEditingId(null);
-                }}
-                className="flex-1 bg-background-tertiary hover:bg-background text-foreground py-2 rounded-lg font-medium transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
+          </div>
         </FormModal>
       )}
       <ConfirmModal

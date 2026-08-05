@@ -337,7 +337,6 @@ export const ja = {
     featuredLabel: "注目記事",
     featuredHint: "注目記事は1件のみ表示されます。他の注目記事は自動的に解除されます。",
     publishedLabel: "公開済み",
-    previewLabel: "プレビュー（公開時の表示）",
     outletNameLabel: "メディア名",
     outletLogoLabel: "ロゴ画像",
     outletWebsiteLabel: "ウェブサイトURL",

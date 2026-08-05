@@ -17,50 +17,6 @@ interface MediaCoverageFormModalProps {
   error?: string;
 }
 
-function PreviewCard({ form }: { form: ArticleFormData }) {
-  const t = useTranslations("mediaCoverage");
-
-  return (
-    <div className="mt-4 border border-border rounded-lg overflow-hidden bg-background">
-      <p className="text-xs text-foreground-secondary px-3 py-2 border-b border-border">
-        {t("previewLabel")}
-      </p>
-      <div className={form.isFeatured ? "md:grid md:grid-cols-2 gap-0" : ""}>
-        <div
-          className={`relative bg-background-tertiary ${form.isFeatured ? "min-h-[180px]" : "h-32"}`}
-        >
-          {form.imageUrl ? (
-            <img src={form.imageUrl} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-foreground-tertiary text-xs">
-              {t("noImage")}
-            </div>
-          )}
-        </div>
-        <div className="p-3">
-          {form.mediaName && <p className="text-xs text-gold-400 mb-1">{form.mediaName}</p>}
-          {form.publishedAt && (
-            <p className="text-xs text-foreground-tertiary mb-1">{form.publishedAt}</p>
-          )}
-          {form.category && (
-            <span className="inline-block text-xs px-2 py-0.5 bg-gold-500/10 text-gold-400 rounded mb-2">
-              {t(`category.${form.category}`)}
-            </span>
-          )}
-          <h4 className="font-semibold text-foreground text-sm line-clamp-2">
-            {form.title || t("titleLabel")}
-          </h4>
-          {form.description && (
-            <p className="text-xs text-foreground-secondary mt-1 line-clamp-2">
-              {form.description}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function MediaCoverageFormModal({
   isOpen,
   editingId,
@@ -85,8 +41,13 @@ export function MediaCoverageFormModal({
       error={error}
       isSaving={isSaving}
       submitLabel={editingId ? tc("save") : tc("add")}
-      overlayClassName="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 overflow-y-auto"
-      contentClassName="bg-background-secondary border border-border rounded-lg p-6 max-w-lg w-full my-8"
+      overlayClassName="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 overflow-hidden"
+      contentClassName="bg-background-secondary border border-border rounded-lg p-6 max-w-lg w-full max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col"
+      headerClassName="shrink-0 flex items-center justify-between pb-4 mb-4 border-b border-border"
+      scrollBody
+      bodyClassName="space-y-4 pr-2"
+      formClassName="flex min-h-0 flex-1 flex-col overflow-hidden"
+      footerClassName="shrink-0 flex gap-3 pt-4 mt-4 border-t border-border"
     >
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -212,7 +173,6 @@ export function MediaCoverageFormModal({
           hint={tc("positionHint")}
         />
       </AdvancedSection>
-      <PreviewCard form={form} />
     </FormModal>
   );
 }

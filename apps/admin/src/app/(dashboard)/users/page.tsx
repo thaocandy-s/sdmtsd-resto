@@ -7,7 +7,6 @@ import { showSuccessToast, showApiErrorToast, toastMessages } from "@/lib/toast"
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
-import { FormError } from "@/shared/components/form-error";
 import { FormModal } from "@/shared/components/form-modal";
 
 interface User {
@@ -325,16 +324,18 @@ export default function UsersPage() {
         <FormModal
           isOpen={showModal}
           title={editingUser ? "Edit User" : "Add User"}
+          onSubmit={handleSubmit}
+          error={formError}
+          submitLabel={editingUser ? "Update" : "Create"}
+          cancelLabel="Cancel"
           onClose={() => {
             setShowModal(false);
             setEditingUser(null);
           }}
-          showFooter={false}
           overlayClassName="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
           contentClassName="bg-background-secondary border border-border rounded-lg p-6 w-full max-w-md"
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {formError && <FormError message={formError} />}
+          <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">First Name</label>
@@ -405,22 +406,7 @@ export default function UsersPage() {
                 Active
               </label>
             </div>
-            <div className="flex gap-3 pt-4">
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="flex-1 h-10 rounded-md border border-border text-sm hover:bg-background-tertiary"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex-1 h-10 rounded-md bg-gold-500 hover:bg-gold-600 text-background font-semibold text-sm"
-              >
-                {editingUser ? "Update" : "Create"}
-              </button>
-            </div>
-          </form>
+          </div>
         </FormModal>
       )}
       <ConfirmModal

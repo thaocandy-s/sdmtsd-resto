@@ -6,7 +6,6 @@ import { api } from "@/lib/api-client";
 import { showSuccessToast, showWarningToast, showApiErrorToast, toastMessages } from "@/lib/toast";
 import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
-import { FormError } from "@/shared/components/form-error";
 import { FormModal } from "@/shared/components/form-modal";
 
 interface Permission {
@@ -265,16 +264,18 @@ export default function RolesPage() {
         <FormModal
           isOpen={showModal}
           title={editingRole ? "Edit Role" : "Add Role"}
+          onSubmit={handleSubmit}
+          error={formError}
+          submitLabel={editingRole ? "Update" : "Create"}
+          cancelLabel="Cancel"
           onClose={() => {
             setShowModal(false);
             setEditingRole(null);
           }}
-          showFooter={false}
           overlayClassName="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto"
           contentClassName="bg-background-secondary border border-border rounded-lg p-6 w-full max-w-2xl my-8 mx-4"
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {formError && <FormError message={formError} />}
+          <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Name</label>
@@ -347,23 +348,7 @@ export default function RolesPage() {
                 </table>
               </div>
             </div>
-
-            <div className="flex gap-3 pt-4">
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="flex-1 h-10 rounded-md border border-border text-sm hover:bg-background-tertiary"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex-1 h-10 rounded-md bg-gold-500 hover:bg-gold-600 text-background font-semibold text-sm"
-              >
-                {editingRole ? "Update" : "Create"}
-              </button>
-            </div>
-          </form>
+          </div>
         </FormModal>
       )}
       <ConfirmModal

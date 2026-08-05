@@ -28,6 +28,9 @@ interface FormModalProps {
   headerClassName?: string;
   titleClassName?: string;
   closeButtonClassName?: string;
+  scrollBody?: boolean;
+  bodyClassName?: string;
+  footer?: ReactNode;
 }
 
 export function FormModal({
@@ -48,12 +51,15 @@ export function FormModal({
   showFooter = true,
   closeOnOverlayClick = false,
   closeDisabled = false,
-  footerClassName = "flex gap-3 pt-4",
+  footerClassName = "shrink-0 flex gap-3 pt-4 mt-4 border-t border-border",
   submitClassName = "flex-1 bg-gold-500 hover:bg-gold-600 text-background py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
   cancelClassName = "flex-1 bg-background-tertiary hover:bg-background text-foreground py-2 rounded-lg font-medium transition-colors",
-  headerClassName = "flex items-center justify-between mb-6",
+  headerClassName = "shrink-0 flex items-center justify-between mb-6",
   titleClassName = "text-xl font-bold text-foreground",
   closeButtonClassName = "text-foreground-secondary hover:text-foreground text-2xl disabled:opacity-50",
+  scrollBody = true,
+  bodyClassName = "space-y-4 pr-2",
+  footer,
 }: FormModalProps) {
   const tc = useTranslations("common");
   const titleId = useId();
@@ -69,6 +75,15 @@ export function FormModal({
 
   if (!isOpen) return null;
 
+  const modalContentStyle = scrollBody
+    ? {
+        maxHeight: "90vh",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column" as const,
+      }
+    : undefined;
+
   return (
     <div
       className={overlayClassName}
@@ -78,7 +93,13 @@ export function FormModal({
           onClose();
       }}
     >
-      <div className={contentClassName} role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div
+        className={contentClassName}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        style={modalContentStyle}
+      >
         <div className={headerClassName}>
           <div>
             <h3 id={titleId} className={titleClassName}>
@@ -100,21 +121,43 @@ export function FormModal({
         </div>
 
         {onSubmit ? (
-          <form onSubmit={onSubmit} className={formClassName}>
-            <FormError message={error || ""} />
-            {children}
-            {showFooter && (
-              <div className={footerClassName}>
-                <button type="submit" disabled={isSaving} className={submitClassName}>
-                  {isSaving
-                    ? (savingLabel ?? `${submitLabel ?? tc("save")}...`)
-                    : (submitLabel ?? tc("save"))}
-                </button>
-                <button type="button" onClick={onClose} className={cancelClassName}>
-                  {cancelLabel ?? tc("cancel")}
-                </button>
+          <form
+            onSubmit={onSubmit}
+            className={
+              scrollBody
+                ? `flex min-h-0 flex-1 flex-col overflow-hidden ${formClassName}`
+                : formClassName
+            }
+          >
+            {scrollBody ? (
+              <div className={`min-h-0 flex-1 overflow-y-auto ${bodyClassName}`}>
+                <FormError message={error || ""} />
+                {children}
               </div>
+            ) : (
+              <>
+                <FormError message={error || ""} />
+                {children}
+              </>
             )}
+            {footer ??
+              (showFooter && (
+                <div className={footerClassName}>
+                  <button type="submit" disabled={isSaving} className={submitClassName}>
+                    {isSaving
+                      ? (savingLabel ?? `${submitLabel ?? tc("save")}...`)
+                      : (submitLabel ?? tc("save"))}
+                  </button>
+                  <button type="button" onClick={onClose} className={cancelClassName}>
+                    {cancelLabel ?? tc("cancel")}
+                  </button>
+                </div>
+              ))}
+            ) : scrollBody ? (
+            <>
+              <div className={`min-h-0 flex-1 overflow-y-auto ${bodyClassName}`}>{children}</div>
+              {footer}
+            </>
           </form>
         ) : (
           children
