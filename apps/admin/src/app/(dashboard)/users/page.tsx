@@ -8,6 +8,7 @@ import { useAuthStore } from "@/shared/hooks/use-auth-store";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { ConfirmModal } from "@/shared/components/confirm-modal";
 import { FormError } from "@/shared/components/form-error";
+import { FormModal } from "@/shared/components/form-modal";
 
 interface User {
   id: string;
@@ -321,99 +322,106 @@ export default function UsersPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background-secondary border border-border rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">{editingUser ? "Edit User" : "Add User"}</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {formError && <FormError message={formError} />}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">First Name</label>
-                  <input
-                    type="text"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    required
-                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Last Name</label>
-                  <input
-                    type="text"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    required
-                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500"
-                  />
-                </div>
-              </div>
+        <FormModal
+          isOpen={showModal}
+          title={editingUser ? "Edit User" : "Add User"}
+          onClose={() => {
+            setShowModal(false);
+            setEditingUser(null);
+          }}
+          showFooter={false}
+          overlayClassName="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          contentClassName="bg-background-secondary border border-border rounded-lg p-6 w-full max-w-md"
+        >
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {formError && <FormError message={formError} />}
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Email</label>
+                <label className="block text-sm font-medium mb-1">First Name</label>
                 <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  type="text"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                   required
                   className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Password {editingUser && "(leave blank to keep current)"}
-                </label>
+                <label className="block text-sm font-medium mb-1">Last Name</label>
                 <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required={!editingUser}
+                  type="text"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  required
                   className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Role</label>
-                <select
-                  value={formData.roleId}
-                  onChange={(e) => setFormData({ ...formData, roleId: e.target.value })}
-                  className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500"
-                >
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.id}>
-                      {role.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="rounded border-border"
-                />
-                <label htmlFor="isActive" className="text-sm">
-                  Active
-                </label>
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 h-10 rounded-md border border-border text-sm hover:bg-background-tertiary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 h-10 rounded-md bg-gold-500 hover:bg-gold-600 text-background font-semibold text-sm"
-                >
-                  {editingUser ? "Update" : "Create"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Email</label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+                className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Password {editingUser && "(leave blank to keep current)"}
+              </label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required={!editingUser}
+                className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Role</label>
+              <select
+                value={formData.roleId}
+                onChange={(e) => setFormData({ ...formData, roleId: e.target.value })}
+                className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500"
+              >
+                {roles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="isActive"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="rounded border-border"
+              />
+              <label htmlFor="isActive" className="text-sm">
+                Active
+              </label>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="flex-1 h-10 rounded-md border border-border text-sm hover:bg-background-tertiary"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 h-10 rounded-md bg-gold-500 hover:bg-gold-600 text-background font-semibold text-sm"
+              >
+                {editingUser ? "Update" : "Create"}
+              </button>
+            </div>
+          </form>
+        </FormModal>
       )}
       <ConfirmModal
         isOpen={deleteConfirmUser !== null}
