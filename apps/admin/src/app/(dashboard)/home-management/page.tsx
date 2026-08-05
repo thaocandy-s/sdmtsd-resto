@@ -35,8 +35,10 @@ interface Event {
 
 export default function HomeManagementPage() {
   const t = useTranslations("homeManagement");
+  const tCommon = useTranslations("common");
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"banners" | "events" | "assets">("banners");
+  const [bannerModalOpen, setBannerModalOpen] = useState(false);
 
   const [logoUrl, setLogoUrl] = useState("");
   const [faviconUrl, setFaviconUrl] = useState("");
@@ -166,15 +168,25 @@ export default function HomeManagementPage() {
 
   return (
     <>
-      <header className="mb-8">
-        <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
-        <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
+      <header className="mb-5">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-2xl font-bold text-foreground whitespace-nowrap">{t("title")}</h2>
+          {activeTab === "banners" && (
+            <button
+              onClick={() => setBannerModalOpen(true)}
+              className="inline-flex h-10 w-auto shrink-0 items-center justify-center rounded-lg bg-gold-500 px-4 py-2 font-semibold text-background transition-colors hover:bg-gold-600"
+            >
+              + {tCommon("add")}
+            </button>
+          )}
+        </div>
+        <p className="text-foreground-secondary mt-2 md:mt-1">{t("subtitle")}</p>
       </header>
 
       <div className="flex gap-4 mb-6">
         <button
           onClick={() => setActiveTab("banners")}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`flex-1 md:flex-none px-4 py-2 rounded-lg font-medium transition-colors ${
             activeTab === "banners"
               ? "bg-gold-500 text-background"
               : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
@@ -184,7 +196,7 @@ export default function HomeManagementPage() {
         </button>
         <button
           onClick={() => setActiveTab("events")}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`flex-1 md:flex-none px-4 py-2 rounded-lg font-medium transition-colors ${
             activeTab === "events"
               ? "bg-gold-500 text-background"
               : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
@@ -194,7 +206,7 @@ export default function HomeManagementPage() {
         </button>
         <button
           onClick={() => setActiveTab("assets")}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`flex-1 md:flex-none px-4 py-2 rounded-lg font-medium transition-colors ${
             activeTab === "assets"
               ? "bg-gold-500 text-background"
               : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary"
@@ -223,6 +235,8 @@ export default function HomeManagementPage() {
           onReorder={reorderBanners}
           onCreated={bannerHighlight.flash}
           getHighlightProps={bannerHighlight.getHighlightProps}
+          isModalOpen={bannerModalOpen}
+          onModalOpenChange={setBannerModalOpen}
         />
       ) : activeTab === "assets" ? (
         <BrandAssetsTab

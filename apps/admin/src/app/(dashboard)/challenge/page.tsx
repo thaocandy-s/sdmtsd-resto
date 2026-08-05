@@ -213,59 +213,80 @@ export default function ChallengePage() {
 
   return (
     <>
-      <header className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
-          <p className="text-foreground-secondary mt-1">{t("subtitle")}</p>
-        </div>
-      </header>
+      <div className="flex flex-col">
+        <header className="order-1 flex items-center justify-between mb-5 md:mb-8">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
+            <p className="text-foreground-secondary mt-2 md:mt-1">{t("subtitle")}</p>
+          </div>
+        </header>
 
-      {/* Illustration Upload Section */}
-      <div className="bg-background-secondary border border-border rounded-lg p-6 mb-8 flex flex-col md:flex-row gap-6 items-center">
-        <div className="w-full md:w-1/3 max-w-sm">
-          <ImageUpload value={challengeImage} onChange={handleImageChange} folder="challenge" />
+        {/* Illustration Upload Section */}
+        <div className="order-2 bg-background-secondary border border-border rounded-lg p-6 mb-8 flex flex-col md:order-2 md:flex-row gap-6 items-center">
+          <div className="w-full md:w-1/3 max-w-sm">
+            <ImageUpload value={challengeImage} onChange={handleImageChange} folder="challenge" />
+          </div>
+          <div className="flex-1 text-center md:text-left">
+            <h3 className="text-lg font-bold text-foreground mb-2">{t("illustrationTitle")}</h3>
+            <p className="text-sm text-foreground-secondary mb-4">{t("illustrationSubtitle")}</p>
+            {isSavingImage && (
+              <p className="text-sm text-gold-500 animate-pulse font-medium">{tc("saving")}</p>
+            )}
+          </div>
         </div>
-        <div className="flex-1 text-center md:text-left">
-          <h3 className="text-lg font-bold text-foreground mb-2">{t("illustrationTitle")}</h3>
-          <p className="text-sm text-foreground-secondary mb-4">{t("illustrationSubtitle")}</p>
-          {isSavingImage && (
-            <p className="text-sm text-gold-500 animate-pulse font-medium">{tc("saving")}</p>
-          )}
-        </div>
-      </div>
 
-      <div className="flex items-center justify-between gap-4 mb-6 border-b border-border">
-        <div className="flex gap-4">
-          <button
-            onClick={() => setTab("rules")}
-            className={`pb-3 px-1 font-medium transition-colors ${
-              tab === "rules"
-                ? "text-gold-500 border-b-2 border-gold-500"
-                : "text-foreground-secondary hover:text-foreground"
-            }`}
-          >
-            {t("rulesTab")} ({rules.length})
-          </button>
-          <button
-            onClick={() => setTab("winners")}
-            className={`pb-3 px-1 font-medium transition-colors ${
-              tab === "winners"
-                ? "text-gold-500 border-b-2 border-gold-500"
-                : "text-foreground-secondary hover:text-foreground"
-            }`}
-          >
-            {t("winnersTab")} ({winners.length})
-          </button>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          {tab === "winners" && (
+        <div className="order-3 flex w-full items-center justify-between gap-4 mb-5 border-b border-border md:order-3 md:mb-6">
+          <div className="flex w-full gap-2 md:w-auto md:gap-4">
             <button
-              onClick={() => setShowReorderModal(true)}
-              className="mb-3 bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+              onClick={() => setTab("rules")}
+              className={`flex-1 whitespace-nowrap pb-3 px-1 text-center text-sm font-medium transition-colors md:flex-none md:text-base ${
+                tab === "rules"
+                  ? "text-gold-500 border-b-2 border-gold-500"
+                  : "text-foreground-secondary hover:text-foreground"
+              }`}
             >
-              {tc("reorder")}
+              {t("rulesTab")} ({rules.length})
             </button>
-          )}
+            <button
+              onClick={() => setTab("winners")}
+              className={`flex-1 whitespace-nowrap pb-3 px-1 text-center text-sm font-medium transition-colors md:flex-none md:text-base ${
+                tab === "winners"
+                  ? "text-gold-500 border-b-2 border-gold-500"
+                  : "text-foreground-secondary hover:text-foreground"
+              }`}
+            >
+              {t("winnersTab")} ({winners.length})
+            </button>
+          </div>
+          <div className="hidden flex-wrap items-center gap-3 md:flex">
+            {tab === "winners" && (
+              <button
+                onClick={() => setShowReorderModal(true)}
+                className="mb-3 bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                {tc("reorder")}
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setEditingId(null);
+                setFormError("");
+                if (tab === "rules") {
+                  setRuleForm(emptyRule);
+                  setShowRuleModal(true);
+                } else {
+                  setWinnerForm(emptyWinner);
+                  setShowWinnerModal(true);
+                }
+              }}
+              className="mb-3 bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
+            >
+              + {tab === "rules" ? t("addRule") : t("addWinner")}
+            </button>
+          </div>
+        </div>
+
+        <div className="order-4 flex flex-col items-stretch gap-3 mb-6 md:hidden">
           <button
             onClick={() => {
               setEditingId(null);
@@ -278,10 +299,18 @@ export default function ChallengePage() {
                 setShowWinnerModal(true);
               }
             }}
-            className="mb-3 bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
+            className="w-full min-h-[44px] bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-medium transition-colors"
           >
             + {tab === "rules" ? t("addRule") : t("addWinner")}
           </button>
+          {tab === "winners" && (
+            <button
+              onClick={() => setShowReorderModal(true)}
+              className="self-start bg-background-secondary border border-border hover:bg-background-tertiary text-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+            >
+              {tc("reorder")}
+            </button>
+          )}
         </div>
       </div>
 

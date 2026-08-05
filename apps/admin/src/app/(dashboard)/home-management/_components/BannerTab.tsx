@@ -21,6 +21,8 @@ interface BannerTabProps {
   onReorder: (orderedIds: string[]) => void;
   onCreated: (id: string) => void;
   getHighlightProps: (id: string) => { "data-highlight-id": string; className: string };
+  isModalOpen: boolean;
+  onModalOpenChange: (open: boolean) => void;
 }
 
 export function BannerTab({
@@ -30,37 +32,23 @@ export function BannerTab({
   onReorder,
   onCreated,
   getHighlightProps,
+  isModalOpen,
+  onModalOpenChange,
 }: BannerTabProps) {
   const t = useTranslations("homeManagement");
   const tCommon = useTranslations("common");
 
-  const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingData, setEditingData] = useState<Banner | null>(null);
-
-  const handleAdd = () => {
-    setEditingId(null);
-    setEditingData(null);
-    setModalOpen(true);
-  };
 
   const handleEdit = (banner: Banner) => {
     setEditingId(banner.id);
     setEditingData(banner);
-    setModalOpen(true);
+    onModalOpenChange(true);
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
-        <button
-          onClick={handleAdd}
-          className="bg-gold-500 hover:bg-gold-600 text-background px-4 py-2 rounded-lg font-semibold transition-colors"
-        >
-          + {tCommon("add")}
-        </button>
-      </div>
-
+    <div className="space-y-0 md:space-y-4">
       {banners.length === 0 ? (
         <div className="bg-background-secondary border border-border rounded-lg p-12 text-center">
           <p className="text-foreground-secondary">{t("noBanners")}</p>
@@ -118,10 +106,10 @@ export function BannerTab({
       )}
 
       <BannerFormModal
-        isOpen={modalOpen}
+        isOpen={isModalOpen}
         editingId={editingId}
         initialData={editingData}
-        onClose={() => setModalOpen(false)}
+        onClose={() => onModalOpenChange(false)}
         onDataChange={(createdId) => {
           onRefresh();
           if (createdId) onCreated(createdId);
