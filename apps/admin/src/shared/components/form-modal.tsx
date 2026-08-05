@@ -153,12 +153,12 @@ export function FormModal({
                   </button>
                 </div>
               ))}
-            ) : scrollBody ? (
-            <>
-              <div className={`min-h-0 flex-1 overflow-y-auto ${bodyClassName}`}>{children}</div>
-              {footer}
-            </>
           </form>
+        ) : scrollBody ? (
+          <>
+            <div className={`min-h-0 flex-1 overflow-y-auto ${bodyClassName}`}>{children}</div>
+            {footer}
+          </>
         ) : (
           children
         )}
