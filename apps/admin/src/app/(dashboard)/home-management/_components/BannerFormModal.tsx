@@ -178,6 +178,25 @@ export function BannerFormModal({
       formClassName="p-6 space-y-4 overflow-y-auto flex-1"
       headerClassName="p-6 border-b border-border flex items-center justify-between"
       closeButtonClassName="text-foreground-secondary hover:text-foreground"
+      footer={
+        <div className="shrink-0 flex justify-end gap-3 pt-4 px-6 pb-6 border-t border-border">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSaving}
+            className="px-4 py-2 border border-border text-foreground rounded-lg hover:bg-background-tertiary transition-colors"
+          >
+            {tc("cancel")}
+          </button>
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="px-4 py-2 bg-gold-500 text-background font-semibold rounded-lg hover:bg-gold-600 transition-colors disabled:opacity-50"
+          >
+            {isSaving ? tc("saving") : tc("save")}
+          </button>
+        </div>
+      }
     >
       <div>
         <label className="block text-sm font-medium text-foreground mb-1">
@@ -283,24 +302,6 @@ export function BannerFormModal({
           hint={tc("positionHint")}
         />
       </AdvancedSection>
-
-      <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
-        <button
-          type="button"
-          onClick={onClose}
-          disabled={isSaving}
-          className="px-4 py-2 border border-border text-foreground rounded-lg hover:bg-background-tertiary transition-colors"
-        >
-          {tc("cancel")}
-        </button>
-        <button
-          type="submit"
-          disabled={isSaving}
-          className="px-4 py-2 bg-gold-500 text-background font-semibold rounded-lg hover:bg-gold-600 transition-colors disabled:opacity-50"
-        >
-          {isSaving ? tc("saving") : tc("save")}
-        </button>
-      </div>
     </FormModal>
   );
 }

@@ -48,7 +48,13 @@ export function getErrorMessage(error: unknown, fallback: string = toastMessages
     return toastMessages.networkError;
   }
   if (error instanceof Error && error.message) {
-    return error.message;
+    // API errors may still contain English implementation messages. Keep
+    // those details out of the Japanese admin UI and use the contextual copy.
+    const message = error.message;
+    if (!/[ぁ-んァ-ン一-龯]/.test(message) && /[A-Za-z]{2,}/.test(message)) {
+      return fallback;
+    }
+    return message;
   }
   return fallback;
 }
